@@ -79,6 +79,12 @@ class Street:
 		else:
 			self.endpoints.append(end_point)
 
+	def initial_point(self):
+		return self.endpoints[0]
+
+	def final_point(self):
+		return self.endpoints[1]
+
 
 class Joint:
 	"""
@@ -107,11 +113,6 @@ class Joint:
 			ind = None
 		return ind
 
-
-class SolitonPath:
-	def __init__(self, label=None):
-		self.label=label
-		pass
 
 ### Important: must develop this class, 
 ### to extract the charges to assign to each
@@ -207,12 +208,12 @@ class MCSN:
 		pass
 
 
-w = MCSN()
+# w = MCSN()
+# # w.check_network()
+# w.attach_streets()
 # w.check_network()
-w.attach_streets()
-w.check_network()
-s1 = w.joints['j_1'].streets[0]
-print w.joints['j_1'].street_position(w.streets['p_2'])
-print w.branch_points['b_1'].street_position(w.streets['p_2'])
+# s1 = w.joints['j_1'].streets[0]
+# print w.joints['j_1'].street_position(w.streets['p_2'])
+# print w.branch_points['b_1'].street_position(w.streets['p_2'])
 
 

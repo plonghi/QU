@@ -1,3 +1,5 @@
+from mcsn import MCSN
+
 class Dash:
 	"""
 	A path on Sigma, characterized by an ordered sequence of streets, 
@@ -11,18 +13,106 @@ class Dash:
 	by just adding a street. The orientation will be determined 
 	automatically by the choice of joint or branch point at which 
 	the extension is performed.
+
+	One may impose restrictions on how a dash can grow: forward_only, 
+	backward_only, or None
 	"""
-	def __init__(self, label=None):
+	def __init__(self, label=None, growth_restriction=None,):
 		self.label = label
 		self.path = []
+		if growth_restriction is not None:
+			self.growth_restriction = growth_restriction
+		else:
+			self.growth_restriction = None
 	
-	def extend_dash_along_street(self, end_pt=None, street=None):
+	def extend_dash_along_street(self, street=None, end_pt=None):
 		if len(self.path) == 0:
-			orientation = set_orientation_from_starting_point(street, end_pt)
-			self.path = [street, orientation]
-		elif end_pt == 'last':
-			terminal_street = self.path[-1]
+			if end_pt is None:
+				raise Exception(
+					'For the first street of a dash, '
+					'a starting point must be given.'
+				)
+			else:
+				new_street_orientation = set_orientation_from_starting_point(
+					street, end_pt
+				)
+				self.path = [[street, new_street_orientation]]
+		
+		elif end_pt == 'last' and (
+				self.growth_restriction == 'forward_only' or 
+				self.growth_restriction is None
+			):
+			terminal_street, terminal_orientation = self.path[-1]
+			if terminal_orientation == +1:
+				intermediate_pt = terminal_street.final_point()
+			elif terminal_orientation == -1:
+				intermediate_pt = terminal_street.initial_point()
+			else:
+				raise ValueError
+			if terminal_street != street:
+				new_street_orientation = set_orientation_from_starting_point(
+						street, intermediate_pt
+					)
+				self.path.append([street, new_street_orientation])
+			else:
+				new_street_orientation = -set_orientation_from_starting_point(
+						street, intermediate_pt
+					)
+				self.path.append([street, new_street_orientation])
 
+		elif end_pt == 'first' and (
+				self.growth_restriction == 'backward_only' or 
+				self.growth_restriction is None
+			):
+			terminal_street, terminal_orientation = self.path[0]
+			if terminal_orientation == +1:
+				intermediate_pt = terminal_street.initial_point()
+			elif terminal_orientation == -1:
+				intermediate_pt = terminal_street.final_point()
+			else:
+				raise ValueError
+			if terminal_street != street:
+				new_street_orientation = set_orientation_from_starting_point(
+						street, intermediate_pt
+					)
+				self.path.insert(0, [street, new_street_orientation])
+			else:
+				new_street_orientation = -set_orientation_from_starting_point(
+						street, intermediate_pt
+					)
+				self.path.insert(0, [street, new_street_orientation])
+
+		else:
+			raise Exception(
+				'It appears that the dash {} cannot be extended along '
+				'street {} from the {} endpoint. Note that the growth'
+				'restriction is {}'
+				.format(
+					self.label, street.label, end_pt, self.growth_restriction
+				)
+			)
+
+	def initial_street(self):
+		return self.path[0][0]
+
+	def final_street(self):
+		return self.path[-1][0]
+
+	def starting_point(self):
+		if self.path[0][1] == 1:
+			return self.initial_street().initial_point()
+		elif self.path[0][1] == -1:
+			return self.initial_street().final_point()
+		else:
+			raise ValueError
+
+	def ending_point(self):
+		if self.path[-1][1] == 1:
+			return self.final_street().final_point()
+		elif self.path[0][1] == -1:
+			return self.final_street().initial_point()
+		else:
+			raise ValueError
 
 
 class SolitonPath:
@@ -30,15 +120,65 @@ class SolitonPath:
 	The attribute .streets_set just tracks the homology of a soliton.
 	But the attribute .path contains full information
 	about its path as it winds on the Seiberg-Witten curve.
+
+	A soliton path must be constructed by propagation through the network. 
+	One starts with a pair of dashes, above a certain street of the network.
+	Then dashes can be extended by propagation, following network rules,
+	either across joints or branch points.
+	When all dashes end up uniting into a single one, 
+	the soliton is completed.
+	A completed soliton is characterized by the attribure .is_complete = True.
+
+	Note: the dashes of a soliton will include the lift of the 
+	initial street on which it is sourced.
+	Therefore, when gluing two solitons to form a closed one,  
+	one must remove one copy of the lift of the initial street on which 
+	both solitons are supported.
+
+	When growing a soliton, the number of dashes can temporarily increase.
+	This will happen for example at a 3-way joint.
+	There will be two dashes initially (sheets i and j) and one more dash
+	on sheet k eventually.
+	It's important to grow dashes in pairs, not singularly: this is how
+	the network rules work.
+	For example, suppose we have two dashes d1, d2 above one street: 
+	their orientations will be opposite. 
+	Since they must both grow in the same direction, one of them will grow
+	"forward" and the other "in reverse".
+	When they split at a Y-joiny, a third dash d3 is created.
+	The new dash will grow forward in pair with d1, 
+	and backwards in pair with d2.
+	Note that now d1 and d2 are no longer paired.
 	"""
 	def __init__(self, label=None):
 		self.label = label
+		self.dashes = []
 		self.streets_set = []
 		self.path = []
 		self.starting_point = None
 		self.ending_point = None
-		
+		self.is_complete = False
 
+	def create(self, street, source_pt):
+		"""
+		The source point characterizes the direction of growth
+		of each dash.
+		If a soliton is stretching "from a joint/branch point" e
+		of a street p, then we create an initial dash d_i that 
+		is given by the street itself with orientation into e, such
+		initial dash can only grow forward.
+		Likewise we also create a final dash d_f that 
+		is given by the street itself with orientation outgoing from e, 
+		such final dash can only grow backward.
+		"""
+		d_i = Dash(label='initial_dash', growth_restriction='forward_only')
+		d_f = Dash(label='final_dash', growth_restriction='backward_only')
+		other_endpoint = #### CAREFUL endpoints of streets are not just branch points or joint, but also "slots" on the branch point or joint!
+		d_i.extend_dash_along_street(street)
+		self.dashes.append([d1, d2])
+
+
+# TO DO: develop this class.
 class ClosedSoliton:
 	"""
 	The closed path obtained by joining two open paths
@@ -52,11 +192,16 @@ class ClosedSoliton:
 		pass
 
 
-def set_orientation_from_starting_point(street, starting_pt):
+def set_orientation_from_starting_point(street, starting_pt, opposite=False):
+	if opposite is False:
+		coeff = +1
+	elif opposite is True:
+		coeff = -1
+
 	if starting_pt == street.endpoints[0]:
-		return +1
+		return +1 * coeff
 	elif starting_pt == street.endpoints[1]:
-		return -1
+		return -1 * coeff
 	else:
 		raise Exception(
 			'The point {} is not an endpoint of street {}'
@@ -64,6 +209,31 @@ def set_orientation_from_starting_point(street, starting_pt):
 		)
 
 
+w = MCSN()
+# w.check_network()
+w.attach_streets()
+w.check_network()
+s1 = w.streets['p_1']
+e11 = s1.endpoints[0]
+e12 = s1.endpoints[1]
+s2 = w.streets['p_2']
+e21 = s2.endpoints[0]
+e22 = s2.endpoints[1]
+s3 = w.streets['p_3']
+e31 = s3.endpoints[0]
+e32 = s3.endpoints[1]
+# print e11.label, e12.label
+# print set_orientation_from_starting_point(s1, e11)
 
 
-
+dash1 = Dash()
+dash1.extend_dash_along_street(street=s1, end_pt=e11)
+print dash1.path
+print dash1.path[0][0].label
+print dash1.path[0][0].endpoints
+dash1.extend_dash_along_street(street=s2, end_pt='last')
+print dash1.path
+dash1.extend_dash_along_street(street=s1, end_pt='first')
+print dash1.path
+print dash1.starting_point().label
+print dash1.ending_point().label
