@@ -244,12 +244,12 @@ class MCSN:
 		pass
 
 
-w = MCSN()
+# w = MCSN()
+# # w.check_network()
+# w.attach_streets()
 # w.check_network()
-w.attach_streets()
-w.check_network()
-s1 = w.joints['j_1'].streets[0]
-print w.joints['j_1'].street_position(w.streets['p_2'])
-print w.branch_points['b_1'].street_position(w.streets['p_2'])
-print s1.initial_point().end_point
-print w.joints['j_1'].street_position(w.streets['p_1'])
+# s1 = w.joints['j_1'].streets[0]
+# print w.joints['j_1'].street_position(w.streets['p_2'])
+# print w.branch_points['b_1'].street_position(w.streets['p_2'])
+# print s1.initial_point().end_point
+# print w.joints['j_1'].street_position(w.streets['p_1'])

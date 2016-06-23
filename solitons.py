@@ -25,16 +25,16 @@ class Dash:
 		else:
 			self.growth_restriction = None
 	
-	def extend_dash_along_street(self, street=None, end_pt=None):
+	def extend_dash_along_street(self, street=None, end_pt=None, slot=None):
 		if len(self.path) == 0:
-			if end_pt is None:
+			if end_pt is None or slot is None:
 				raise Exception(
 					'For the first street of a dash, '
 					'a starting point must be given.'
 				)
 			else:
 				new_street_orientation = set_orientation_from_starting_point(
-					street, end_pt
+					street, end_pt, slot
 				)
 				self.path = [[street, new_street_orientation]]
 		
@@ -44,19 +44,19 @@ class Dash:
 			):
 			terminal_street, terminal_orientation = self.path[-1]
 			if terminal_orientation == +1:
-				intermediate_pt = terminal_street.final_point()
+				intermediate_pt = terminal_street.final_point().end_point
 			elif terminal_orientation == -1:
-				intermediate_pt = terminal_street.initial_point()
+				intermediate_pt = terminal_street.initial_point().end_point
 			else:
 				raise ValueError
 			if terminal_street != street:
 				new_street_orientation = set_orientation_from_starting_point(
-						street, intermediate_pt
+						street, intermediate_pt, slot
 					)
 				self.path.append([street, new_street_orientation])
 			else:
 				new_street_orientation = -set_orientation_from_starting_point(
-						street, intermediate_pt
+						street, intermediate_pt, slot
 					)
 				self.path.append([street, new_street_orientation])
 
@@ -66,19 +66,19 @@ class Dash:
 			):
 			terminal_street, terminal_orientation = self.path[0]
 			if terminal_orientation == +1:
-				intermediate_pt = terminal_street.initial_point()
+				intermediate_pt = terminal_street.initial_point().end_point
 			elif terminal_orientation == -1:
-				intermediate_pt = terminal_street.final_point()
+				intermediate_pt = terminal_street.final_point().end_point
 			else:
 				raise ValueError
 			if terminal_street != street:
 				new_street_orientation = set_orientation_from_starting_point(
-						street, intermediate_pt
+						street, intermediate_pt, slot
 					)
 				self.path.insert(0, [street, new_street_orientation])
 			else:
 				new_street_orientation = -set_orientation_from_starting_point(
-						street, intermediate_pt
+						street, intermediate_pt, slot
 					)
 				self.path.insert(0, [street, new_street_orientation])
 
@@ -109,10 +109,25 @@ class Dash:
 	def ending_point(self):
 		if self.path[-1][1] == 1:
 			return self.final_street().final_point()
-		elif self.path[0][1] == -1:
+		elif self.path[-1][1] == -1:
 			return self.final_street().initial_point()
 		else:
 			raise ValueError
+
+	def print_endpoints(self):
+		print (
+			'Path {} starts from {} at slot {}, going out on street {}, '
+			'and ends on {} at slot {} erriving on street {}.'
+			.format(
+				self.label, 
+				self.starting_point().end_point.label, 
+				self.starting_point().slot,
+				self.starting_point().street.label,
+				dash1.ending_point().end_point.label,
+				self.ending_point().slot,
+				self.ending_point().street.label,
+			)
+		)
 
 
 class SolitonPath:
@@ -180,7 +195,8 @@ class SolitonPath:
 		"""
 		d_i = Dash(label='initial_dash', growth_restriction='forward_only')
 		d_f = Dash(label='final_dash', growth_restriction='backward_only')
-		other_endpoint = #### CAREFUL endpoints of streets are not just branch points or joint, but also "slots" on the branch point or joint!
+		other_endpoint = None#### CAREFUL endpoints of streets are not just branch points or joint, but also "slots" on the branch point or joint!
+		#TODO: make a check tat the street is actually attached to slot
 		d_i.extend_dash_along_street(street)
 		self.dashes.append([d1, d2])
 
@@ -199,20 +215,48 @@ class ClosedSoliton:
 		pass
 
 
-def set_orientation_from_starting_point(street, starting_pt, opposite=False):
+def set_orientation_from_starting_point(
+		street, starting_pt, starting_slot, opposite=False
+	):
+	"""
+	The variable starting_pt must be a branch point or a joint,
+	while starting_slot must be an integer.
+	"""
+	# First of all, check that the slot actually corresponds to
+	# one here the street ands on the starting_point
+	if (
+		street.initial_point().end_point == starting_pt and
+		street.initial_point().slot == starting_slot
+	) or (
+		street.final_point().end_point == starting_pt and
+		street.final_point().slot == starting_slot
+	):
+		pass
+	else:
+		raise Exception(
+			'Street {} doesnt end on {} at slot {}'
+			.format(street.label, starting_pt.label, starting_slot)
+		)
+
 	if opposite is False:
 		coeff = +1
 	elif opposite is True:
 		coeff = -1
 
-	if starting_pt == street.endpoints[0]:
+	if (
+		starting_pt == street.initial_point().end_point and
+		starting_slot == street.initial_point().slot
+	):
 		return +1 * coeff
-	elif starting_pt == street.endpoints[1]:
+	elif (
+		starting_pt == street.final_point().end_point and
+		starting_slot == street.final_point().slot	
+	):
 		return -1 * coeff
 	else:
 		raise Exception(
-			'The point {} is not an endpoint of street {}'
-			.format(starting_pt.label, street.label)
+			'The point {} is not an endpoint of street {} with slot {}'
+			.format(starting_pt.label, street.label, starting_slot)
 		)
 
 
@@ -221,26 +265,36 @@ w = MCSN()
 w.attach_streets()
 w.check_network()
 s1 = w.streets['p_1']
-e11 = s1.endpoints[0]
-e12 = s1.endpoints[1]
+e11 = s1.initial_point().end_point
+e12 = s1.final_point().end_point
 s2 = w.streets['p_2']
-e21 = s2.endpoints[0]
-e22 = s2.endpoints[1]
+e21 = s2.initial_point().end_point
+e22 = s2.final_point().end_point
 s3 = w.streets['p_3']
-e31 = s3.endpoints[0]
-e32 = s3.endpoints[1]
+e31 = s3.initial_point().end_point
+e32 = s3.final_point().end_point
+j1 = w.joints.values()[0]
+b1 = w.branch_points.values()[0]
 # print e11.label, e12.label
 # print set_orientation_from_starting_point(s1, e11)
 
 
-dash1 = Dash()
-dash1.extend_dash_along_street(street=s1, end_pt=e11)
-print dash1.path
-print dash1.path[0][0].label
-print dash1.path[0][0].endpoints
-dash1.extend_dash_along_street(street=s2, end_pt='last')
-print dash1.path
-dash1.extend_dash_along_street(street=s1, end_pt='first')
-print dash1.path
-print dash1.starting_point().label
-print dash1.ending_point().label
+dash1 = Dash(label='dash_1')
+dash1.extend_dash_along_street(street=s1, end_pt=e11, slot=0)
+dash1.print_endpoints()
+# print dash1.starting_point()
+# print dash1.ending_point()
+# print dash1.path
+# print dash1.path[0][0].label
+# print dash1.path[0][0].endpoints
+dash1.extend_dash_along_street(street=s2, end_pt='last', slot=j1.street_position(s2)[0])
+# print dash1.path
+# print dash1.starting_point()
+# print dash1.ending_point()
+dash1.print_endpoints()
+# print dash1.path
+dash1.extend_dash_along_street(street=s1, end_pt='first', slot=b1.street_position(s1)[0])
+# print dash1.path
+dash1.print_endpoints()
+
+
