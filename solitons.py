@@ -117,13 +117,13 @@ class Dash:
 	def print_endpoints(self):
 		print (
 			'Path {} starts from {} at slot {}, going out on street {}, '
-			'and ends on {} at slot {} erriving on street {}.'
+			'and ends on {} at slot {} arriving on street {}.'
 			.format(
 				self.label, 
 				self.starting_point().end_point.label, 
 				self.starting_point().slot,
 				self.starting_point().street.label,
-				dash1.ending_point().end_point.label,
+				self.ending_point().end_point.label,
 				self.ending_point().slot,
 				self.ending_point().street.label,
 			)
@@ -160,7 +160,7 @@ class SolitonPath:
 	their orientations will be opposite. 
 	Since they must both grow in the same direction, one of them will grow
 	"forward" and the other "in reverse".
-	When they split at a Y-joiny, a third dash d3 is created.
+	When they split at a Y-joint, a third dash d3 is created.
 	The new dash will grow forward in pair with d1, 
 	and backwards in pair with d2.
 	Note that now d1 and d2 are no longer paired.
@@ -174,31 +174,52 @@ class SolitonPath:
 		self.ending_point = None
 		self.is_complete = False
 
-	def create(self, street, source_pt_and_slot):
+	def create(self, street=None, source_pt=None, slot=None):
 		"""
-		The source point characterizes the direction of growth
+		The source point and slot characterize the direction of growth
 		of each dash.
-		Note that there can be streets with both endpoints on the 
-		same branch point, or joint.
-		For this reason, the variable source_pt_and_slot
-		must be of the form [pt, slot] where pt is a branch point or a joint
-		and slot is an integer.
-		A check will be performed that the steet is actually attached 
-		to that slot.
+		The variable source_pt must be a branch point or a joint, while
+		slot must be an integer.
+		
 		If a soliton is stretching "from a joint/branch point" e
 		of a street p, then we create an initial dash d_i that 
-		is given by the street itself with orientation into e, such
-		initial dash can only grow forward.
+		is given by the street itself with orientation into e, 
+		moreover we impose the constraint that such initial dash 
+		can only grow forward.
 		Likewise we also create a final dash d_f that 
 		is given by the street itself with orientation outgoing from e, 
 		such final dash can only grow backward.
 		"""
+		# First of all, check that the slot actually corresponds to
+		# one here the street ands on the starting_point
+		if (
+			street.initial_point().end_point == source_pt and
+			street.initial_point().slot == slot
+		): 
+			other_endpoint = street.final_point().end_point
+			other_slot = street.final_point().slot
+		elif (
+			street.final_point().end_point == source_pt and
+			street.final_point().slot == slot
+		):
+			other_endpoint = street.initial_point().end_point
+			other_slot = street.initial_point().slot
+		else:
+			raise Exception(
+				'Street {} doesnt end on {} at slot {}'
+				.format(street.label, starting_pt.label, starting_slot)
+			)
+
 		d_i = Dash(label='initial_dash', growth_restriction='forward_only')
 		d_f = Dash(label='final_dash', growth_restriction='backward_only')
-		other_endpoint = None#### CAREFUL endpoints of streets are not just branch points or joint, but also "slots" on the branch point or joint!
-		#TODO: make a check tat the street is actually attached to slot
-		d_i.extend_dash_along_street(street)
-		self.dashes.append([d1, d2])
+		
+		d_i.extend_dash_along_street(
+			street=street, end_pt=other_endpoint, slot=other_slot
+		)
+		d_f.extend_dash_along_street(
+			street=street, end_pt=source_pt, slot=slot
+		)
+		self.dashes.append([d_i, d_f])
 
 
 # TO DO: develop this class.
@@ -275,26 +296,23 @@ e31 = s3.initial_point().end_point
 e32 = s3.final_point().end_point
 j1 = w.joints.values()[0]
 b1 = w.branch_points.values()[0]
-# print e11.label, e12.label
-# print set_orientation_from_starting_point(s1, e11)
 
 
 dash1 = Dash(label='dash_1')
 dash1.extend_dash_along_street(street=s1, end_pt=e11, slot=0)
 dash1.print_endpoints()
-# print dash1.starting_point()
-# print dash1.ending_point()
-# print dash1.path
-# print dash1.path[0][0].label
-# print dash1.path[0][0].endpoints
-dash1.extend_dash_along_street(street=s2, end_pt='last', slot=j1.street_position(s2)[0])
-# print dash1.path
-# print dash1.starting_point()
-# print dash1.ending_point()
+dash1.extend_dash_along_street(
+	street=s2, end_pt='last', slot=j1.street_position(s2)[0]
+)
 dash1.print_endpoints()
-# print dash1.path
-dash1.extend_dash_along_street(street=s1, end_pt='first', slot=b1.street_position(s1)[0])
-# print dash1.path
+dash1.extend_dash_along_street(
+	street=s1, end_pt='first', slot=b1.street_position(s1)[0]
+)
 dash1.print_endpoints()
+
+a1 = SolitonPath(label='a_1')
+a1.create(street=s1, source_pt=b1, slot=0)
+print a1.dashes[0][0].print_endpoints()
+print a1.dashes[0][1].print_endpoints()
 
 
