@@ -113,7 +113,9 @@ class SolitonPath:
 		self.label=label
 		pass
 
-
+### Important: must develop this class, 
+### to extract the charges to assign to each
+### lift of solitons.
 class StringUnit:
 	def __init__(self, label=None):
 		self.label=label
