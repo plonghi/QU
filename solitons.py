@@ -159,10 +159,17 @@ class SolitonPath:
 		self.ending_point = None
 		self.is_complete = False
 
-	def create(self, street, source_pt):
+	def create(self, street, source_pt_and_slot):
 		"""
 		The source point characterizes the direction of growth
 		of each dash.
+		Note that there can be streets with both endpoints on the 
+		same branch point, or joint.
+		For this reason, the variable source_pt_and_slot
+		must be of the form [pt, slot] where pt is a branch point or a joint
+		and slot is an integer.
+		A check will be performed that the steet is actually attached 
+		to that slot.
 		If a soliton is stretching "from a joint/branch point" e
 		of a street p, then we create an initial dash d_i that 
 		is given by the street itself with orientation into e, such
