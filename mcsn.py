@@ -1,9 +1,12 @@
-ALLOWED_JOINTS = (
+TYPE_3_JOINTS = (
 	# 3-way
 	[
 	['Street', 'NoneType', 'Street', 'NoneType', 'Street', 'NoneType'],
 	['NoneType', 'Street', 'NoneType', 'Street', 'NoneType', 'Street'],
-	] +
+	]
+)
+
+TYPE_4_A_JOINTS = (
 	# 4-way - peace sign
 	[
 	['NoneType', 'Street', 'NoneType', 'Street', 'Street', 'Street'],
@@ -12,13 +15,19 @@ ALLOWED_JOINTS = (
 	['Street', 'Street', 'Street', 'NoneType', 'Street', 'NoneType'],
 	['Street', 'Street', 'NoneType', 'Street', 'NoneType', 'Street'],
 	['Street', 'NoneType', 'Street', 'NoneType', 'Street', 'Street'],
-	] + 
+	]
+)
+
+TYPE_4_B_JOINTS = (
 	# 4-way - X sign
 	[
 	['Street', 'Street', 'NoneType', 'Street', 'Street', 'NoneType'],
 	['Street', 'NoneType', 'Street', 'Street', 'NoneType', 'Street'],
 	['NoneType', 'Street', 'Street', 'NoneType', 'Street', 'Street'],
-	] +
+	]
+)
+
+TYPE_5_JOINTS = (
 	# 5-way
 	[
 	['NoneType', 'Street', 'Street', 'Street', 'Street', 'Street'],
@@ -27,13 +36,49 @@ ALLOWED_JOINTS = (
 	['Street', 'Street', 'Street', 'NoneType', 'Street', 'Street'],
 	['Street', 'Street', 'Street', 'Street', 'NoneType', 'Street'],
 	['Street', 'Street', 'Street', 'Street', 'Street', 'NoneType'],
-	] + 
+	]
+)
+
+TYPE_6_JOINTS = (
 	# 6-way
 	[
 	['Street', 'Street', 'Street', 'Street', 'Street', 'Street'],
 	]
 )
 
+ALLOWED_JOINTS = (
+	TYPE_3_JOINTS +
+	TYPE_4_A_JOINTS +
+	TYPE_4_B_JOINTS +
+	TYPE_5_JOINTS +
+	TYPE_6_JOINTS
+)
+
+TYPE_1_BRANCH_POINTS = (
+	[
+	['Street', 'NoneType', 'NoneType'],
+	['NoneType', 'Street', 'NoneType'],
+	['NoneType', 'NoneType', 'Street']
+	]
+)
+
+TYPE_2_BRANCH_POINTS = (
+	[
+	['Street', 'Street', 'NoneType'],
+	['NoneType', 'Street', 'Street'],
+	['Street', 'NoneType', 'Street']
+	]
+)
+
+TYPE_3_BRANCH_POINTS = (
+	[
+	['Street', 'Street', 'Street'],
+	]
+)
+
+ALLOWED_BRANCH_POINTS = (
+	TYPE_1_BRANCH_POINTS + TYPE_2_BRANCH_POINTS + TYPE_3_BRANCH_POINTS
+)
 
 class BranchPoint:
 	"""
@@ -72,6 +117,20 @@ class BranchPoint:
 		# except ValueError:
 		# 	ind = None
 		# return ind
+
+	def type(self):
+		bp_type = [st.__class__.__name__ for  st in self.streets]
+		if bp_type in TYPE_1_BRANCH_POINTS:
+			return 'type_1_branch_point'
+		elif bp_type in TYPE_2_BRANCH_POINTS:
+			return 'type_2_branch_point'
+		elif bp_type in TYPE_3_BRANCH_POINTS:
+			return 'type_3_branch_point'
+		else:
+			return None
+
+	def print_type(self):
+		print '{} is a {}'.format(self.label, self.type())
 
 
 class Street:
@@ -141,6 +200,23 @@ class Joint:
 		# 	ind = None
 		# return ind
 
+	def type(self):
+		j_type = [st.__class__.__name__ for  st in self.streets]
+		if j_type in TYPE_3_JOINTS:
+			return 'type_3_joint'
+		elif j_type in TYPE_4_A_JOINTS:
+			return 'type_4_A_joint'
+		elif j_type in TYPE_4_B_JOINTS:
+			return 'type_4_B_joint'
+		elif j_type in TYPE_5_JOINTS:
+			return 'type_5_joint'
+		elif j_type in TYPE_6_JOINTS:
+			return 'type_6_joint'
+		else:
+			return None
+
+	def print_type(self):
+		print '{} is a {}'.format(self.label, self.type())
 
 ### Important: must develop this class, 
 ### to extract the charges to assign to each
@@ -219,10 +295,10 @@ class MCSN:
 
 		# Check that every joint is of an allowed type
 		for j_pt in self.joints.values():
-			j_type = [st.__class__.__name__ for  st in j_pt.streets]
+			j_type = j_pt.type()
 			is_allowed = False
 			for a_joint in ALLOWED_JOINTS:
-				if j_type == a_joint:
+				if j_type is not None:
 					is_allowed = True
 					break
 				else:

@@ -102,12 +102,14 @@ class Dash:
 		if self.path[0][1] == 1:
 			return DashEndpoint(
 				dash=self,
-				street_end_pt=self.initial_street().initial_point()
+				street_end_pt=self.initial_street().initial_point(),
+				orientation='out'
 			)
 		elif self.path[0][1] == -1:
 			return DashEndpoint(
 				dash=self,
-				street_end_pt=self.initial_street().final_point()
+				street_end_pt=self.initial_street().final_point(),
+				orientation='out'
 			)
 		else:
 			raise ValueError
@@ -116,12 +118,14 @@ class Dash:
 		if self.path[-1][1] == 1:
 			return DashEndpoint(
 				dash=self,
-				street_end_pt=self.final_street().final_point()
+				street_end_pt=self.final_street().final_point(),
+				orientation='in'
 			)
 		elif self.path[-1][1] == -1:
 			return DashEndpoint(
 				dash=self,
-				street_end_pt=self.final_street().initial_point()
+				street_end_pt=self.final_street().initial_point(),
+				orientation='in'
 			)
 		else:
 			raise ValueError
@@ -143,12 +147,13 @@ class Dash:
 
 
 class DashEndpoint:
-	def __init__(self, dash=None, street_end_pt=None):
+	def __init__(self, dash=None, street_end_pt=None, orientation=None):
 		self.dash = dash
 		self.end_point = street_end_pt.end_point
 		self.street = street_end_pt.street
 		self.slot = street_end_pt.slot
 		self.street_end_point = street_end_pt
+		self.orientation = orientation
 
 
 class SolitonPath:
@@ -239,9 +244,18 @@ class SolitonPath:
 			street=street, end_pt=source_pt, slot=slot
 		)
 		self.growing_pairs.append([d_i.ending_point(), d_f.starting_point()])
+		self.check_growing_pairs()
+		self.starting_point = d_i.starting_point()
+		self.ending_point = d_f.ending_point()
 
 	def dashes(self):
-		raise NotImplemented
+		dashes = []
+		for p in self.growing_pairs:
+			if not p[0].dash in dashes:
+				dashes.append(p[0].dash)
+			if not p[1].dash in dashes:
+				dashes.append(p[1].dash)
+		return dashes
 
 	def street_set(self):
 		raise NotImplemented
@@ -250,12 +264,26 @@ class SolitonPath:
 		raise NotImplemented
 
 	def print_growing_pairs(self):
-		print 'The growing pairs are'
+		print 'The growing pairs are:'
 		for p in self.growing_pairs:
-			print '{} and {}'.format(
-				p[0].end_point.label, 
-				p[1].end_point.label
+			print (
+				'{} at slot {} with orientation {}, '
+				'and {} at slot {} with orientation {}'.
+				format(
+					p[0].end_point.label, p[0].slot, p[0].orientation, 
+					p[1].end_point.label, p[1].slot, p[1].orientation, 
+				)
 			)
+
+	def check_growing_pairs(self):
+		for p in self.growing_pairs:
+			if (
+				p[0].orientation=='in' and p[1].orientation=='out' or
+				p[1].orientation=='in' and p[0].orientation=='out'
+			):
+				pass
+			else:
+				raise Exception('A growing pair is not of the (in,out) type.')
 
 
 # TO DO: develop this class.
@@ -332,7 +360,8 @@ e31 = s3.initial_point().end_point
 e32 = s3.final_point().end_point
 j1 = w.joints.values()[0]
 b1 = w.branch_points.values()[0]
-
+b1.print_type()
+j1.print_type()
 
 dash1 = Dash(label='dash_1')
 dash1.extend_dash_along_street(street=s1, end_pt=e11, slot=0)
@@ -349,6 +378,5 @@ dash1.print_endpoints()
 a1 = SolitonPath(label='a_1')
 a1.create(street=s1, source_pt=b1, slot=0)
 a1.print_growing_pairs()
-# print a1.dashes[0][0].print_endpoints()
-# print a1.dashes[0][1].print_endpoints()
+print [d.label for d in a1.dashes()]
 
