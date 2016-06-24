@@ -15,7 +15,7 @@ class Dash:
 	the extension is performed.
 
 	One may impose restrictions on how a dash can grow: forward_only, 
-	backward_only, or None
+	backward_only, or None (if can grow both ways).
 	"""
 	def __init__(self, label=None, growth_restriction=None,):
 		self.label = label
@@ -100,17 +100,29 @@ class Dash:
 
 	def starting_point(self):
 		if self.path[0][1] == 1:
-			return self.initial_street().initial_point()
+			return DashEndpoint(
+				dash=self,
+				street_end_pt=self.initial_street().initial_point()
+			)
 		elif self.path[0][1] == -1:
-			return self.initial_street().final_point()
+			return DashEndpoint(
+				dash=self,
+				street_end_pt=self.initial_street().final_point()
+			)
 		else:
 			raise ValueError
 
 	def ending_point(self):
 		if self.path[-1][1] == 1:
-			return self.final_street().final_point()
+			return DashEndpoint(
+				dash=self,
+				street_end_pt=self.final_street().final_point()
+			)
 		elif self.path[-1][1] == -1:
-			return self.final_street().initial_point()
+			return DashEndpoint(
+				dash=self,
+				street_end_pt=self.final_street().initial_point()
+			)
 		else:
 			raise ValueError
 
@@ -128,6 +140,15 @@ class Dash:
 				self.ending_point().street.label,
 			)
 		)
+
+
+class DashEndpoint:
+	def __init__(self, dash=None, street_end_pt=None):
+		self.dash = dash
+		self.end_point = street_end_pt.end_point
+		self.street = street_end_pt.street
+		self.slot = street_end_pt.slot
+		self.street_end_point = street_end_pt
 
 
 class SolitonPath:
@@ -161,15 +182,13 @@ class SolitonPath:
 	Since they must both grow in the same direction, one of them will grow
 	"forward" and the other "in reverse".
 	When they split at a Y-joint, a third dash d3 is created.
-	The new dash will grow forward in pair with d1, 
+	The new dash will grow forward in pair with d1, but also
 	and backwards in pair with d2.
 	Note that now d1 and d2 are no longer paired.
 	"""
 	def __init__(self, label=None):
 		self.label = label
-		self.dashes = []
-		self.streets_set = []
-		self.path = []
+		self.growing_pairs = []
 		self.starting_point = None
 		self.ending_point = None
 		self.is_complete = False
@@ -219,7 +238,24 @@ class SolitonPath:
 		d_f.extend_dash_along_street(
 			street=street, end_pt=source_pt, slot=slot
 		)
-		self.dashes.append([d_i, d_f])
+		self.growing_pairs.append([d_i.ending_point(), d_f.starting_point()])
+
+	def dashes(self):
+		raise NotImplemented
+
+	def street_set(self):
+		raise NotImplemented
+
+	def path(self):
+		raise NotImplemented
+
+	def print_growing_pairs(self):
+		print 'The growing pairs are'
+		for p in self.growing_pairs:
+			print '{} and {}'.format(
+				p[0].end_point.label, 
+				p[1].end_point.label
+			)
 
 
 # TO DO: develop this class.
@@ -312,7 +348,7 @@ dash1.print_endpoints()
 
 a1 = SolitonPath(label='a_1')
 a1.create(street=s1, source_pt=b1, slot=0)
-print a1.dashes[0][0].print_endpoints()
-print a1.dashes[0][1].print_endpoints()
-
+a1.print_growing_pairs()
+# print a1.dashes[0][0].print_endpoints()
+# print a1.dashes[0][1].print_endpoints()
 
