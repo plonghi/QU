@@ -1,4 +1,6 @@
+from copy import deepcopy
 from mcsn import MCSN
+from growth_rules import growing_clusters
 
 class Dash:
 	"""
@@ -17,9 +19,12 @@ class Dash:
 	One may impose restrictions on how a dash can grow: forward_only, 
 	backward_only, or None (if can grow both ways).
 	"""
-	def __init__(self, label=None, growth_restriction=None,):
+	def __init__(self, label=None, growth_restriction=None, path=None):
 		self.label = label
-		self.path = []
+		if path is None:
+			self.path = []
+		else:
+			self.path=path
 		if growth_restriction is not None:
 			self.growth_restriction = growth_restriction
 		else:
@@ -191,11 +196,17 @@ class SolitonPath:
 	and backwards in pair with d2.
 	Note that now d1 and d2 are no longer paired.
 	"""
-	def __init__(self, label=None):
+	def __init__(
+		self, label=None, starting_point=None, 
+		ending_point=None, growing_pairs=None
+	):
 		self.label = label
-		self.growing_pairs = []
-		self.starting_point = None
-		self.ending_point = None
+		if growing_pairs is None:
+			self.growing_pairs = []
+		else:
+			self.growing_pairs = growing_pairs
+		self.starting_point = starting_point
+		self.ending_point = ending_point
 		self.is_complete = False
 
 	def create(self, street=None, source_pt=None, slot=None):
@@ -258,10 +269,10 @@ class SolitonPath:
 		return dashes
 
 	def street_set(self):
-		raise NotImplemented
+		raise NotImplementedError
 
 	def path(self):
-		raise NotImplemented
+		raise NotImplementedError
 
 	def print_growing_pairs(self):
 		print 'The growing pairs are:'
@@ -280,10 +291,29 @@ class SolitonPath:
 			if (
 				p[0].orientation=='in' and p[1].orientation=='out' or
 				p[1].orientation=='in' and p[0].orientation=='out'
+			) and (
+				p[0].end_point==p[1].end_point
 			):
 				pass
 			else:
 				raise Exception('A growing pair is not of the (in,out) type.')
+
+	def check_complete(self):
+		dashes = self.dashes()
+		for d in dashes:
+			if (
+				d.starting_point() == self.starting_point() and
+				d.ending_point() == self.ending_point()
+			):
+				if len(dashes) == 1:
+					return True
+				else: 
+					return Exception(
+						'The soliton has a complete dash, but also some'
+						'disconnected pieces.'
+					)
+			else:
+				return False
 
 
 # TO DO: develop this class.
@@ -345,6 +375,62 @@ def set_orientation_from_starting_point(
 		)
 
 
+def copy_of_soliton(soliton, label=None):
+	"""
+	This function makes a copy of a soliton.
+	This includes copying the dashes and preparing a new soliton.
+	Note that one cannot just use deeocopy, otherwise the branch points
+	and the joints of the network will be copied too.
+	That would prevent us from ever joining solitons.
+	"""
+	dashes = soliton.dashes()
+	new_dashes = (
+		[Dash(
+			growth_restriction=d.growth_restriction, path=d.path
+		) for d in dashes]
+	)
+
+	new_growing_pairs = []
+	for i, p in enumerate(soliton.growing_pairs):
+		# Each p is a pair of DashEndpoints
+		# So each has a .dash attribute, and we can use that to 
+		# figure out the index of the corresponding dash in the 
+		# whole set of dashes.
+		j_0 = dashes.index(p[0].dash)
+		j_1 = dashes.index(p[1].dash)
+		# we just create a new pair of dash endpoints,
+		# the only difference will be the dash they are attached to
+		# while the streets of the network will be the same
+		new_growing_pairs.append(
+			[DashEndpoint(
+				dash=new_dashes[j_0], 
+				street_end_pt=p[0].street_end_point, 
+				orientation=p[0].orientation
+			),
+			DashEndpoint(
+				dash=new_dashes[j_1], 
+				street_end_pt=p[1].street_end_point, 
+				orientation=p[1].orientation
+			)]
+		)
+
+	# now determine the new starting and ending points
+	j_0 = dashes.index(soliton.starting_point.dash)
+	j_1 = dashes.index(soliton.ending_point.dash)
+	new_starting_point = new_dashes[j_0].starting_point
+	new_ending_point = new_dashes[j_1].ending_point
+
+	return SolitonPath(
+		label=label,
+		starting_point=new_starting_point, 
+		ending_point=new_ending_point, 
+		growing_pairs=new_growing_pairs
+	)
+	# new_soliton = deepcopy(soliton)
+	# new_soliton.label = label
+	# return new_soliton
+
+
 w = MCSN()
 # w.check_network()
 w.attach_streets()
@@ -376,7 +462,26 @@ dash1.extend_dash_along_street(
 dash1.print_endpoints()
 
 a1 = SolitonPath(label='a_1')
+a1.print_growing_pairs()
+
 a1.create(street=s1, source_pt=b1, slot=0)
 a1.print_growing_pairs()
+
 print [d.label for d in a1.dashes()]
+growing_clusters(a1.growing_pairs)
+print b1.available_slots
+print j1.available_slots
+
+### Check how a soliton is copied:
+a2 = copy_of_soliton(a1)
+print a1.growing_pairs[0][0]
+print a2.growing_pairs[0][0]
+# for a given growing point, the streets should be the same
+print a1.growing_pairs[0][0].street==a2.growing_pairs[0][0].street
+# also the streets andpoint (joint/branch point) should be the same
+print a1.growing_pairs[0][0].street_end_point==a2.growing_pairs[0][0].street_end_point
+# also the slot on the andpoint (joint/branch point) should be the same
+print a1.growing_pairs[0][0].slot==a2.growing_pairs[0][0].slot
+# but the dash should be different, as it will be grown differntly for different solitons
+print a1.growing_pairs[0][0].dash==a2.growing_pairs[0][0].dash
 

@@ -99,7 +99,8 @@ class BranchPoint:
 			raise Exception(
 				'Cannot handle branch points with more than three streets.'
 			)
-		pass
+		self.type = self.determine_type()
+		self.available_slots = self.determine_available_slots()
 
 	def street_position(self, street):
 		"""
@@ -118,7 +119,7 @@ class BranchPoint:
 		# 	ind = None
 		# return ind
 
-	def type(self):
+	def determine_type(self):
 		bp_type = [st.__class__.__name__ for  st in self.streets]
 		if bp_type in TYPE_1_BRANCH_POINTS:
 			return 'type_1_branch_point'
@@ -130,7 +131,11 @@ class BranchPoint:
 			return None
 
 	def print_type(self):
-		print '{} is a {}'.format(self.label, self.type())
+		print '{} is a {}'.format(self.label, self.type)
+
+	def determine_available_slots(self):
+		bp_type = [st.__class__.__name__ for st in self.streets]
+		return [i for i, x in enumerate(bp_type) if x=='Street']
 
 
 class Street:
@@ -181,6 +186,8 @@ class Joint:
 			raise Exception(
 				'Must specify 6 streets for each joint.'
 			)
+		self.type = self.determine_type()
+		self.available_slots = self.determine_available_slots()
 
 	def street_position(self, street):
 		"""
@@ -200,7 +207,7 @@ class Joint:
 		# 	ind = None
 		# return ind
 
-	def type(self):
+	def determine_type(self):
 		j_type = [st.__class__.__name__ for  st in self.streets]
 		if j_type in TYPE_3_JOINTS:
 			return 'type_3_joint'
@@ -216,7 +223,11 @@ class Joint:
 			return None
 
 	def print_type(self):
-		print '{} is a {}'.format(self.label, self.type())
+		print '{} is a {}'.format(self.label, self.type)
+
+	def determine_available_slots(self):
+		j_type = [st.__class__.__name__ for st in self.streets]
+		return [i for i, x in enumerate(j_type) if x=='Street']
 
 ### Important: must develop this class, 
 ### to extract the charges to assign to each
@@ -295,7 +306,7 @@ class MCSN:
 
 		# Check that every joint is of an allowed type
 		for j_pt in self.joints.values():
-			j_type = j_pt.type()
+			j_type = j_pt.type
 			is_allowed = False
 			for a_joint in ALLOWED_JOINTS:
 				if j_type is not None:
