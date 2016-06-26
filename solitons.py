@@ -1,6 +1,5 @@
 from copy import deepcopy
 from mcsn import MCSN
-from growth_rules import growing_clusters
 
 class Dash:
 	"""
@@ -17,7 +16,8 @@ class Dash:
 	the extension is performed.
 
 	One may impose restrictions on how a dash can grow: forward_only, 
-	backward_only, or None (if can grow both ways).
+	backward_only, both (dash is a completed soliton), 
+	or None (if can grow both ways).
 	"""
 	def __init__(self, label=None, growth_restriction=None, path=None):
 		self.label = label
@@ -29,6 +29,8 @@ class Dash:
 			self.growth_restriction = growth_restriction
 		else:
 			self.growth_restriction = None
+		self.starting_point = self.determine_starting_point()
+		self.ending_point = self.determine_ending_point()
 	
 	def extend_dash_along_street(self, street=None, end_pt=None, slot=None):
 		if len(self.path) == 0:
@@ -42,6 +44,11 @@ class Dash:
 					street, end_pt, slot
 				)
 				self.path = [[street, new_street_orientation]]
+
+		elif self.growth_restriction == 'both':
+			# The dash cannot be grown anymore, 
+			# it should correspond to a completed soliton.
+			pass
 		
 		elif end_pt == 'last' and (
 				self.growth_restriction == 'forward_only' or 
@@ -96,6 +103,8 @@ class Dash:
 					self.label, street.label, end_pt, self.growth_restriction
 				)
 			)
+		# update endpoints of the dash
+		self.update_endpoints()
 
 	def initial_street(self):
 		return self.path[0][0]
@@ -103,52 +112,87 @@ class Dash:
 	def final_street(self):
 		return self.path[-1][0]
 
-	def starting_point(self):
-		if self.path[0][1] == 1:
-			return DashEndpoint(
-				dash=self,
-				street_end_pt=self.initial_street().initial_point(),
-				orientation='out'
-			)
-		elif self.path[0][1] == -1:
-			return DashEndpoint(
-				dash=self,
-				street_end_pt=self.initial_street().final_point(),
-				orientation='out'
-			)
+	def determine_starting_point(self):
+		if len(self.path)==0:
+			return None
 		else:
-			raise ValueError
+			if self.path[0][1] == 1:
+				return DashEndpoint(
+					dash=self,
+					street_end_pt=self.initial_street().initial_point(),
+					orientation='out'
+				)
+			elif self.path[0][1] == -1:
+				return DashEndpoint(
+					dash=self,
+					street_end_pt=self.initial_street().final_point(),
+					orientation='out'
+				)
+			else:
+				raise ValueError
 
-	def ending_point(self):
-		if self.path[-1][1] == 1:
-			return DashEndpoint(
-				dash=self,
-				street_end_pt=self.final_street().final_point(),
-				orientation='in'
-			)
-		elif self.path[-1][1] == -1:
-			return DashEndpoint(
-				dash=self,
-				street_end_pt=self.final_street().initial_point(),
-				orientation='in'
-			)
+	def determine_ending_point(self):
+		if len(self.path)==0:
+			return None
 		else:
-			raise ValueError
+			if self.path[-1][1] == 1:
+				return DashEndpoint(
+					dash=self,
+					street_end_pt=self.final_street().final_point(),
+					orientation='in'
+				)
+			elif self.path[-1][1] == -1:
+				return DashEndpoint(
+					dash=self,
+					street_end_pt=self.final_street().initial_point(),
+					orientation='in'
+				)
+			else:
+				raise ValueError
+
+	def update_endpoints(self):
+		old_start = self.starting_point
+		old_end = self.ending_point
+		new_start = self.determine_starting_point()
+		new_end = self.determine_ending_point()
+
+		if old_start==None:
+			self.starting_point = new_start
+		elif (
+			old_start.end_point!=new_start.end_point or 
+			old_start.slot!=new_start.slot
+		):
+			self.starting_point = new_start
+		else:
+			pass
+
+		if old_end==None:
+			self.ending_point = new_end
+		elif (
+			old_end.end_point!=new_end.end_point or 
+			old_end.slot!=new_end.slot
+		):
+			self.ending_point = new_end
+		else:
+			pass
 
 	def print_endpoints(self):
-		print (
-			'Path {} starts from {} at slot {}, going out on street {}, '
-			'and ends on {} at slot {} arriving on street {}.'
-			.format(
-				self.label, 
-				self.starting_point().end_point.label, 
-				self.starting_point().slot,
-				self.starting_point().street.label,
-				self.ending_point().end_point.label,
-				self.ending_point().slot,
-				self.ending_point().street.label,
+		if len(self.path)==0:
+			print 'The dash is empty.'
+		else:
+			print (
+				'Path {} starts from {} at slot {}, going out on street {}, '
+				'and ends on {} at slot {} arriving on street {}.'
+				.format(
+					self.label, 
+					self.starting_point.end_point.label, 
+					self.starting_point.slot,
+					self.starting_point.street.label,
+					self.ending_point.end_point.label,
+					self.ending_point.slot,
+					self.ending_point.street.label,
+				)
 			)
-		)
 
 
 class DashEndpoint:
@@ -198,7 +242,8 @@ class SolitonPath:
 	"""
 	def __init__(
 		self, label=None, starting_point=None, 
-		ending_point=None, growing_pairs=None
+		ending_point=None, growing_pairs=None,
+		complete_dash=None,
 	):
 		self.label = label
 		if growing_pairs is None:
@@ -208,6 +253,7 @@ class SolitonPath:
 		self.starting_point = starting_point
 		self.ending_point = ending_point
 		self.is_complete = False
+		self.complete_dash = complete_dash
 
 	def create(self, street=None, source_pt=None, slot=None):
 		"""
@@ -254,10 +300,10 @@ class SolitonPath:
 		d_f.extend_dash_along_street(
 			street=street, end_pt=source_pt, slot=slot
 		)
-		self.growing_pairs.append([d_i.ending_point(), d_f.starting_point()])
+		self.growing_pairs.append([d_i.ending_point, d_f.starting_point])
 		self.check_growing_pairs()
-		self.starting_point = d_i.starting_point()
-		self.ending_point = d_f.ending_point()
+		self.starting_point = d_i.starting_point
+		self.ending_point = d_f.ending_point
 
 	def dashes(self):
 		dashes = []
@@ -266,6 +312,8 @@ class SolitonPath:
 				dashes.append(p[0].dash)
 			if not p[1].dash in dashes:
 				dashes.append(p[1].dash)
+		if self.is_complete is True:
+			dashes.append(self.complete_dash)
 		return dashes
 
 	def street_set(self):
@@ -431,6 +479,67 @@ def copy_of_soliton(soliton, label=None):
 	# return new_soliton
 
 
+def join_dashes(growing_pair):
+	"""
+	Returns a new dash.
+	"""
+	dash_endpoint_1 = growing_pair[0]
+	dash_endpoint_2 = growing_pair[1]
+
+	if dash_endpoint_1.end_point != dash_endpoint_2.end_point:
+		raise Exception('Growing pair cannot be joined.')
+	# dashes must have a common endpoint to be joined, this is checked above.
+	# then, the first dash will be the one whose orientation is 'in'
+	# and the second dash will be the one whose orientation is 'out'
+	# of the common point
+	if (
+		dash_endpoint_1.orientation == 'in' and
+		dash_endpoint_2.orientation == 'out'
+	):
+		first_dash = dash_endpoint_1.dash
+		second_dash = dash_endpoint_2.dash
+	elif (
+		dash_endpoint_1.orientation == 'out' and
+		dash_endpoint_2.orientation == 'in'
+	):
+		first_dash = dash_endpoint_2.dash
+		second_dash = dash_endpoint_1.dash
+	else:
+		raise Exception('Growing pair cannot be joined')
+
+	# Now determine growth restrictions
+	if (
+		first_dash.growth_restriction is 'forward_only' and
+		second_dash.growth_restriction is 'backward_only'
+	):
+		new_growth_restriction = 'both'
+	elif (
+		first_dash.growth_restriction is 'forward_only' and
+		second_dash.growth_restriction is None
+	):
+		new_growth_restriction = 'forward_only'
+	elif (
+		first_dash.growth_restriction is None and
+		second_dash.growth_restriction is 'backward_only'
+	):
+		new_growth_restriction = 'backward_only'
+	elif (
+		first_dash.growth_restriction is None and
+		second_dash.growth_restriction is None
+	):
+		new_growth_restriction = None
+	else:
+		raise Exception('Cannot determine growth restriction')
+
+	new_dash = Dash(
+		# label=first_dash.label+'_'+second_dash.label, 
+		growth_restriction=new_growth_restriction, 
+		path=(first_dash.path + second_dash.path)
+	)
+
+	return new_dash
+
+
 w = MCSN()
 # w.check_network()
 w.attach_streets()
@@ -467,21 +576,18 @@ a1.print_growing_pairs()
 a1.create(street=s1, source_pt=b1, slot=0)
 a1.print_growing_pairs()
 
-print [d.label for d in a1.dashes()]
-growing_clusters(a1.growing_pairs)
-print b1.available_slots
-print j1.available_slots
 
-### Check how a soliton is copied:
-a2 = copy_of_soliton(a1)
-print a1.growing_pairs[0][0]
-print a2.growing_pairs[0][0]
-# for a given growing point, the streets should be the same
-print a1.growing_pairs[0][0].street==a2.growing_pairs[0][0].street
-# also the streets andpoint (joint/branch point) should be the same
-print a1.growing_pairs[0][0].street_end_point==a2.growing_pairs[0][0].street_end_point
-# also the slot on the andpoint (joint/branch point) should be the same
-print a1.growing_pairs[0][0].slot==a2.growing_pairs[0][0].slot
-# but the dash should be different, as it will be grown differntly for different solitons
-print a1.growing_pairs[0][0].dash==a2.growing_pairs[0][0].dash
+
+# ### Check how a soliton is copied:
+# a2 = copy_of_soliton(a1)
+# print a1.growing_pairs[0][0]
+# print a2.growing_pairs[0][0]
+# # for a given growing point, the streets should be the same
+# print a1.growing_pairs[0][0].street==a2.growing_pairs[0][0].street
+# # also the streets andpoint (joint/branch point) should be the same
+# print a1.growing_pairs[0][0].street_end_point==a2.growing_pairs[0][0].street_end_point
+# # also the slot on the andpoint (joint/branch point) should be the same
+# print a1.growing_pairs[0][0].slot==a2.growing_pairs[0][0].slot
+# # but the dash should be different, as it will be grown differntly for different solitons
+# print a1.growing_pairs[0][0].dash==a2.growing_pairs[0][0].dash
 
