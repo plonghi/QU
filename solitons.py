@@ -18,6 +18,12 @@ class Dash:
 	One may impose restrictions on how a dash can grow: forward_only, 
 	backward_only, both (dash is a completed soliton), 
 	or None (if can grow both ways).
+
+	The starting point and ending point of a dash are important objects.
+	They are attributes of solitons.
+	So when a dash is grown, it is important to NOT change the dash
+	endpoint, but rather to update its attributes to reflect the 
+	new path of the dash.
 	"""
 	def __init__(self, label=None, growth_restriction=None, path=None):
 		self.label = label
@@ -162,7 +168,14 @@ class Dash:
 			old_start.end_point!=new_start.end_point or 
 			old_start.slot!=new_start.slot
 		):
-			self.starting_point = new_start
+			# note that we don't replace the DashEndpoint instance,
+			# but just update its attribute
+			self.starting_point.dash = new_start.dash
+			self.starting_point.end_point = new_start.end_point
+			self.starting_point.street = new_start.street
+			self.starting_point.slot = new_start.slot
+			self.starting_point.street_end_point = new_start.street_end_point
+			self.starting_point.orientation = new_start.orientation
 		else:
 			pass
 
@@ -172,7 +185,14 @@ class Dash:
 			old_end.end_point!=new_end.end_point or 
 			old_end.slot!=new_end.slot
 		):
-			self.ending_point = new_end
+			# note that we don't replace the DashEndpoint instance,
+			# but just update its attribute
+			self.ending_point.dash = new_end.dash
+			self.ending_point.end_point = new_end.end_point
+			self.ending_point.street = new_end.street
+			self.ending_point.slot = new_end.slot
+			self.ending_point.street_end_point = new_end.street_end_point
+			self.ending_point.orientation = new_end.orientation
 		else:
 			pass
 
