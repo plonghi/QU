@@ -297,8 +297,8 @@ class SolitonPath:
 			self.dashes = []
 		else:
 			self.dashes = dashes
-		self.starting_point = starting_point
-		self.ending_point = ending_point
+		# self.starting_point = starting_point
+		# self.ending_point = ending_point
 		self.is_complete = False
 		self.complete_dash = complete_dash
 
@@ -366,11 +366,8 @@ class SolitonPath:
 		# self.growing_pairs.append([d_i.ending_point, d_f.starting_point])
 		self.growing_pairs = growing_pairs_from_dashes(self.dashes)
 		self.check_growing_pairs()
-		self.starting_point = d_i.starting_point
-		self.ending_point = d_f.ending_point
-		
 
-	# def dashes(self):
+	# def dashes_from_growing_pairs(self):
 	# 	dashes = []
 	# 	for p in self.growing_pairs:
 	# 		if not p[0].dash in dashes:
@@ -427,6 +424,14 @@ class SolitonPath:
 					)
 			else:
 				return False
+
+	def starting_point(self):
+		check_dashes_ordering(self.dashes)
+		return self.dashes[0].starting_point
+
+	def ending_point(self):
+		check_dashes_ordering(self.dashes)
+		return self.dashes[-1].ending_point
 
 
 # TO DO: develop this class.
@@ -503,34 +508,11 @@ def copy_of_soliton(soliton, label=None):
 		) for d in dashes]
 	)
 
-	# new_growing_pairs = []
-	# for i, p in enumerate(soliton.growing_pairs):
-	# 	# Each p is a pair of DashEndpoints
-	# 	# So each has a .dash attribute, and we can use that to 
-	# 	# figure out the index of the corresponding dash in the 
-	# 	# whole set of dashes.
-	# 	j_0 = dashes.index(p[0].dash)
-	# 	j_1 = dashes.index(p[1].dash)
-	# 	# we just create a new pair of dash endpoints,
-	# 	# the only difference will be the dash they are attached to
-	# 	# while the streets of the network will be the same
-	# 	new_growing_pairs.append(
-	# 		[DashEndpoint(
-	# 			dash=new_dashes[j_0], 
-	# 			street_end_pt=p[0].street_end_point, 
-	# 			orientation=p[0].orientation
-	# 		),
-	# 		DashEndpoint(
-	# 			dash=new_dashes[j_1], 
-	# 			street_end_pt=p[1].street_end_point, 
-	# 			orientation=p[1].orientation
-	# 		)]
-	# 	)
 	new_growing_pairs = growing_pairs_from_dashes(new_dashes)
 
 	# now determine the new starting and ending points
-	j_0 = dashes.index(soliton.starting_point.dash)
-	j_1 = dashes.index(soliton.ending_point.dash)
+	j_0 = dashes.index(soliton.starting_point().dash)
+	j_1 = dashes.index(soliton.ending_point().dash)
 	new_starting_point = new_dashes[j_0].starting_point
 	new_ending_point = new_dashes[j_1].ending_point
 
@@ -607,40 +589,47 @@ def join_dashes(growing_pair):
 	return new_dash
 
 
-def growing_pairs_from_dashes(dash_set):
+def check_dashes_ordering(dash_sequence):
 	"""
-	Takes an ORDERED sequence of dashes (typically from a soliton)
+	Checks an ORDERED sequence of dashes (typically from a soliton)
 	such that the first one is "forward only", and its ending point 
 	is on the same nodal point (branch pt/joint), same slot as the 
 	beginning point of the second one, with opposite orientation.
 	And so on for the ending point of the 2nd dash with the beginning 
 	point of the 3rd dash, and so on.
 	The last dash must be "backward only" type.
-	This function returns the corresponding set of growing pairs then.
 	"""
 	if (
-		dash_set[0].growth_restriction is not 'forward_only' and 
-		dash_set[0].growth_restriction is not 'both'
+		dash_sequence[0].growth_restriction is not 'forward_only' and 
+		dash_sequence[0].growth_restriction is not 'both'
 	):
 		raise Exception
 	if (
-		dash_set[-1].growth_restriction is not 'backward_only' and 
-		dash_set[-1].growth_restriction is not 'both'
+		dash_sequence[-1].growth_restriction is not 'backward_only' and 
+		dash_sequence[-1].growth_restriction is not 'both'
 	):
 		raise Exception
-	for i in range(len(dash_set)-1):
-		d_1 = dash_set[i]
-		d_2 = dash_set[i+1]
+	for i in range(len(dash_sequence)-1):
+		d_1 = dash_sequence[i]
+		d_2 = dash_sequence[i+1]
 		if (
 			d_1.ending_point.end_point != d_2.starting_point.end_point or
 			d_1.ending_point.slot != d_2.starting_point.slot
 		):
 			raise Exception
+	pass
+
+
+def growing_pairs_from_dashes(dash_sequence):
+	"""
+	This function returns the corresponding set of growing pairs.
+	"""
+	check_dashes_ordering(dash_sequence)
 
 	growing_pairs = []
-	for i in range(len(dash_set)-1):
-		d_1 = dash_set[i]
-		d_2 = dash_set[i+1]
+	for i in range(len(dash_sequence)-1):
+		d_1 = dash_sequence[i]
+		d_2 = dash_sequence[i+1]
 		growing_pairs.append([d_1.ending_point, d_2.starting_point])
 
 	return growing_pairs

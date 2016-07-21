@@ -120,42 +120,6 @@ def bp_type_1_growth(old_soliton, old_cluster):
 		# point of type 1 enters. 
 		new_dash = join_dashes(new_p)
 
-		# # Remove the growing pair that has been joined at the branch point.
-		# # and replace it with the new dash (done just below)
-		# new_growing_pairs = (
-		# 	[new_p_i for new_p_i in new_soliton.growing_pairs 
-		# 	if new_p_i != new_p]
-		# )
-		# new_soliton.growing_pairs = new_growing_pairs
-		# # Now update the other growing pairs which contained the other
-		# # endpoints of the two dashes we merged, substituting them
-		# # with the new dash's endpoints
-		# for np in new_growing_pairs:
-		# 	if np[0].dash == new_d_1 or np[0].dash == new_d_2:
-		# 		if (
-		# 			np[0].end_point == new_dash.starting_point.end_point and 
-		# 			np[0].slot == new_dash.starting_point.slot
-		# 		):
-		# 			np[0] = new_dash.starting_point
-		# 		elif (
-		# 			np[0].end_point == new_dash.ending_point.end_point and 
-		# 			np[0].slot == new_dash.ending_point.slot
-		# 		):
-		# 			np[0] = new_dash.ending_point
-		# 		print 'replaced'
-		# 	elif np[1].dash == new_d_1 or np[1].dash == new_d_2:
-		# 		if (
-		# 			np[1].end_point == new_dash.starting_point.end_point and 
-		# 			np[1].slot == new_dash.starting_point.slot
-		# 		):
-		# 			np[1] = new_dash.starting_point
-		# 		elif (
-		# 			np[1].end_point == new_dash.ending_point.end_point and 
-		# 			np[1].slot == new_dash.ending_point.slot
-		# 		):
-		# 			np[1] = new_dash.ending_point
-		# 		print 'replaced'
-
 		# collect the new dashes, by replacing the two we just merged
 		# with their union
 		# the dashes are ordered, so the two that have been joined 
@@ -175,47 +139,29 @@ def bp_type_1_growth(old_soliton, old_cluster):
 		new_soliton.dashes = new_dashes
 		new_soliton.growing_pairs = new_growing_pairs
 
-		# print '\nThese are the soliton starting point and ending point'
-		# print new_soliton.starting_point
-		# print new_soliton.ending_point
-		# print 'But notice that these are the new dashes points'
-		# print new_p[0]
-		# print new_p[1]
-
 		if len(new_growing_pairs) == 0: 
 			# In this case the soliton has been completed
 			new_soliton.is_complete = True
 			new_soliton.complete_dash = new_dash
-			new_soliton.starting_point = new_dash.starting_point
-			new_soliton.ending_point = new_dash.ending_point
-		else:
-			# If the dash that is being replaced is initial or 
-			# final dash, must also replace initial and 
-			# final points of the soliton
-			### TODO: this needs some testing
-			dash_endpoint_1 = new_p[0]
-			dash_endpoint_2 = new_p[1]
-			if (
-				dash_endpoint_1 == new_soliton.starting_point or
-				dash_endpoint_2 == new_soliton.starting_point
-			):
-				new_soliton.starting_point = new_dash.starting_point
-			if (
-				dash_endpoint_1 == new_soliton.ending_point or
-				dash_endpoint_2 == new_soliton.ending_point
-			):
-				new_soliton.ending_point = new_dash.ending_point
+		# else:
+		# 	# If the dash that is being replaced is initial or 
+		# 	# final dash, must also replace initial and 
+		# 	# final points of the soliton
+		# 	### TODO: this needs some testing
+		# 	dash_endpoint_1 = new_p[0]
+		# 	dash_endpoint_2 = new_p[1]
+		# 	if (
+		# 		dash_endpoint_1 == new_soliton.starting_point or
+		# 		dash_endpoint_2 == new_soliton.starting_point
+		# 	):
+		# 		new_soliton.starting_point = new_dash.starting_point
+		# 	if (
+		# 		dash_endpoint_1 == new_soliton.ending_point or
+		# 		dash_endpoint_2 == new_soliton.ending_point
+		# 	):
+		# 		new_soliton.ending_point = new_dash.ending_point
 
 		new_solitons.append(new_soliton)
-		### QUESTION: in the network rules, there seems to be a precise order
-		### of dashes. [REALLY??? No: each dash is a string of \tau and \nu
-		### and these strings are just summed together like
-		### \tau = \nu\nu\nu+\tau\nu+\nu\tau etc] 
-		### That moreover affects how they can compose.
-		### Should keep the ordering into account as well, and when creating 
-		### a new dash make sure that the new ordering is correct.
-		### It's important to pin down carefully the relation between dashes 
-		### and the 2d soliton generating functions, tau and nu.
 		
 	return new_solitons
 
@@ -338,34 +284,7 @@ def j_type_3_growth(old_soliton, old_cluster):
 			growing_pairs_from_dashes(new_soliton.dashes)
 		)
 
-		# # Remove the growing pair that has been joined at the branch point.
-		# new_growing_pairs = (
-		# 	[new_p_i for new_p_i in new_soliton.growing_pairs 
-		# 	if new_p_i != new_p]
-		# )
-		# new_soliton.growing_pairs = new_growing_pairs
-
-		# # then add the two new growing pairs
-		# # [..., [end(d_32), start(d_21)], [end(d_13), start(d_32)] ...]
-		# new_soliton.growing_pairs.append(
-		# 	[d_32.ending_point, d_21.starting_point]
-		# )
-		# new_soliton.growing_pairs.append(
-		# 	[d_13.ending_point, d_32.starting_point]
-		# )
-		# ### ????? DOES THE ORDERING MATTER ??????? SEE QUESTION BELOW, 
-		# ### AND UPDATE ORDER OF PAIRS IF NECESSARY!!!
-
 		new_solitons.append(new_soliton)
-		### QUESTION: in the network rules, there seems to be a precise order
-		### of dashes. [REALLY??? No: each dash is a string of \tau and \nu
-		### and these strings are just summed together like
-		### \tau = \nu\nu\nu+\tau\nu+\nu\tau etc] 
-		### That moreover affects how they can compose.
-		### Should keep the ordering into account as well, and when creating 
-		### a new dash make sure that the new ordering is correct.
-		### It's important to pin down carefully the relation between dashes 
-		### and the 2d soliton generating functions, tau and nu.
 		
 	return new_solitons
 

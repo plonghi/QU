@@ -193,31 +193,59 @@ new_sols_5 = bp_type_1_growth(a4, cls_4[0])
 print '\nThere are {} new solitons after growth'.format(len(new_sols))
 a5=new_sols_5[0]
 
-print '\nthe soliton dashes are \n{}'.format([d.label for d in a4.dashes])
-print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a4.dashes])
+print '\nthe soliton dashes are \n{}'.format([d.label for d in a5.dashes])
+print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a5.dashes])
 
-a4.dashes[0].print_endpoints()
-print 'starting point {}'.format(a4.dashes[0].starting_point)
-print 'ending point {}\n'.format(a4.dashes[0].ending_point)
+a5.dashes[0].print_endpoints()
+print 'starting point {}'.format(a5.dashes[0].starting_point)
+print 'ending point {}\n'.format(a5.dashes[0].ending_point)
 
-a4.dashes[1].print_endpoints()
-print 'starting point {}'.format(a4.dashes[1].starting_point)
-print 'ending point {}\n'.format(a4.dashes[1].ending_point)
+a5.dashes[1].print_endpoints()
+print 'starting point {}'.format(a5.dashes[1].starting_point)
+print 'ending point {}\n'.format(a5.dashes[1].ending_point)
 
-a4.dashes[2].print_endpoints()
-print 'starting point {}'.format(a4.dashes[2].starting_point)
-print 'ending point {}\n'.format(a4.dashes[2].ending_point)
-
-print '\nThe soliton is now complete: {}'.format(a4.is_complete)
+print '\nThe soliton is now complete: {}'.format(a5.is_complete)
 
 
 
+print '\n\n-------------------------------------------------------'
+print '\nKeep on growing automatically, with one more step'
 
-# print (
-# 	'The soliton starting point equals the dash starting point: {}'
-# 	.format(a4.starting_point==a4.complete_dash.starting_point)
-# )
-# print (
-# 	'The soliton ending point equals the dash ending point: {}'
-# 	.format(a4.ending_point==a4.complete_dash.ending_point)
-# )
+cls_5 = growing_clusters(a5)
+print '\nThe growing clusters:\n{}'.format(cls_5)
+print '\nNow I grow soliton a5 at {}'.format(cls_5[0][0][0].end_point.label)
+new_sols_6 = bp_type_1_growth(a5, cls_5[0])
+print '\nThere are {} new solitons after growth'.format(len(new_sols))
+a6=new_sols_6[0]
+
+print '\nthe soliton dashes are \n{}'.format([d.label for d in a6.dashes])
+print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a6.dashes])
+
+a6.dashes[0].print_endpoints()
+print 'starting point {}'.format(a6.dashes[0].starting_point)
+print 'ending point {}\n'.format(a6.dashes[0].ending_point)
+
+print '\nThe soliton is now complete: {}'.format(a6.is_complete)
+
+print (
+	'The soliton starting point equals the dash starting point: {}'
+	.format(a6.starting_point()==a6.complete_dash.starting_point)
+)
+print (
+	'The soliton ending point equals the dash ending point: {}'
+	.format(a6.ending_point()==a6.complete_dash.ending_point)
+)
+
+print '\n\n-------------------------------------------------------'
+print '\nCheck that older solitons havent been accidentally grown'
+print '\nBack to a5 soliton\n'
+a5.dashes[0].print_endpoints()
+print 'starting point {}'.format(a5.dashes[0].starting_point)
+print 'ending point {}\n'.format(a5.dashes[0].ending_point)
+
+a5.dashes[1].print_endpoints()
+print 'starting point {}'.format(a5.dashes[1].starting_point)
+print 'ending point {}\n'.format(a5.dashes[1].ending_point)
+
+
+
