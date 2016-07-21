@@ -1,5 +1,5 @@
 from copy import deepcopy
-from mcsn import MCSN
+from mcsn import MCSN, Street, Joint, BranchPoint
 
 class Dash:
 	"""
@@ -569,11 +569,39 @@ def join_dashes(growing_pair):
 
 	return new_dash
 
-
+# ----- Create a spectral network ------
+#
 w = MCSN()
-# w.check_network()
+w.streets = {
+	'p_1' : Street(label='p_1'),
+	'p_2' : Street(label='p_2'),
+	'p_3' : Street(label='p_3'),
+}
+w.branch_points = {
+	'b_1' : BranchPoint(
+		label='b_1', streets=[w.streets['p_1'], None, None]
+	), 
+	'b_2' : BranchPoint(
+		label='b_2', streets=[w.streets['p_2']]
+	),
+	'b_3' : BranchPoint(
+		label='b_3', streets=[w.streets['p_3']]
+	),
+}
+w.joints = {'j_1': Joint(
+	label='j_1', streets=[
+		w.streets['p_1'], 
+		None,
+		w.streets['p_2'], 
+		None,
+		w.streets['p_3'], 
+		None
+	]
+)}
 w.attach_streets()
 w.check_network()
+#------ Finished creating network -------
+
 s1 = w.streets['p_1']
 e11 = s1.initial_point().end_point
 e12 = s1.final_point().end_point

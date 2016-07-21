@@ -246,32 +246,32 @@ class MCSN:
 	"""
 	def __init__(self, label=None):
 		self.label=label
-		self.streets = {
-			'p_1' : Street(label='p_1'),
-			'p_2' : Street(label='p_2'),
-			'p_3' : Street(label='p_3'),
-		}
-		self.branch_points = {
-			'b_1' : BranchPoint(
-				label='b_1', streets=[self.streets['p_1'], None, None]
-			), 
-			'b_2' : BranchPoint(
-				label='b_2', streets=[self.streets['p_2']]
-			),
-			'b_3' : BranchPoint(
-				label='b_3', streets=[self.streets['p_3']]
-			),
-		}
-		self.joints = {'j_1': Joint(
-			label='j_1', streets=[
-				self.streets['p_1'], 
-				None,
-				self.streets['p_2'], 
-				None,
-				self.streets['p_3'], 
-				None
-			]
-		)}
+		# self.streets = {
+		# 	'p_1' : Street(label='p_1'),
+		# 	'p_2' : Street(label='p_2'),
+		# 	'p_3' : Street(label='p_3'),
+		# }
+		# self.branch_points = {
+		# 	'b_1' : BranchPoint(
+		# 		label='b_1', streets=[self.streets['p_1'], None, None]
+		# 	), 
+		# 	'b_2' : BranchPoint(
+		# 		label='b_2', streets=[self.streets['p_2']]
+		# 	),
+		# 	'b_3' : BranchPoint(
+		# 		label='b_3', streets=[self.streets['p_3']]
+		# 	),
+		# }
+		# self.joints = {'j_1': Joint(
+		# 	label='j_1', streets=[
+		# 		self.streets['p_1'], 
+		# 		None,
+		# 		self.streets['p_2'], 
+		# 		None,
+		# 		self.streets['p_3'], 
+		# 		None
+		# 	]
+		# )}
 
 	def attach_streets(self):
 		for b_pt in self.branch_points.values():
