@@ -25,7 +25,7 @@ class Dash:
 	endpoint, but rather to update its attributes to reflect the 
 	new path of the dash.
 	"""
-	def __init__(self, label=None, growth_restriction=None, path=None):
+	def __init__(self, label='no_label', growth_restriction=None, path=None):
 		self.label = label
 		if path is None:
 			self.path = []
@@ -283,16 +283,26 @@ class SolitonPath:
 		slot must be an integer.
 		
 		If a soliton is stretching "from a joint/branch point" e
-		of a street p, then we create an initial dash d_i that 
+		of a street p, then we create an INITIAL dash d_i that 
 		is given by the street itself with orientation into e, 
 		moreover we impose the constraint that such initial dash 
-		can only grow forward.
-		Likewise we also create a final dash d_f that 
-		is given by the street itself with orientation outgoing from e, 
-		such final dash can only grow backward.
+		can only grow FORWARD.
+		Likewise we also create a FINAL dash d_f that 
+		is given by the street itself with orientation OUTGOING from e, 
+		such final dash can only grow BACKWARD.
+
+		The convention is that the soliton endpoints are fixed at the 
+		beginning, as they determine its relative homology class.
+		The growth constraints then indeed preserve the initial point
+		and the final point.
+		As the soliton is created, it is not a closed soliton, even if 
+		it is sourced at a branch point. The growth process
+		will take care of closing it, or propagating it further through the
+		branch point, if this is of type II or III, following the traffic
+		rules of GMN5.
 		"""
 		# First of all, check that the slot actually corresponds to
-		# one here the street ands on the starting_point
+		# one where the street ands on the starting_point
 		if (
 			street.initial_point().end_point == source_pt and
 			street.initial_point().slot == slot
@@ -578,6 +588,7 @@ b1 = w.branch_points.values()[0]
 b1.print_type()
 j1.print_type()
 
+print '\nCreating a dash, and growing it by hand'
 dash1 = Dash(label='dash_1')
 dash1.extend_dash_along_street(street=s1, end_pt=e11, slot=0)
 dash1.print_endpoints()
@@ -590,6 +601,8 @@ dash1.extend_dash_along_street(
 )
 dash1.print_endpoints()
 
+
+print '\nCreating a soliton, and growing it automatically'
 a1 = SolitonPath(label='a_1')
 a1.print_growing_pairs()
 
