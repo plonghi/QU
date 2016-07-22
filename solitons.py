@@ -73,11 +73,23 @@ class Dash:
 			else:
 				raise ValueError
 			if terminal_street != street:
-				new_street_orientation = set_orientation_from_starting_point(
+				# new_street_orientation = set_orientation_from_starting_point(
+				# 		street, intermediate_pt, slot
+				# 	)
+				# self.path.append([street, new_street_orientation])
+
+				# since 'end_pt' is 'last', in this case the dash goes 
+				# INTO the NEW street,
+				# therefore the intermediate point is a "starting point"
+				# for the new street, according to the orientation
+				new_street_orientation = (
+					set_orientation_from_starting_point(
 						street, intermediate_pt, slot
 					)
+				)
 				self.path.append([street, new_street_orientation])
 			else:
+				raise Exception('Review code here before proceeding.')
 				new_street_orientation = -set_orientation_from_starting_point(
 						street, intermediate_pt, slot
 					)
@@ -87,6 +99,10 @@ class Dash:
 				self.growth_restriction == 'backward_only' or 
 				self.growth_restriction is None
 			):
+			# recover info on the terminal street of the path
+			# (either the first street or the last one)
+			# and whether the street orientation agrees or disagrees
+			# with the direction of the dash
 			terminal_street, terminal_orientation = self.path[0]
 			if terminal_orientation == +1:
 				intermediate_pt = terminal_street.initial_point().end_point
@@ -95,24 +111,34 @@ class Dash:
 			else:
 				raise ValueError
 			if terminal_street != street:
-				if terminal_orientation == 1:
-					# In this case the dash goes into the new street,
-					# therefore the intermediate point is a "starting point"
-					# for the new street, according to the orientation
-					new_street_orientation = (
-						set_orientation_from_starting_point(
-							street, intermediate_pt, slot
-						)
+				# if :
+				# 	# In this case the dash goes INTO the NEW street,
+				# 	# therefore the intermediate point is a "starting point"
+				# 	# for the new street, according to the orientation
+				# 	new_street_orientation = (
+				# 		set_orientation_from_starting_point(
+				# 			street, intermediate_pt, slot
+				# 		)
+				# 	)
+				# elif terminal_orientation == -1:
+				# 	# In this case the dash goes OUT from the NEW street,
+				# 	# therefore the intermediate point is an "ending point"
+				# 	# for the new street, according to the orientation
+				# 	new_street_orientation = (
+				# 		set_orientation_from_starting_point(
+				# 			street, intermediate_pt, slot, opposite=True
+				# 		)
+				# 	)
+
+				# since 'end_pt' is 'first', in this case the dash goes 
+				# OUT from the NEW street,
+				# therefore the intermediate point is an "ending point"
+				# for the new street, according to the orientation
+				new_street_orientation = (
+					set_orientation_from_starting_point(
+						street, intermediate_pt, slot, opposite=True
 					)
-				elif terminal_orientation == -1:
-					# In this case the dash goes out from the new street,
-					# therefore the intermediate point is an "ending point"
-					# for the new street, according to the orientation
-					new_street_orientation = (
-						set_orientation_from_starting_point(
-							street, intermediate_pt, slot, opposite=True
-						)
-					)
+				)
 				self.path.insert(0, [street, new_street_orientation])
 			else:
 				raise Exception('Review code here before proceeding.')
@@ -217,13 +243,26 @@ class Dash:
 		else:
 			pass
 
-	def print_endpoints(self):
+	def print_endpoints(self, text=False):
 		if len(self.path)==0:
 			print 'The dash is empty.'
-		else:
+		elif text is True:
 			print (
 				'Path {} starts from {} at slot {}, going out on street {}, '
 				'and ends on {} at slot {} arriving on street {}.'
+				.format(
+					self.label, 
+					self.starting_point.end_point.label, 
+					self.starting_point.slot,
+					self.starting_point.street.label,
+					self.ending_point.end_point.label,
+					self.ending_point.slot,
+					self.ending_point.street.label,
+				)
+			)
+		else:
+			print (
+				'Path {} :\n\t({}, slot {}, street {}) ---> ({}, slot {}, street {}), '
 				.format(
 					self.label, 
 					self.starting_point.end_point.label, 

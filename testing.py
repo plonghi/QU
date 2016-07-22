@@ -8,52 +8,52 @@ from growth_rules import (
 )
 from soliton_data import SolitonData
 
-# ----- Create a spectral network ------
-#
-w = MCSN()
-w.streets = {
-	'p_1' : Street(label='p_1'),
-	'p_2' : Street(label='p_2'),
-	'p_3' : Street(label='p_3'),
-}
-w.branch_points = {
-	'b_1' : BranchPoint(
-		label='b_1', streets=[w.streets['p_1'], None, None]
-	), 
-	'b_2' : BranchPoint(
-		label='b_2', streets=[w.streets['p_2']]
-	),
-	'b_3' : BranchPoint(
-		label='b_3', streets=[w.streets['p_3']]
-	),
-}
-w.joints = {'j_1': Joint(
-	label='j_1', streets=[
-		w.streets['p_1'], 
-		None,
-		w.streets['p_2'], 
-		None,
-		w.streets['p_3'], 
-		None
-	]
-)}
-w.attach_streets()
-w.check_network()
-#------ Finished creating network -------
+# # ----- Create a spectral network ------
+# #
+# w = MCSN()
+# w.streets = {
+# 	'p_1' : Street(label='p_1'),
+# 	'p_2' : Street(label='p_2'),
+# 	'p_3' : Street(label='p_3'),
+# }
+# w.branch_points = {
+# 	'b_1' : BranchPoint(
+# 		label='b_1', streets=[w.streets['p_1'], None, None]
+# 	), 
+# 	'b_2' : BranchPoint(
+# 		label='b_2', streets=[w.streets['p_2']]
+# 	),
+# 	'b_3' : BranchPoint(
+# 		label='b_3', streets=[w.streets['p_3']]
+# 	),
+# }
+# w.joints = {'j_1': Joint(
+# 	label='j_1', streets=[
+# 		w.streets['p_1'], 
+# 		None,
+# 		w.streets['p_2'], 
+# 		None,
+# 		w.streets['p_3'], 
+# 		None
+# 	]
+# )}
+# w.attach_streets()
+# w.check_network()
+# #------ Finished creating network -------
 
-s1 = w.streets['p_1']
-e11 = s1.initial_point().end_point
-e12 = s1.final_point().end_point
-s2 = w.streets['p_2']
-e21 = s2.initial_point().end_point
-e22 = s2.final_point().end_point
-s3 = w.streets['p_3']
-e31 = s3.initial_point().end_point
-e32 = s3.final_point().end_point
-j1 = w.joints.values()[0]
-b1 = w.branch_points.values()[0]
-b1.print_type()
-j1.print_type()
+# s1 = w.streets['p_1']
+# e11 = s1.initial_point().end_point
+# e12 = s1.final_point().end_point
+# s2 = w.streets['p_2']
+# e21 = s2.initial_point().end_point
+# e22 = s2.final_point().end_point
+# s3 = w.streets['p_3']
+# e31 = s3.initial_point().end_point
+# e32 = s3.final_point().end_point
+# j1 = w.joints.values()[0]
+# b1 = w.branch_points.values()[0]
+# b1.print_type()
+# j1.print_type()
 
 # print '\nCreating a dash, and growing it by hand'
 # dash1 = Dash(label='dash_1')
@@ -274,28 +274,132 @@ j1.print_type()
 
 
 
+#### TESTING LEVEL 2 ####
+
+# # ----- Create a spectral network ------
+# # 			Y-shaped network	
+# #
+# #	b3 ---(p3)--- j1 ---(p2)--- b2
+# #				   |
+# #				   |
+# #				  (p1)
+# #				   |
+# #				   |
+# #				   b1
+
+# w = MCSN()
+# w.streets = {
+# 	'p_1' : Street(label='p_1'),
+# 	'p_2' : Street(label='p_2'),
+# 	'p_3' : Street(label='p_3'),
+# }
+# w.branch_points = {
+# 	'b_1' : BranchPoint(
+# 		label='b_1', streets=[w.streets['p_1'], None, None]
+# 	), 
+# 	'b_2' : BranchPoint(
+# 		label='b_2', streets=[w.streets['p_2']]
+# 	),
+# 	'b_3' : BranchPoint(
+# 		label='b_3', streets=[w.streets['p_3']]
+# 	),
+# }
+# w.joints = {'j_1': Joint(
+# 	label='j_1', streets=[
+# 		w.streets['p_1'], 
+# 		None,
+# 		w.streets['p_2'], 
+# 		None,
+# 		w.streets['p_3'], 
+# 		None
+# 	]
+# )}
+# w.attach_streets()
+# w.check_network()
+# #------ Finished creating network -------
+
+
+
+# ----- Create a spectral network ------
+# 			H-shaped network	
+#
+#	b3 ---(p3)--- j2 ---(p4)--- b4
+#				   |
+#				   |
+#				  (p5)
+#				   |
+#				   |
+#	b1 ---(p1)--- j1 ---(p2)--- b2
+
+w = MCSN()
+w.streets = {
+	'p_1' : Street(label='p_1'),
+	'p_2' : Street(label='p_2'),
+	'p_3' : Street(label='p_3'),
+	'p_4' : Street(label='p_4'),
+	'p_5' : Street(label='p_5'),
+}
+w.branch_points = {
+	'b_1' : BranchPoint(
+		label='b_1', streets=[w.streets['p_1'], None, None]
+	), 
+	'b_2' : BranchPoint(
+		label='b_2', streets=[w.streets['p_2']]
+	),
+	'b_3' : BranchPoint(
+		label='b_3', streets=[w.streets['p_3']]
+	),
+	'b_4' : BranchPoint(
+		label='b_4', streets=[w.streets['p_4']]
+	),
+}
+w.joints = {
+	'j_1': Joint(
+		label='j_1', streets=[
+			w.streets['p_1'], 
+			None,
+			w.streets['p_2'], 
+			None,
+			w.streets['p_5'], 
+			None
+		]
+	),
+	'j_2': Joint(
+		label='j_2', streets=[
+			w.streets['p_5'], 
+			None,
+			w.streets['p_4'], 
+			None,
+			w.streets['p_3'], 
+			None
+		]
+	),
+}
+
+w.attach_streets()
+w.check_network()
+#------ Finished creating network -------
+
+s1 = w.streets['p_1']
+s2 = w.streets['p_2']
+s3 = w.streets['p_3']
+s4 = w.streets['p_4']
+s5 = w.streets['p_5']
+
+print s2.initial_point().end_point
+print s2.final_point().end_point
+
+print s5.initial_point().end_point
+print s5.final_point().end_point
 
 print '\n\n-------------------------------------------------------'
 print 'Soliton Data'
-Q1 = SolitonData(label='Q_1', network=w , street=s3)
+Q1 = SolitonData(label='Q_1', network=w , street=s1)
 
 Q1.initialize()
 Q1.print_info(full_path=True)
 
-Q1.grow()
+Q1.grow(n_steps=3)
 Q1.print_info(full_path=True)
-
-# a7.create(street=s1, source_pt=j1, slot=0)
-# new_sols = grow_soliton(a7, n_steps=3)
-# print '\nThere are {} new solitons after growth'.format(len(new_sols))
-# a8=new_sols[0]
-
-# print '\nthe soliton dashes are \n{}'.format([d.label for d in a8.dashes])
-# print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a8.dashes])
-
-# a8.dashes[0].print_endpoints()
-# print 'starting point {}'.format(a8.dashes[0].starting_point)
-# print 'ending point {}'.format(a8.dashes[0].ending_point)
-# print '\nThe soliton is now complete: {}'.format(a8.is_complete)
 
 

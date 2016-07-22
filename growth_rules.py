@@ -74,7 +74,7 @@ def grow_soliton_once(soliton):
 
 	if soliton.is_complete:
 		return [soliton]
-		
+
 	else:
 		# growing_pairs = soliton.growing_pairs
 		original_clusters = growing_clusters(soliton)
@@ -330,6 +330,7 @@ def j_type_3_growth(old_soliton, old_cluster):
 		# instead d_21 must be grown backward, so 
 		# we specify the 'first' point for growth
 		d_21.extend_dash_along_street(street=p2, end_pt='first', slot=s_2)
+		
 
 		# Then, we create a new dash, 
 		d_32 = Dash(
@@ -337,6 +338,7 @@ def j_type_3_growth(old_soliton, old_cluster):
 			growth_restriction=None
 		)
 		# and extend it first along p2
+		# NOTE: this will fix the overall orientation of the dash!
 		d_32.extend_dash_along_street(
 			street=p2, end_pt=joint, slot=s_2
 		)
