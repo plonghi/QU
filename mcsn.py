@@ -291,6 +291,7 @@ class MCSN:
 							street=street, end_point=j_pt, slot=i,
 						)
 					)
+					print street.endpoints
 
 	def check_network(self):
 		# Check that every street has exactly two endpoints

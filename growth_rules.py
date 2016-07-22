@@ -120,44 +120,65 @@ def grow_soliton_once(soliton):
 			node = cl[0][0].end_point
 			node_type = node.type
 
+			# if node_type == 'type_1_branch_point':
+			# 	new_solitons = []
+			# 	for sol in old_solitons:
+			# 		# must now identify which growth cluster of each soliton 
+			# 		# is the one corresponding to 'original_cluster'
+			# 		sol_cl = find_corresponding_cluster(sol, cl)
+			# 		new_solitons += bp_type_1_growth(sol, sol_cl)
+			# 	old_solitons = new_solitons
+
+			# elif node_type == 'type_3_joint':
+			# 	new_solitons = []
+			# 	for sol in old_solitons:
+			# 		# must now identify which growth cluster of each soliton 
+			# 		# is the one corresponding to 'original_cluster'
+			# 		sol_cl = find_corresponding_cluster(sol, cl)
+			# 		new_solitons += j_type_3_growth(sol, sol_cl)
+			# 	old_solitons = new_solitons
+
+			# elif node_type == 'type_2_branch_point':
+			# 	new_solitons = []
+			# 	for sol in old_solitons:
+			# 		# must now identify which growth cluster of each soliton 
+			# 		# is the one corresponding to 'original_cluster'
+			# 		sol_cl = find_corresponding_cluster(sol, cl)
+			# 		new_solitons += bp_type_2_growth(sol, sol_cl)
+			# 	old_solitons = new_solitons
+
+			# elif node_type == 'type_3_branch_point':
+			# 	new_solitons = []
+			# 	for sol in old_solitons:
+			# 		# must now identify which growth cluster of each soliton 
+			# 		# is the one corresponding to 'original_cluster'
+			# 		sol_cl = find_corresponding_cluster(sol, cl)
+			# 		new_solitons += bp_type_3_growth(sol, sol_cl)
+			# 	old_solitons = new_solitons
+
+			# else:
+			# 	raise NotImplementedError
+
 			if node_type == 'type_1_branch_point':
-				new_solitons = []
-				for sol in old_solitons:
-					# must now identify which growth cluster of each soliton 
-					# is the one corresponding to 'original_cluster'
-					sol_cl = find_corresponding_cluster(sol, cl)
-					new_solitons += bp_type_1_growth(sol, sol_cl)
-				old_solitons = new_solitons
-
+				grow_at_node = bp_type_1_growth
 			elif node_type == 'type_3_joint':
-				new_solitons = []
-				for sol in old_solitons:
-					# must now identify which growth cluster of each soliton 
-					# is the one corresponding to 'original_cluster'
-					sol_cl = find_corresponding_cluster(sol, cl)
-					new_solitons += j_type_3_growth(sol, sol_cl)
-				old_solitons = new_solitons
-
+				grow_at_node = j_type_3_growth
 			elif node_type == 'type_2_branch_point':
-				new_solitons = []
-				for sol in old_solitons:
-					# must now identify which growth cluster of each soliton 
-					# is the one corresponding to 'original_cluster'
-					sol_cl = find_corresponding_cluster(sol, cl)
-					new_solitons += bp_type_2_growth(sol, sol_cl)
-				old_solitons = new_solitons
-
+				grow_at_node = bp_type_2_growth
 			elif node_type == 'type_3_branch_point':
-				new_solitons = []
-				for sol in old_solitons:
-					# must now identify which growth cluster of each soliton 
-					# is the one corresponding to 'original_cluster'
-					sol_cl = find_corresponding_cluster(sol, cl)
-					new_solitons += bp_type_3_growth(sol, sol_cl)
-				old_solitons = new_solitons
-
+				grow_at_node = bp_type_3_growth
+			elif node_type == 'type_4_A_joint':
+				grow_at_node = j_type_4_A_growth
 			else:
 				raise NotImplementedError
+
+			new_solitons = []
+			for sol in old_solitons:
+				# must now identify which growth cluster of each soliton 
+				# is the one corresponding to 'original_cluster'
+				sol_cl = find_corresponding_cluster(sol, cl)
+				new_solitons += grow_at_node(sol, sol_cl)
+			old_solitons = new_solitons
 
 		return new_solitons
 
@@ -583,8 +604,221 @@ def j_type_3_growth(old_soliton, old_cluster):
 	return new_solitons
 
 
-def j_type_4_A_growth():
-	raise NotImplementedError
+def j_type_4_A_growth(old_soliton, old_cluster):
+	"""
+	Joints of type 4A are those with four two-way streets p1, p2, p3, p4
+	ending on them. 
+
+		p4		p3 		 p2
+		  `      |      '
+		   `     |     '
+		    `    |    '
+		     `   |   '
+		      `  |  '
+		       ` | '
+		         |
+		         |
+		         |
+		         |
+		         |
+		         |
+		         p1
+
+	The relavant relations here are 
+	(from eq. A.3 of 1204.4824, but with our labels)
+		tau1 = nu3 + nu2 nu4
+		tau2 = nu4 nu1
+		tau3 = nu1
+		tau4 = nu1 nu2
+	
+	In terms of dashes, this means that there will be a complex behavior,
+	involving both the one seen in type_3 joints, 
+	and simple straight propagation.
+	"""
+
+	# first of all, determine on which street 
+	# the soliton is approaching the joint
+
+	new_solitons = []
+	joint = old_cluster[0][0].end_point
+	sol_slot = old_cluster[0][0].slot
+	av_slots = joint.available_slots
+
+	previous_slot = (sol_slot - 1) % 6
+	next_slot = (sol_slot + 1) % 6
+
+	incoming_street = None
+
+	if (
+		previous_slot not in av_slots and
+		next_slot not in av_slots
+	):
+		incoming_street = 'p1'
+	elif (
+		previous_slot not in av_slots and
+		next_slot in av_slots
+	):
+		incoming_street = 'p2'
+	elif (
+		previous_slot in av_slots and
+		next_slot in av_slots
+	):
+		incoming_street = 'p3'
+	elif (
+		previous_slot in av_slots and
+		next_slot not in av_slots
+	):
+		incoming_street = 'p4'
+	else:
+		raise Exception('Cannot determine position of soliton on joint.')
+
+	# Now handle various cases separately.
+
+	if incoming_street=='p1':
+		# In this case there is both straight propagation, and Y-propagation
+
+		# Start with straight propagation
+		new_slot = (sol_slot + 3) % 6
+		new_street = joint.streets[new_slot]
+		for p in old_cluster:
+			new_soliton_straight = copy_of_soliton(old_soliton)
+			# Now for the growing pair p of DashEndpoints we 
+			# identify the new corresponding growing pair in 
+			# the new soliton
+			old_pair_index = old_soliton.growing_pairs.index(p)
+			new_p = new_soliton_straight.growing_pairs[old_pair_index]
+
+			# now identify the dashes d_in and d_out, and grow them.
+			# it will be important to check the orientation
+			# of each growth point in the pair
+			if new_p[0].orientation=='in' and new_p[1].orientation=='out':
+				d_in = new_p[0].dash
+				d_out = new_p[1].dash
+			elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
+				d_in = new_p[1].dash
+				d_out = new_p[0].dash
+			else:
+				raise ValueError
+
+			# Now grow dashes d_in and d_out
+			# note that d_in must be grown forward, so 
+			# we specify the 'last' point for growth
+			d_in.extend_dash_along_street(
+				street=new_street, end_pt='last', slot=new_slot
+			)
+
+			# instead d_out must be grown backward, so 
+			# we specify the 'first' point for growth
+			d_out.extend_dash_along_street(
+				street=new_street, end_pt='first', slot=new_slot
+			)
+
+			# Then update the soliton's growing pairs
+			new_soliton_straight.growing_pairs = (
+				growing_pairs_from_dashes(new_soliton_straight.dashes)
+			)
+
+			new_solitons.append(new_soliton_straight)
+
+		# Then proceed with Y-propagation (like in type_3 joint)
+		# in this section we use the labeling conventions explained
+		# in the function 'j_type_3_growth'
+		for p in old_cluster:
+			new_soliton_Y = copy_of_soliton(old_soliton)
+			# Now for the growing pair p of DashEndpoints we 
+			# identify the new corresponding growing pair in 
+			# the new soliton
+			old_pair_index = old_soliton.growing_pairs.index(p)
+			new_p = new_soliton_Y.growing_pairs[old_pair_index]
+
+			# The joint in question. 
+			# NOTE: must tart using new_p from here on!
+			# The slot of street p_1 at the joint in question
+			s_1 = new_p[0].slot
+			# the slots of streets 2 and 3 
+			# (recall that ordering of slots is CCW, as in GMN)
+			# so hwre we first have s_1, then an empty slot, then s_3, 
+			# then empty, then s_2.
+			if s_1 + 4 < 6:
+				s_2 = s_1 + 4
+			else:
+				s_2 = s_1 - 2
+			if s_1 + 2 < 6:
+				s_3 = s_1 + 2
+			else:
+				s_3 = s_1 - 4
+
+			# the three streets
+			p1 = joint.streets[s_1]
+			p2 = joint.streets[s_2]
+			p3 = joint.streets[s_3]
+
+			# now identify d_21 and d_13, and grow them.
+			# it will be important to check the orientation
+			# of each growth point in the pair
+			if new_p[0].orientation=='in' and new_p[1].orientation=='out':
+				d_13 = new_p[0].dash
+				d_21 = new_p[1].dash
+			elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
+				d_13 = new_p[1].dash
+				d_21 = new_p[0].dash
+			else:
+				raise ValueError
+
+			# check that all three slots are actually 
+			# the ones available at the joint
+			if (
+				s_1 in joint.available_slots and 
+				s_2 in joint.available_slots and
+				s_3 in joint.available_slots
+			):
+				pass
+			else:
+				raise ValueError
+			
+			# Now grow dashes d_13 and d_21
+			# note that d_13 must be grown forward, so 
+			# we specify the 'last' point for growth
+			d_13.print_path_info()
+			d_13.extend_dash_along_street(street=p3, end_pt='last', slot=s_3)
+			# instead d_21 must be grown backward, so 
+			# we specify the 'first' point for growth
+			d_21.extend_dash_along_street(street=p2, end_pt='first', slot=s_2)
+			
+			# Then, we create a new dash, 
+			d_32 = Dash(
+				label='joint_new_dash_'+joint.label, 
+				growth_restriction=None
+			)
+			# and extend it first along p2
+			# NOTE: this will fix the overall orientation of the dash!
+			d_32.extend_dash_along_street(
+				street=p2, end_pt=joint, slot=s_2
+			)
+			# then also extend along p3, by growing backwards 
+			# (hence specify the 'first' point for growth)
+			d_32.extend_dash_along_street(
+				street=p3, end_pt='first', slot=s_3
+			)
+
+			# At this point we add the new dash to the soliton's dashes
+			# it must be inserted just after d_13 and before d_21
+			indx = new_soliton_Y.dashes.index(d_21)
+			new_soliton_Y.dashes.insert(indx, d_32)
+
+			# And the update the soliton's growing pairs
+			new_soliton_Y.growing_pairs = (
+				growing_pairs_from_dashes(new_soliton_Y.dashes)
+			)
+
+			new_solitons.append(new_soliton_Y)
+
+		return new_solitons
+	
+	else:
+		return NotImplementedError
+
+
 
 
 

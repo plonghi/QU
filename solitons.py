@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 from mcsn import MCSN, Street, Joint, BranchPoint
 
 class Dash:
@@ -82,6 +82,11 @@ class Dash:
 				# INTO the NEW street,
 				# therefore the intermediate point is a "starting point"
 				# for the new street, according to the orientation
+
+				# print 'EXTENDING DASH {}'.format(self)
+				# print 'street = {}'.format(street.label)
+				# print 'slot = {}'.format(slot)
+				# print 'intermediate_pt = {}'.format(intermediate_pt.label)
 				new_street_orientation = (
 					set_orientation_from_starting_point(
 						street, intermediate_pt, slot
@@ -262,7 +267,8 @@ class Dash:
 			)
 		else:
 			print (
-				'Path {} :\n\t({}, slot {}, street {}) ---> ({}, slot {}, street {}), '
+				'Path {} :\n\t' + 
+				'({}, slot {}, street {}) ---> ({}, slot {}, street {}), '
 				.format(
 					self.label, 
 					self.starting_point.end_point.label, 
@@ -558,11 +564,22 @@ def copy_of_soliton(soliton, label=None):
 	That would prevent us from ever joining solitons.
 	"""
 	dashes = soliton.dashes
-	new_dashes = (
-		[Dash(
-			growth_restriction=d.growth_restriction, path=d.path
-		) for d in dashes]
-	)
+	new_dashes = []
+	for d in dashes:
+		# NOTE: we don't pass the 'd.path', because that would 
+		# giving the SAME path to the new dash.
+		# Instead, we make a 'shallow copy', which creates a new list object
+		# which however will contain the SAME content as the original one,
+		# i.e. it will not produce new copies of the streets and so on.
+		# Same for the growth condition.
+		new_path = copy(d.path)
+		new_growth_restriction = copy(d.growth_restriction)
+		new_dashes.append(
+			Dash(
+				growth_restriction=new_growth_restriction, 
+				path=new_path
+			)
+		)
 
 	new_growing_pairs = growing_pairs_from_dashes(new_dashes)
 
@@ -572,13 +589,15 @@ def copy_of_soliton(soliton, label=None):
 	new_starting_point = new_dashes[j_0].starting_point
 	new_ending_point = new_dashes[j_1].ending_point
 
-	return SolitonPath(
+	new_soliton = SolitonPath(
 		label=label,
 		starting_point=new_starting_point, 
 		ending_point=new_ending_point, 
 		growing_pairs=new_growing_pairs,
 		dashes=new_dashes,
 	)
+
+	return new_soliton
 	# new_soliton = deepcopy(soliton)
 	# new_soliton.label = label
 	# return new_soliton
