@@ -6,6 +6,7 @@ from solitons import (
 from growth_rules import (
 	bp_type_1_growth, j_type_3_growth, grow_soliton_once, grow_soliton,
 )
+from soliton_data import SolitonData
 
 # ----- Create a spectral network ------
 #
@@ -254,19 +255,47 @@ j1.print_type()
 
 
 
+# print '\n\n-------------------------------------------------------'
+# print 'Automatic growth method'
+# a7 = SolitonPath(label='a_7')
+
+# a7.create(street=s1, source_pt=j1, slot=0)
+# new_sols = grow_soliton(a7, n_steps=3)
+# print '\nThere are {} new solitons after growth'.format(len(new_sols))
+# a8=new_sols[0]
+
+# print '\nthe soliton dashes are \n{}'.format([d.label for d in a8.dashes])
+# print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a8.dashes])
+
+# a8.dashes[0].print_endpoints()
+# print 'starting point {}'.format(a8.dashes[0].starting_point)
+# print 'ending point {}'.format(a8.dashes[0].ending_point)
+# print '\nThe soliton is now complete: {}'.format(a8.is_complete)
+
+
+
+
 print '\n\n-------------------------------------------------------'
-print '\Automatic growth method'
-a7 = SolitonPath(label='a_7')
+print 'Soliton Data'
+Q1 = SolitonData(label='Q_1', network=w , street=s3)
 
-a7.create(street=s1, source_pt=j1, slot=0)
-new_sols = grow_soliton(a7, n_steps=3)
-print '\nThere are {} new solitons after growth'.format(len(new_sols))
-a8=new_sols[0]
+Q1.initialize()
+Q1.print_info(full_path=True)
 
-print '\nthe soliton dashes are \n{}'.format([d.label for d in a8.dashes])
-print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a8.dashes])
+Q1.grow()
+Q1.print_info(full_path=True)
 
-a8.dashes[0].print_endpoints()
-print 'starting point {}'.format(a8.dashes[0].starting_point)
-print 'ending point {}'.format(a8.dashes[0].ending_point)
-print '\nThe soliton is now complete: {}'.format(a8.is_complete)
+# a7.create(street=s1, source_pt=j1, slot=0)
+# new_sols = grow_soliton(a7, n_steps=3)
+# print '\nThere are {} new solitons after growth'.format(len(new_sols))
+# a8=new_sols[0]
+
+# print '\nthe soliton dashes are \n{}'.format([d.label for d in a8.dashes])
+# print 'with growth restrictions {}\n'.format([d.growth_restriction for d in a8.dashes])
+
+# a8.dashes[0].print_endpoints()
+# print 'starting point {}'.format(a8.dashes[0].starting_point)
+# print 'ending point {}'.format(a8.dashes[0].ending_point)
+# print '\nThe soliton is now complete: {}'.format(a8.is_complete)
+
+

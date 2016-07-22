@@ -30,7 +30,7 @@ class SolitonData:
 
 	def initialize(self):
 		# The initial co-oriented soliton
-		ij_sol = SolitonPath(label=self.label+'ij_sol')
+		ij_sol = SolitonPath(label=self.label+'_ij_sol')
 		ij_source_pt = self.street.initial_point().end_point
 		ij_source_slot = self.street.initial_point().slot
 		ij_sol.create(
@@ -40,7 +40,7 @@ class SolitonData:
 		)
 
 		# The initial anti-oriented soliton
-		ji_sol = SolitonPath(label=self.label+'ji_sol')
+		ji_sol = SolitonPath(label=self.label+'_ji_sol')
 		ji_source_pt = self.street.final_point().end_point
 		ji_source_slot = self.street.final_point().slot
 		ji_sol.create(
@@ -68,6 +68,16 @@ class SolitonData:
 			new_anti_or_sols += new_sols
 
 		self.anti_oriented_solitons = new_anti_or_sols
+
+	def print_info(self, full_path=False):
+		print '\nCo-oriented solitons:\n--------------------'
+		for i, s in enumerate(self.co_oriented_solitons):
+			print '{}.'.format(i+1)
+			s.print_info(full_path=full_path)
+		print '\nAnti-oriented solitons:\n--------------------'
+		for i, s in enumerate(self.anti_oriented_solitons):
+			print '{}.'.format(i+1)
+			s.print_info(full_path=full_path)
 
 
 

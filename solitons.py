@@ -235,6 +235,9 @@ class Dash:
 				)
 			)
 
+	def print_path_info(self):
+		print [[street.label, sign] for street, sign in self.path]
+
 
 class DashEndpoint:
 	def __init__(self, dash=None, street_end_pt=None, orientation=None):
@@ -395,6 +398,20 @@ class SolitonPath:
 					p[1].end_point.label, p[1].slot, p[1].orientation, 
 				)
 			)
+
+	def print_info(self, full_path=False):
+		print 'Dashes of soliton path {} / {}:'.format(self.label, self)
+		for d in self.dashes:
+			d.print_endpoints()
+		if self.is_complete is True:
+			print 'This soliton is complete'
+		else:
+			print 'This soliton is not complete'
+
+		if full_path is True:
+			if self.is_complete is True:
+				print 'The full path of the soliton is'
+				self.complete_dash.print_path_info()
 
 	def check_growing_pairs(self):
 		for p in self.growing_pairs:
