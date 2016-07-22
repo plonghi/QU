@@ -238,8 +238,115 @@ def bp_type_1_growth(old_soliton, old_cluster):
 	return new_solitons
 
 
-def bp_type_2_growth():
-	raise NotImplementedError
+def bp_type_2_growth(old_soliton, old_cluster):
+	"""
+	Branch points of type 2 are those with two two-way streets 
+	ending on them.
+	Two things can happen: 
+	1- a soliton 'caps off' there, 
+	2- it gets propagated on another street ending on the branch point,
+	   as explained in equation (A.7) of 1204.4824
+	But, note that the second option is only available to solitons
+	propagating on one street, not the other.
+	"""
+	new_solitons = []
+	branch_pt = old_cluster[0][0].end_point
+	sol_slot = old_cluster[0][0].slot
+	av_slots = branch_pt.available_slots
+
+	# First, consider the capping off of the soliton
+	# ths is just the same as for type_1 branch points
+	for p in old_cluster:
+		new_soliton = copy_of_soliton(old_soliton)
+		# Now for the growing pair p of DashEndpoints we 
+		# identify the new corresponding growing pair in 
+		# the new soliton
+		old_pair_index = old_soliton.growing_pairs.index(p)
+		new_p = new_soliton.growing_pairs[old_pair_index]
+		#the two dashes that will be merged are the following
+		new_d_1 = new_p[0].dash
+		new_d_2 = new_p[1].dash
+
+		# Then, we create a new dash, by joining the dashes of this 
+		# pair at the branch point. This is where the rule for a branch
+		# point of type 1 enters. 
+		new_dash = join_dashes(new_p)
+
+		# collect the new dashes, by replacing the two we just merged
+		# with their union
+		# the dashes are ordered, so the two that have been joined 
+		# are consecutive ones, their indices are
+		ind_1 = new_soliton.dashes.index(new_d_1)
+		ind_2 = new_soliton.dashes.index(new_d_2)
+		if (ind_1 + 1 != ind_2) and (ind_1 - 1 != ind_2):
+			raise Exception('Dashes to be concatenated are not consecutive.')
+		
+		new_dashes = (
+			new_soliton.dashes[0:min(ind_1, ind_2)] 
+			+ [new_dash] 
+			+ new_soliton.dashes[(max(ind_1, ind_2)+1):]
+		)
+		new_growing_pairs = growing_pairs_from_dashes(new_dashes)
+
+		new_soliton.dashes = new_dashes
+		new_soliton.growing_pairs = new_growing_pairs
+
+		if len(new_growing_pairs) == 0: 
+			# In this case the soliton has been completed
+			new_soliton.is_complete = True
+			new_soliton.complete_dash = new_dash
+
+		new_solitons.append(new_soliton)
+
+	# Then, if pertinent, also handle the growth of the soliton through
+	# the branch point.
+	# It depends on the branch point's slot after the soliton's occupied 
+	# slot, counter-clockwise. If this slot is also attached to a street 
+	# (i.e. if it appears in available_slots), then the soliton 
+	# can propagate as explained in point 2. Otherwise it cannot.
+	next_slot = (sol_slot + 1) % 3
+	if next_slot in av_slots:
+		next_street = branch_pt.streets[next_slot]
+		for p in old_cluster:
+			new_soliton = copy_of_soliton(old_soliton)
+			# Now for the growing pair p of DashEndpoints we 
+			# identify the new corresponding growing pair in 
+			# the new soliton
+			old_pair_index = old_soliton.growing_pairs.index(p)
+			new_p = new_soliton.growing_pairs[old_pair_index]
+
+			# now identify the dashes d_in and d_out, and grow them.
+			# it will be important to check the orientation
+			# of each growth point in the pair
+			if new_p[0].orientation=='in' and new_p[1].orientation=='out':
+				d_in = new_p[0].dash
+				d_out = new_p[1].dash
+			elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
+				d_in = new_p[1].dash
+				d_out = new_p[0].dash
+			else:
+				raise ValueError
+
+			# Now grow dashes d_in and d_out
+			# note that d_in must be grown forward, so 
+			# we specify the 'last' point for growth
+			d_in.extend_dash_along_street(
+				street=next_street, end_pt='last', slot=next_slot
+			)
+			# instead d_out must be grown backward, so 
+			# we specify the 'first' point for growth
+			d_out.extend_dash_along_street(
+				street=next_street, end_pt='first', slot=next_slot
+			)
+
+			# Then update the soliton's growing pairs
+			new_soliton.growing_pairs = (
+				growing_pairs_from_dashes(new_soliton.dashes)
+			)
+
+			new_solitons.append(new_soliton)
+		
+	return new_solitons
 
 
 def bp_type_3_growth():
@@ -324,7 +431,7 @@ def j_type_3_growth(old_soliton, old_cluster):
 			raise ValueError
 		
 		# Now grow dashes d_13 and d_21
-		# note that d_13 must be grown forwrd, so 
+		# note that d_13 must be grown forward, so 
 		# we specify the 'last' point for growth
 		d_13.extend_dash_along_street(street=p3, end_pt='last', slot=s_3)
 		# instead d_21 must be grown backward, so 
