@@ -616,6 +616,9 @@ def check_dashes_ordering(dash_sequence):
 			d_1.ending_point.end_point != d_2.starting_point.end_point or
 			d_1.ending_point.slot != d_2.starting_point.slot
 		):
+			print '\nDashes are not ordered properly:'
+			for d in dash_sequence:
+				d.print_endpoints()
 			raise Exception
 	pass
 
@@ -665,5 +668,43 @@ def growing_clusters(soliton):
 		clusters.append(nodal_cluster)
 
 	return clusters
+
+
+def find_corresponding_cluster(soliton, ref_cluster):
+	"""
+	For a given soliton, identifies which of its growth clusters
+	corresponds to a certain 'reference cluster'.
+	"""
+	# characterize the reference cluster by 
+	# - the nodal point (joint/branch point)
+	# - the slot on the nodal point
+	ref_gr_pair = ref_cluster[0]
+	ref_end_point = ref_gr_pair[0].end_point
+	ref_slot = ref_gr_pair[0].slot
+
+	clusters = growing_clusters(soliton)
+	candidates = []
+	# collect all candidate clusters, based on their nodal point and slot
+	for cl in clusters:
+		sample_gr_pair = cl[0]
+		if (
+			sample_gr_pair[0].end_point == ref_end_point and
+			sample_gr_pair[0].slot == ref_slot
+		):
+			candidates.append(cl)
+
+	if len(candidates) > 1:
+		raise Exception(
+			'Cannot find a unique cluster corresponding to the reference one'
+		)
+	elif len(candidates) == 0:
+		raise Exception(
+			'Cannot find any cluster corresponding to the reference one'
+		)
+	else:
+		return candidates[0]
+
+
+
 
 

@@ -1,6 +1,6 @@
 from solitons import (
 	copy_of_soliton, join_dashes, SolitonPath, Dash, 
-	growing_pairs_from_dashes, growing_clusters
+	growing_pairs_from_dashes, growing_clusters, find_corresponding_cluster
 )
 
 """
@@ -39,7 +39,7 @@ each must be considered separately in all possible combinations.
 All possibilities are considered, generating a number of new solitons.
 """
 
-def grow_soliton(soliton):
+def grow_soliton_once(soliton):
 	"""
 	This function must return several new solitons.
 	New solitons are created as copies of the original one,
@@ -53,46 +53,115 @@ def grow_soliton(soliton):
 	Instead, we must first copy the soliton, then identify 
 	the corresponding growing pair that matches to the one
 	in the original soliton, and then ask for that to be grown.
+
+	Growth will be organized in 'clusters', i.e. all the 
+	growing pairs (endpoints of dashes above the same nodal point
+	of the network) of a soliton will be organized according
+	to which nodal point they lie on.
+	All growing pairs above the same nodal point will belong to
+	the same cluster, and will be grown at once.
 	
-	Moreover, instead of growing pairs, we must consider 
-	growing clusters: there may be more than a pair of dashes 
-	that ends on a joint or branch point, for a certain time
-	during soliton growth.
-	Two or more pairs of dashes can furthermore join together,
-	into a smaller number of pairs. 
-	QUESTION: [IS THIS ACTUALLY CORRECT? THINK ABOUT \TAU AND \NU'S]
-	The way this can happen is handled by the rules at each 
-	joint or branch point.
+	# NOTE: the following is DEPRECATED.
+	# it seems unnecessary at this point. But keep for the future.
+	# 
+	# Two or more pairs of dashes can furthermore join together,
+	# into a smaller number of pairs. 
+	# QUESTION: [IS THIS ACTUALLY CORRECT? THINK ABOUT \TAU AND \NU'S]
+	# The way this can happen is handled by the rules at each 
+	# joint or branch point.
+	
 	"""
-	growing_pairs = soliton.growing_pairs
-	clusters = growing_clusters(soliton)
+	# growing_pairs = soliton.growing_pairs
+	original_clusters = growing_clusters(soliton)
+	old_solitons = [soliton]
 	new_solitons = []
 
-	for c_i, c in enumerate(clusters):
-		# slot taken by each growing pair
-		c_slots = [pair[0].slot for pair in c]
-		node = c[0][0].end_point
+	# DEPRECATED: all nontrivial interactions at a nodal point
+	# are taken into account by the traffic rules, there is no 
+	# need to check possible combinations of dashes.
+	#
+	# for c_i, c in enumerate(clusters):
+	# 	# slot taken by each growing pair
+	# 	c_slots = [pair[0].slot for pair in c]
+	# 	node = c[0][0].end_point
+	# 	node_type = node.type
+	# 	av_slots = node.available_slots
+	# 	for s in av_slots:
+	# 		# check if a slot is taken by more than one growing pair
+	# 		if c_slots.count(s) > 1:
+	# 			# probably this kind of evolution will be handled directly 
+	# 			# by each branch point or joint. To be decided.
+	# 			raise NotImplementedError
+	# 		else:
+	# 			pass
+
+	# 	if node_type == 'type_1_branch_point':
+	# 		# here c_i tells which cluster must be grown
+	# 		# we must not pass the actual cluster,
+	# 		# because growth will not be performed on this soliton, 
+	# 		# but rather on a copy of it.
+	# 		new_solitons.join(bp_type_1_growth(soliton, c))
+	# 	elif node_type == 'type_3_joint':
+	# 		new_solitons.join(j_type_3_growth(soliton, c_i))
+	# 	else:
+	# 		raise NotImplementedError
+
+	for cl in original_clusters:
+		# update the solitons in the list old_solitons, for each growing
+		# cluster, returning a new list called 'new_solitons' which
+		# will supersed old_solitons, thus being updated at the
+		# next growth step (next cluster)
+
+		node = cl[0][0].end_point
 		node_type = node.type
-		av_slots = node.available_slots
-		for s in av_slots:
-			# check if a slot is taken by more than one growing pair
-			if c_slots.count(s) > 1:
-				# probably this kind of evolution will be handled directly 
-				# by each branch point or joint. To be decided.
-				raise NotImplementedError
-			else:
-				pass
 
 		if node_type == 'type_1_branch_point':
-			# here c_i tells which cluster must be grown
-			# we must not pass the actual cluster,
-			# because growth will not be performed on this soliton, 
-			# but rather on a copy of it.
-			new_solitons.join(bp_type_1_growth(soliton, c))
+			new_solitons = []
+			for sol in old_solitons:
+				# must now identify which growth cluster of each soliton 
+				# is the one corresponding to 'original_cluster'
+				sol_cl = find_corresponding_cluster(sol, cl)
+				new_solitons += bp_type_1_growth(sol, sol_cl)
+			old_solitons = new_solitons
+
 		elif node_type == 'type_3_joint':
-			new_solitons.join(j_type_3_growth(soliton, c_i))
+			new_solitons = []
+			for sol in old_solitons:
+				# must now identify which growth cluster of each soliton 
+				# is the one corresponding to 'original_cluster'
+				sol_cl = find_corresponding_cluster(sol, cl)
+				new_solitons += j_type_3_growth(sol, sol_cl)
+			old_solitons = new_solitons
+
+		elif node_type == 'type_2_branch_point':
+			new_solitons = []
+			for sol in old_solitons:
+				# must now identify which growth cluster of each soliton 
+				# is the one corresponding to 'original_cluster'
+				sol_cl = find_corresponding_cluster(sol, cl)
+				new_solitons += bp_type_2_growth(sol, sol_cl)
+			old_solitons = new_solitons
+
 		else:
 			raise NotImplementedError
+
+	return new_solitons
+
+
+def grow_soliton(soliton, n_steps=1):
+	"""
+	Repeated application of grow_soliton_once(soliton)
+	"""
+	
+	old_solitons = [soliton]
+	for i in range(n_steps):
+		print '\nSTEP {}\n'.format(i)
+		new_solitons = []
+		for sol in old_solitons:
+			new_solitons += grow_soliton_once(sol)
+		old_solitons = new_solitons
+
+	return new_solitons
 
 
 def bp_type_1_growth(old_soliton, old_cluster):
