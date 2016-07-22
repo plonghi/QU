@@ -619,14 +619,28 @@ w.check_network()
 
 s1 = w.streets['p_1']
 s2 = w.streets['p_2']
+s3 = w.streets['p_3']
+s4 = w.streets['p_4']
+
 
 print '\n\n-------------------------------------------------------'
 print 'Soliton Data'
 Q1 = SolitonData(label='Q_1', network=w , street=s1)
-
 Q1.initialize()
 # Q1.print_info(full_path=True)
-
 Q1.grow(n_steps=3)
 Q1.print_info(full_path=True)
+
+
+Q4 = SolitonData(label='Q_4', network=w , street=s4)
+Q4.initialize()
+# Q1.print_info(full_path=True)
+Q4.grow(n_steps=3)
+Q4.print_info(full_path=True)
+
+Q3 = SolitonData(label='Q_3', network=w , street=s3)
+Q3.initialize()
+# Q1.print_info(full_path=True)
+Q3.grow(n_steps=3)
+Q3.print_info(full_path=True)
 
