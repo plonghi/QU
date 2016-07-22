@@ -654,15 +654,15 @@ def growing_clusters(soliton):
 		# The following is superfluous, if growing pairs are correctly formed
 		# if p[1].end_point not in nodal_points:
 		# 	nodal_points.append(p[1].end_point)
-	print 'Nodal points are {}'.format(nodal_points)
+	# print 'Nodal points are {}'.format(nodal_points)
 
 	clusters = []
 	for n in nodal_points:
 		# select all the pairs that end on the nodal point
 		nodal_cluster = [p for p in growing_pairs if p[0].end_point == n]
-		print 'For nodal point {}, the pairs are {}'.format(
-			n.label, nodal_cluster
-		)
+		# print 'For nodal point {}, the pairs are {}'.format(
+		# 	n.label, nodal_cluster
+		# )
 		# note that there may be two or more pairs in a nodal cluster 
 		# that end on the same slot.
 		clusters.append(nodal_cluster)

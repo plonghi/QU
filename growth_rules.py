@@ -71,91 +71,94 @@ def grow_soliton_once(soliton):
 	# joint or branch point.
 	
 	"""
-	# growing_pairs = soliton.growing_pairs
-	original_clusters = growing_clusters(soliton)
-	old_solitons = [soliton]
-	new_solitons = []
 
-	# DEPRECATED: all nontrivial interactions at a nodal point
-	# are taken into account by the traffic rules, there is no 
-	# need to check possible combinations of dashes.
-	#
-	# for c_i, c in enumerate(clusters):
-	# 	# slot taken by each growing pair
-	# 	c_slots = [pair[0].slot for pair in c]
-	# 	node = c[0][0].end_point
-	# 	node_type = node.type
-	# 	av_slots = node.available_slots
-	# 	for s in av_slots:
-	# 		# check if a slot is taken by more than one growing pair
-	# 		if c_slots.count(s) > 1:
-	# 			# probably this kind of evolution will be handled directly 
-	# 			# by each branch point or joint. To be decided.
-	# 			raise NotImplementedError
-	# 		else:
-	# 			pass
+	if soliton.is_complete:
+		return [soliton]
+		
+	else:
+		# growing_pairs = soliton.growing_pairs
+		original_clusters = growing_clusters(soliton)
+		old_solitons = [soliton]
+		new_solitons = []
 
-	# 	if node_type == 'type_1_branch_point':
-	# 		# here c_i tells which cluster must be grown
-	# 		# we must not pass the actual cluster,
-	# 		# because growth will not be performed on this soliton, 
-	# 		# but rather on a copy of it.
-	# 		new_solitons.join(bp_type_1_growth(soliton, c))
-	# 	elif node_type == 'type_3_joint':
-	# 		new_solitons.join(j_type_3_growth(soliton, c_i))
-	# 	else:
-	# 		raise NotImplementedError
+		# DEPRECATED: all nontrivial interactions at a nodal point
+		# are taken into account by the traffic rules, there is no 
+		# need to check possible combinations of dashes.
+		#
+		# for c_i, c in enumerate(clusters):
+		# 	# slot taken by each growing pair
+		# 	c_slots = [pair[0].slot for pair in c]
+		# 	node = c[0][0].end_point
+		# 	node_type = node.type
+		# 	av_slots = node.available_slots
+		# 	for s in av_slots:
+		# 		# check if a slot is taken by more than one growing pair
+		# 		if c_slots.count(s) > 1:
+		# 			# probably this kind of evolution will be handled directly 
+		# 			# by each branch point or joint. To be decided.
+		# 			raise NotImplementedError
+		# 		else:
+		# 			pass
 
-	for cl in original_clusters:
-		# update the solitons in the list old_solitons, for each growing
-		# cluster, returning a new list called 'new_solitons' which
-		# will supersed old_solitons, thus being updated at the
-		# next growth step (next cluster)
+		# 	if node_type == 'type_1_branch_point':
+		# 		# here c_i tells which cluster must be grown
+		# 		# we must not pass the actual cluster,
+		# 		# because growth will not be performed on this soliton, 
+		# 		# but rather on a copy of it.
+		# 		new_solitons.join(bp_type_1_growth(soliton, c))
+		# 	elif node_type == 'type_3_joint':
+		# 		new_solitons.join(j_type_3_growth(soliton, c_i))
+		# 	else:
+		# 		raise NotImplementedError
 
-		node = cl[0][0].end_point
-		node_type = node.type
+		for cl in original_clusters:
+			# update the solitons in the list old_solitons, for each growing
+			# cluster, returning a new list called 'new_solitons' which
+			# will supersed old_solitons, thus being updated at the
+			# next growth step (next cluster)
 
-		if node_type == 'type_1_branch_point':
-			new_solitons = []
-			for sol in old_solitons:
-				# must now identify which growth cluster of each soliton 
-				# is the one corresponding to 'original_cluster'
-				sol_cl = find_corresponding_cluster(sol, cl)
-				new_solitons += bp_type_1_growth(sol, sol_cl)
-			old_solitons = new_solitons
+			node = cl[0][0].end_point
+			node_type = node.type
 
-		elif node_type == 'type_3_joint':
-			new_solitons = []
-			for sol in old_solitons:
-				# must now identify which growth cluster of each soliton 
-				# is the one corresponding to 'original_cluster'
-				sol_cl = find_corresponding_cluster(sol, cl)
-				new_solitons += j_type_3_growth(sol, sol_cl)
-			old_solitons = new_solitons
+			if node_type == 'type_1_branch_point':
+				new_solitons = []
+				for sol in old_solitons:
+					# must now identify which growth cluster of each soliton 
+					# is the one corresponding to 'original_cluster'
+					sol_cl = find_corresponding_cluster(sol, cl)
+					new_solitons += bp_type_1_growth(sol, sol_cl)
+				old_solitons = new_solitons
 
-		elif node_type == 'type_2_branch_point':
-			new_solitons = []
-			for sol in old_solitons:
-				# must now identify which growth cluster of each soliton 
-				# is the one corresponding to 'original_cluster'
-				sol_cl = find_corresponding_cluster(sol, cl)
-				new_solitons += bp_type_2_growth(sol, sol_cl)
-			old_solitons = new_solitons
+			elif node_type == 'type_3_joint':
+				new_solitons = []
+				for sol in old_solitons:
+					# must now identify which growth cluster of each soliton 
+					# is the one corresponding to 'original_cluster'
+					sol_cl = find_corresponding_cluster(sol, cl)
+					new_solitons += j_type_3_growth(sol, sol_cl)
+				old_solitons = new_solitons
 
-		else:
-			raise NotImplementedError
+			elif node_type == 'type_2_branch_point':
+				new_solitons = []
+				for sol in old_solitons:
+					# must now identify which growth cluster of each soliton 
+					# is the one corresponding to 'original_cluster'
+					sol_cl = find_corresponding_cluster(sol, cl)
+					new_solitons += bp_type_2_growth(sol, sol_cl)
+				old_solitons = new_solitons
 
-	return new_solitons
+			else:
+				raise NotImplementedError
+
+		return new_solitons
 
 
 def grow_soliton(soliton, n_steps=1):
 	"""
 	Repeated application of grow_soliton_once(soliton)
 	"""
-	
 	old_solitons = [soliton]
 	for i in range(n_steps):
-		print '\nSTEP {}\n'.format(i)
 		new_solitons = []
 		for sol in old_solitons:
 			new_solitons += grow_soliton_once(sol)

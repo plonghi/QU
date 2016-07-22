@@ -257,10 +257,9 @@ j1.print_type()
 print '\n\n-------------------------------------------------------'
 print '\Automatic growth method'
 a7 = SolitonPath(label='a_7')
-a7.print_growing_pairs()
 
 a7.create(street=s1, source_pt=j1, slot=0)
-new_sols = grow_soliton(a7, n_steps=2)
+new_sols = grow_soliton(a7, n_steps=3)
 print '\nThere are {} new solitons after growth'.format(len(new_sols))
 a8=new_sols[0]
 
