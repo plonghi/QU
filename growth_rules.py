@@ -81,36 +81,6 @@ def grow_soliton_once(soliton):
 		old_solitons = [soliton]
 		new_solitons = []
 
-		# DEPRECATED: all nontrivial interactions at a nodal point
-		# are taken into account by the traffic rules, there is no 
-		# need to check possible combinations of dashes.
-		#
-		# for c_i, c in enumerate(clusters):
-		# 	# slot taken by each growing pair
-		# 	c_slots = [pair[0].slot for pair in c]
-		# 	node = c[0][0].end_point
-		# 	node_type = node.type
-		# 	av_slots = node.available_slots
-		# 	for s in av_slots:
-		# 		# check if a slot is taken by more than one growing pair
-		# 		if c_slots.count(s) > 1:
-		# 			# probably this kind of evolution will be handled directly 
-		# 			# by each branch point or joint. To be decided.
-		# 			raise NotImplementedError
-		# 		else:
-		# 			pass
-
-		# 	if node_type == 'type_1_branch_point':
-		# 		# here c_i tells which cluster must be grown
-		# 		# we must not pass the actual cluster,
-		# 		# because growth will not be performed on this soliton, 
-		# 		# but rather on a copy of it.
-		# 		new_solitons.join(bp_type_1_growth(soliton, c))
-		# 	elif node_type == 'type_3_joint':
-		# 		new_solitons.join(j_type_3_growth(soliton, c_i))
-		# 	else:
-		# 		raise NotImplementedError
-
 		for cl in original_clusters:
 			# update the solitons in the list old_solitons, for each growing
 			# cluster, returning a new list called 'new_solitons' which
@@ -119,45 +89,6 @@ def grow_soliton_once(soliton):
 
 			node = cl[0][0].end_point
 			node_type = node.type
-
-			# if node_type == 'type_1_branch_point':
-			# 	new_solitons = []
-			# 	for sol in old_solitons:
-			# 		# must now identify which growth cluster of each soliton 
-			# 		# is the one corresponding to 'original_cluster'
-			# 		sol_cl = find_corresponding_cluster(sol, cl)
-			# 		new_solitons += bp_type_1_growth(sol, sol_cl)
-			# 	old_solitons = new_solitons
-
-			# elif node_type == 'type_3_joint':
-			# 	new_solitons = []
-			# 	for sol in old_solitons:
-			# 		# must now identify which growth cluster of each soliton 
-			# 		# is the one corresponding to 'original_cluster'
-			# 		sol_cl = find_corresponding_cluster(sol, cl)
-			# 		new_solitons += j_type_3_growth(sol, sol_cl)
-			# 	old_solitons = new_solitons
-
-			# elif node_type == 'type_2_branch_point':
-			# 	new_solitons = []
-			# 	for sol in old_solitons:
-			# 		# must now identify which growth cluster of each soliton 
-			# 		# is the one corresponding to 'original_cluster'
-			# 		sol_cl = find_corresponding_cluster(sol, cl)
-			# 		new_solitons += bp_type_2_growth(sol, sol_cl)
-			# 	old_solitons = new_solitons
-
-			# elif node_type == 'type_3_branch_point':
-			# 	new_solitons = []
-			# 	for sol in old_solitons:
-			# 		# must now identify which growth cluster of each soliton 
-			# 		# is the one corresponding to 'original_cluster'
-			# 		sol_cl = find_corresponding_cluster(sol, cl)
-			# 		new_solitons += bp_type_3_growth(sol, sol_cl)
-			# 	old_solitons = new_solitons
-
-			# else:
-			# 	raise NotImplementedError
 
 			if node_type == 'type_1_branch_point':
 				grow_at_node = bp_type_1_growth
@@ -206,67 +137,6 @@ def bp_type_1_growth(old_soliton, old_cluster):
 	from the algebra of tau and nu generating functions of 2d solitons.
 	"""
 	new_solitons = soliton_capping_off(old_soliton, old_cluster)
-
-	# new_solitons = []
-	# for p in old_cluster:
-	# 	new_soliton = copy_of_soliton(old_soliton)
-	# 	# Now for the growing pair p of DashEndpoints we 
-	# 	# identify the new corresponding growing pair in 
-	# 	# the new soliton
-	# 	old_pair_index = old_soliton.growing_pairs.index(p)
-	# 	new_p = new_soliton.growing_pairs[old_pair_index]
-	# 	#the two dashes that will be merged are the following
-	# 	new_d_1 = new_p[0].dash
-	# 	new_d_2 = new_p[1].dash
-
-	# 	# Then, we create a new dash, by joining the dashes of this 
-	# 	# pair at the branch point. This is where the rule for a branch
-	# 	# point of type 1 enters. 
-	# 	new_dash = join_dashes(new_p)
-
-	# 	# collect the new dashes, by replacing the two we just merged
-	# 	# with their union
-	# 	# the dashes are ordered, so the two that have been joined 
-	# 	# are consecutive ones, their indices are
-	# 	ind_1 = new_soliton.dashes.index(new_d_1)
-	# 	ind_2 = new_soliton.dashes.index(new_d_2)
-	# 	if (ind_1 + 1 != ind_2) and (ind_1 - 1 != ind_2):
-	# 		raise Exception('Dashes to be concatenated are not consecutive.')
-		
-	# 	new_dashes = (
-	# 		new_soliton.dashes[0:min(ind_1, ind_2)] 
-	# 		+ [new_dash] 
-	# 		+ new_soliton.dashes[(max(ind_1, ind_2)+1):]
-	# 	)
-	# 	new_growing_pairs = growing_pairs_from_dashes(new_dashes)
-
-	# 	new_soliton.dashes = new_dashes
-	# 	new_soliton.growing_pairs = new_growing_pairs
-
-	# 	if len(new_growing_pairs) == 0: 
-	# 		# In this case the soliton has been completed
-	# 		new_soliton.is_complete = True
-	# 		new_soliton.complete_dash = new_dash
-	# 	# else:
-	# 	# 	# If the dash that is being replaced is initial or 
-	# 	# 	# final dash, must also replace initial and 
-	# 	# 	# final points of the soliton
-	# 	# 	### TODO: this needs some testing
-	# 	# 	dash_endpoint_1 = new_p[0]
-	# 	# 	dash_endpoint_2 = new_p[1]
-	# 	# 	if (
-	# 	# 		dash_endpoint_1 == new_soliton.starting_point or
-	# 	# 		dash_endpoint_2 == new_soliton.starting_point
-	# 	# 	):
-	# 	# 		new_soliton.starting_point = new_dash.starting_point
-	# 	# 	if (
-	# 	# 		dash_endpoint_1 == new_soliton.ending_point or
-	# 	# 		dash_endpoint_2 == new_soliton.ending_point
-	# 	# 	):
-	# 	# 		new_soliton.ending_point = new_dash.ending_point
-
-	# 	new_solitons.append(new_soliton)
-
 	return new_solitons
 
 
