@@ -267,8 +267,8 @@ class Dash:
 			)
 		else:
 			print (
-				'Path {} :\n\t' + 
-				'({}, slot {}, street {}) ---> ({}, slot {}, street {}), '
+				('Path {}:\n\t' + 
+				'({}, slot {}, street {}) ---> ({}, slot {}, street {}), ')
 				.format(
 					self.label, 
 					self.starting_point.end_point.label, 

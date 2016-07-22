@@ -554,25 +554,120 @@ from soliton_data import SolitonData
 
 
 
-### TEST TYPE 4_A JOINTS
+# ### TEST TYPE 4_A JOINTS
+
+# # ----- Create a spectral network ------
+# # 	  	 Peace-sign network
+# #
+# # 		b4		b3 		 b2
+# # 		  `      |      '
+# # 		   `     |     '
+# # 		 (p4)  (p3)   (p2)
+# # 		     `   |   '
+# # 		      `  |  '
+# # 		       ` | '
+# # 		        j1
+# # 		         |
+# # 		         |
+# # 		        (p1)
+# # 		         |
+# # 		         |
+# # 		         b1
+
+# w = MCSN()
+# w.streets = {
+# 	'p_1' : Street(label='p_1'),
+# 	'p_2' : Street(label='p_2'),
+# 	'p_3' : Street(label='p_3'),
+# 	'p_4' : Street(label='p_4'),
+# }
+# w.branch_points = {
+# 	'b_1' : BranchPoint(
+# 		label='b_1', 
+# 		streets=[w.streets['p_1']]
+# 	), 
+# 	'b_2' : BranchPoint(
+# 		label='b_2', 
+# 		streets=[w.streets['p_2']]
+# 	),
+# 	'b_3' : BranchPoint(
+# 		label='b_3', 
+# 		streets=[w.streets['p_3']]
+# 	),
+# 	'b_4' : BranchPoint(
+# 		label='b_4', 
+# 		streets=[w.streets['p_4']]
+# 	),
+# }
+
+# w.joints = {
+# 	'j_1': Joint(
+# 		label='j_1', streets=[
+# 			w.streets['p_1'], 
+# 			None,
+# 			w.streets['p_2'], 	
+# 			w.streets['p_3'], 
+# 			w.streets['p_4'], 
+# 			None
+# 		]
+# 	),
+# }
+
+# w.attach_streets()
+# w.check_network()
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+# s3 = w.streets['p_3']
+# s4 = w.streets['p_4']
+
+
+# print '\n\n-------------------------------------------------------'
+# print 'Soliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=3)
+# Q1.print_info(full_path=True)
+
+
+# Q4 = SolitonData(label='Q_4', network=w , street=s4)
+# Q4.initialize()
+# # Q1.print_info(full_path=True)
+# Q4.grow(n_steps=3)
+# Q4.print_info(full_path=True)
+
+# Q3 = SolitonData(label='Q_3', network=w , street=s3)
+# Q3.initialize()
+# # Q1.print_info(full_path=True)
+# Q3.grow(n_steps=3)
+# Q3.print_info(full_path=True)
+
+
+
+
+### TEST TYPE 4_B JOINTS
 
 # ----- Create a spectral network ------
-# 	  	 Peace-sign network
+# 	  	 Cross-sign network
 #
-# 		b4		b3 		 b2
-# 		  `      |      '
-# 		   `     |     '
-# 		 (p4)  (p3)   (p2)
-# 		     `   |   '
-# 		      `  |  '
-# 		       ` | '
-# 		        j1
-# 		         |
-# 		         |
-# 		        (p1)
-# 		         |
-# 		         |
-# 		         b1
+# 		b4		 		 b3
+# 		  `             '
+# 		   `           '
+# 		   (p4)     (p3)
+# 		     `       '
+# 		      `     '
+# 		       `   '
+# 		        ` '
+#				j1
+# 		        ' `
+# 		       '   `
+# 		      '     `
+# 		   (p1)     (p2)
+# 		    '         `
+# 		   '           `
+# 		 b1             b2
 
 w = MCSN()
 w.streets = {
@@ -604,8 +699,8 @@ w.joints = {
 	'j_1': Joint(
 		label='j_1', streets=[
 			w.streets['p_1'], 
-			None,
-			w.streets['p_2'], 	
+			w.streets['p_2'], 
+			None,	
 			w.streets['p_3'], 
 			w.streets['p_4'], 
 			None
@@ -631,16 +726,9 @@ Q1.initialize()
 Q1.grow(n_steps=3)
 Q1.print_info(full_path=True)
 
-
-Q4 = SolitonData(label='Q_4', network=w , street=s4)
-Q4.initialize()
+Q2 = SolitonData(label='Q_2', network=w , street=s2)
+Q2.initialize()
 # Q1.print_info(full_path=True)
-Q4.grow(n_steps=3)
-Q4.print_info(full_path=True)
-
-Q3 = SolitonData(label='Q_3', network=w , street=s3)
-Q3.initialize()
-# Q1.print_info(full_path=True)
-Q3.grow(n_steps=3)
-Q3.print_info(full_path=True)
+Q2.grow(n_steps=3)
+Q2.print_info(full_path=True)
 
