@@ -651,6 +651,37 @@ def soliton_capping_off(old_soliton, old_cluster):
 	return new_solitons
 
 
+def create_dash_through_joint(
+	joint, in_street, out_street, in_slot, out_slot
+):
+	"""
+	Creates a dash stretching from 'in_street', through 'joint' and out on
+	'out_street'.
+	"""
+	### TODO:
+	### - do some checks on the consistency of streets being attached to joint
+	# NOTE: it's necessary that slots are specified externally, 
+	# they cannot be computed here. Because a street may end on a 
+	# branch point or joint more than once (twice) leading to ambiguities.
+
+	new_dash = Dash(
+		label='joint_new_dash_'+joint.label, 
+		growth_restriction=None
+	)
+	# and extend it first along the out_street
+	# NOTE: this will fix the overall orientation of the dash!
+	new_dash.extend_dash_along_street(
+		street=out_street, end_pt=joint, slot=out_slot
+	)
+	# then also extend along in_street, by growing backwards 
+	# (hence specify the 'first' point for growth)
+	new_dash.extend_dash_along_street(
+		street=in_street, end_pt='first', slot=in_slot
+	)
+
+	return new_dash
+
+
 def soliton_propagation_1(old_soliton, old_cluster, new_street, new_slot):
 	"""
 	Handles propagation of a soliton along a single new street,
@@ -791,20 +822,7 @@ def soliton_propagation_2(old_soliton, old_cluster):
 		d_21.extend_dash_along_street(street=p2, end_pt='first', slot=s_2)
 		
 		# Then, we create a new dash, 
-		d_32 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p2
-		# NOTE: this will fix the overall orientation of the dash!
-		d_32.extend_dash_along_street(
-			street=p2, end_pt=joint, slot=s_2
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_32.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
+		d_32 = create_dash_through_joint(joint, p3, p2, s_3, s_2)
 
 		# At this point we add the new dash to the soliton's dashes
 		# it must be inserted just after d_13 and before d_21
@@ -916,37 +934,11 @@ def soliton_propagation_3(old_soliton, old_cluster):
 		# we specify the 'first' point for growth
 		d_42.extend_dash_along_street(street=p4, end_pt='first', slot=s_4)
 		
-		# Then, we create a new dash d_31, 
-		d_31 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p1
-		# NOTE: this will fix the overall orientation of the dash!
-		d_31.extend_dash_along_street(
-			street=p1, end_pt=joint, slot=s_1
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_31.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
+		# Then, we create a new dash, 
+		d_31 = create_dash_through_joint(joint, p3, p1, s_3, s_1)
 
-		# Then, we create a new dash d_14, 
-		d_14 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p4
-		# NOTE: this will fix the overall orientation of the dash!
-		d_14.extend_dash_along_street(
-			street=p4, end_pt=joint, slot=s_4
-		)
-		# then also extend along p1, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_14.extend_dash_along_street(
-			street=p1, end_pt='first', slot=s_1
-		)
+		# Then, we create a new dash, 
+		d_14 = create_dash_through_joint(joint, p1, p4, s_1, s_4)
 
 		# At this point we add the new dashes to the soliton's dashes
 		# they must be inserted just after d_23 and before d_42
@@ -1026,53 +1018,14 @@ def soliton_propagation_4(old_soliton, old_cluster):
 		# we specify the 'first' point for growth
 		d_41.extend_dash_along_street(street=p4, end_pt='first', slot=s_4)
 		
-		# Then, we create a new dash d_35, 
-		d_35 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p5
-		# NOTE: this will fix the overall orientation of the dash!
-		d_35.extend_dash_along_street(
-			street=p5, end_pt=joint, slot=s_5
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_35.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
+		# Then, we create a new dash, 
+		d_35 = create_dash_through_joint(joint, p3, p5, s_3, s_5)
 
-		# Then, we create a new dash d_51, 
-		d_51 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p1
-		# NOTE: this will fix the overall orientation of the dash!
-		d_51.extend_dash_along_street(
-			street=p1, end_pt=joint, slot=s_1
-		)
-		# then also extend along p5, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_51.extend_dash_along_street(
-			street=p5, end_pt='first', slot=s_5
-		)
+		# Then, we create a new dash, 
+		d_51 = create_dash_through_joint(joint, p5, p1, s_5, s_1)
 
-		# Then, we create a new dash d_14, 
-		d_14 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p4
-		# NOTE: this will fix the overall orientation of the dash!
-		d_14.extend_dash_along_street(
-			street=p4, end_pt=joint, slot=s_4
-		)
-		# then also extend along p1, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_14.extend_dash_along_street(
-			street=p1, end_pt='first', slot=s_1
-		)
+		# Then, we create a new dash, 
+		d_14 = create_dash_through_joint(joint, p1, p4, s_1, s_4)
 
 		# At this point we add the new dashes to the soliton's dashes
 		# they must be inserted just after d_13 and before d_41
@@ -1151,69 +1104,17 @@ def soliton_propagation_5(old_soliton, old_cluster):
 		# we specify the 'first' point for growth
 		d_41.extend_dash_along_street(street=p4, end_pt='first', slot=s_4)
 		
-		# Then, we create a new dash d_35, 
-		d_35 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p5
-		# NOTE: this will fix the overall orientation of the dash!
-		d_35.extend_dash_along_street(
-			street=p5, end_pt=joint, slot=s_5
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_35.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
+		# Then, we create a new dash, 
+		d_35 = create_dash_through_joint(joint, p3, p5, s_3, s_5)
 
-		# Then, we create a new dash d_52, 
-		d_52 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p2
-		# NOTE: this will fix the overall orientation of the dash!
-		d_52.extend_dash_along_street(
-			street=p2, end_pt=joint, slot=s_2
-		)
-		# then also extend along p5, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_51.extend_dash_along_street(
-			street=p5, end_pt='first', slot=s_5
-		)
+		# Then, we create a new dash, 
+		d_52 = create_dash_through_joint(joint, p5, p2, s_5, s_2)
 
-		# Then, we create a new dash d_26, 
-		d_26 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p6
-		# NOTE: this will fix the overall orientation of the dash!
-		d_26.extend_dash_along_street(
-			street=p6, end_pt=joint, slot=s_6
-		)
-		# then also extend along p2, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_26.extend_dash_along_street(
-			street=p2, end_pt='first', slot=s_2
-		)
+		# Then, we create a new dash, 
+		d_26 = create_dash_through_joint(joint, p2, p6, s_2, s_6)
 
-		# Then, we create a new dash d_64, 
-		d_64 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p4
-		# NOTE: this will fix the overall orientation of the dash!
-		d_64.extend_dash_along_street(
-			street=p4, end_pt=joint, slot=s_4
-		)
-		# then also extend along p6, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_64.extend_dash_along_street(
-			street=p6, end_pt='first', slot=s_6
-		)
+		# Then, we create a new dash, 
+		d_64 = create_dash_through_joint(joint, p6, p4, s_6, s_4)
 
 		# At this point we add the new dashes to the soliton's dashes
 		# they must be inserted just after d_13 and before d_41
@@ -1293,86 +1194,21 @@ def soliton_propagation_6(old_soliton, old_cluster):
 		# instead the latter must be grown backward, so 
 		# we specify the 'first' point for growth
 		d_41.extend_dash_along_street(street=p4, end_pt='first', slot=s_4)
+
+		# Then, we create a new dash, 
+		d_35 = create_dash_through_joint(joint, p3, p5, s_3, s_5)
+
+		# Then, we create a new dash, 
+		d_51 = create_dash_through_joint(joint, p5, p1, s_5, s_1)
+
+		# Then, we create a new dash, 
+		d_13_a = create_dash_through_joint(joint, p1, p3, s_1, s_3)
 		
-		# Then, we create a new dash d_35, 
-		d_35 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p5
-		# NOTE: this will fix the overall orientation of the dash!
-		d_35.extend_dash_along_street(
-			street=p5, end_pt=joint, slot=s_5
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_35.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
+		# Then, we create a new dash, 
+		d_36 = create_dash_through_joint(joint, p3, p6, s_3, s_6)
 
-		# Then, we create a new dash d_51, 
-		d_51 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p1
-		# NOTE: this will fix the overall orientation of the dash!
-		d_51.extend_dash_along_street(
-			street=p1, end_pt=joint, slot=s_1
-		)
-		# then also extend along p5, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_51.extend_dash_along_street(
-			street=p5, end_pt='first', slot=s_5
-		)
-
-		# Then, we create a new dash d_13, 
-		d_13_a = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p3
-		# NOTE: this will fix the overall orientation of the dash!
-		d_13_a.extend_dash_along_street(
-			street=p3, end_pt=joint, slot=s_3
-		)
-		# then also extend along p1, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_13_a.extend_dash_along_street(
-			street=p1, end_pt='first', slot=s_1
-		)
-
-		# Then, we create a new dash d_36, 
-		d_36 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p6
-		# NOTE: this will fix the overall orientation of the dash!
-		d_36.extend_dash_along_street(
-			street=p6, end_pt=joint, slot=s_6
-		)
-		# then also extend along p3, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_36.extend_dash_along_street(
-			street=p3, end_pt='first', slot=s_3
-		)
-
-		# Then, we create a new dash d_64, 
-		d_64 = Dash(
-			label='joint_new_dash_'+joint.label, 
-			growth_restriction=None
-		)
-		# and extend it first along p4
-		# NOTE: this will fix the overall orientation of the dash!
-		d_64.extend_dash_along_street(
-			street=p4, end_pt=joint, slot=s_4
-		)
-		# then also extend along p6, by growing backwards 
-		# (hence specify the 'first' point for growth)
-		d_64.extend_dash_along_street(
-			street=p6, end_pt='first', slot=s_6
-		)
+		# Then, we create a new dash, 
+		d_64 = create_dash_through_joint(joint, p6, p4, s_6, s_4)
 
 		# At this point we add the new dashes to the soliton's dashes
 		# they must be inserted just after d_13 and before d_41
