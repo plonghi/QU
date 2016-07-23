@@ -4,7 +4,8 @@ from solitons import (
 	growing_pairs_from_dashes, growing_clusters
 )
 from growth_rules import (
-	bp_type_1_growth, j_type_3_growth, grow_soliton_once, grow_soliton,
+	# bp_type_1_growth, j_type_3_growth, 
+	grow_soliton_once, grow_soliton,
 )
 from soliton_data import SolitonData
 
@@ -731,4 +732,111 @@ from soliton_data import SolitonData
 # # Q1.print_info(full_path=True)
 # Q2.grow(n_steps=3)
 # Q2.print_info(full_path=True)
+
+
+
+
+### TEST TYPE 5 JOINTS
+
+# ----- Create a spectral network ------
+# 	  	 Cross-sign network
+#
+# 		b4		 		 b3
+# 		  `             '
+# 		   `           '
+# 		   (p4)     (p3)
+# 		     `       '
+# 		      `     '
+# 		       `   '
+# 		        ` '
+#				j1
+# 		        '|`
+# 		       ' | `
+# 		      '  |  `
+# 		   (p1) (p5)  (p2)
+# 		    '    |    `
+# 		   '     |     `
+# 		 b1      b5     b2
+
+w = MCSN()
+w.streets = {
+	'p_1' : Street(label='p_1'),
+	'p_2' : Street(label='p_2'),
+	'p_3' : Street(label='p_3'),
+	'p_4' : Street(label='p_4'),
+	'p_5' : Street(label='p_5'),
+}
+w.branch_points = {
+	'b_1' : BranchPoint(
+		label='b_1', 
+		streets=[w.streets['p_1']]
+	), 
+	'b_2' : BranchPoint(
+		label='b_2', 
+		streets=[w.streets['p_2']]
+	),
+	'b_3' : BranchPoint(
+		label='b_3', 
+		streets=[w.streets['p_3']]
+	),
+	'b_4' : BranchPoint(
+		label='b_4', 
+		streets=[w.streets['p_4']]
+	),
+	'b_5' : BranchPoint(
+		label='b_5', 
+		streets=[w.streets['p_5']]
+	),
+}
+
+w.joints = {
+	'j_1': Joint(
+		label='j_1', streets=[
+			w.streets['p_1'], 
+			w.streets['p_5'], 
+			w.streets['p_2'], 
+			w.streets['p_3'], 
+			None,
+			w.streets['p_4'], 
+		]
+	),
+}
+
+w.attach_streets()
+w.check_network()
+#------ Finished creating network -------
+
+s1 = w.streets['p_1']
+s2 = w.streets['p_2']
+s3 = w.streets['p_3']
+s4 = w.streets['p_4']
+s5 = w.streets['p_5']
+
+
+print '\n\n-------------------------------------------------------'
+print 'Soliton Data'
+Q1 = SolitonData(label='Q_1', network=w , street=s1)
+Q1.initialize()
+# Q1.print_info(full_path=True)
+Q1.grow(n_steps=3)
+Q1.print_info(full_path=True)
+
+Q2 = SolitonData(label='Q_2', network=w , street=s2)
+Q2.initialize()
+# Q1.print_info(full_path=True)
+Q2.grow(n_steps=3)
+Q2.print_info(full_path=True)
+
+Q5 = SolitonData(label='Q_5', network=w , street=s5)
+Q5.initialize()
+# Q1.print_info(full_path=True)
+Q5.grow(n_steps=3)
+Q5.print_info(full_path=True)
+
+Q3 = SolitonData(label='Q_3', network=w , street=s3)
+Q3.initialize()
+# Q1.print_info(full_path=True)
+Q3.grow(n_steps=3)
+Q3.print_info(full_path=True)
+
 

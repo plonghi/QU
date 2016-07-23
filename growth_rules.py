@@ -139,6 +139,8 @@ def grow_soliton(soliton, n_steps=1):
 	return new_solitons
 
 
+### TODO: merge the handling of the three branch-point types.
+
 def bp_type_1_growth(old_soliton, old_cluster):
 	"""
 	Branch points of type 1 are those with a single two-way street 
@@ -218,226 +220,368 @@ def bp_type_3_growth(old_soliton, old_cluster):
 	return new_solitons
 
 
-def j_type_3_growth(old_soliton, old_cluster):
+### The single joint types have been deprecated.
+### now they are handled by the 6-way joint.
+
+# def j_type_3_growth(old_soliton, old_cluster):
+# 	"""
+# 	Joints of type 3 are those with a three two-way streets p1, p2, p3
+# 	ending on them, so when a soliton ends on them from one of 
+# 	the streets (say p1), it will keep growing on both the other two, p2, p3.
+# 	For definiteness, take fig 46 of GMN5 (spectral networks), then
+# 	p1 is the bottom steet, p2 will be the one on the top-left, 
+# 	and p3 on the top-right. 
+# 	The relavant relation here is (eq. A.3)
+# 		" tau1 = nu6 nu2 "
+# 	In terms of dashes, this means that the two incoming dashes 
+# 	(supported on street p1) will be grown along different streets: 
+# 	one called d_21, flowing from p2 into p1 (on sheet j in the picture), 
+# 	and another called d_13 flowing from p1 into p3 
+# 	(on sheet k in the picture)	(also, note the ordering!).
+# 	Then a third dash d_32 will be added to the soliton, 
+# 	flowing from p3 into p2 (on sheet i of the picture). 
+# 	The new growing pairs will then be: 
+# 	[..., [end(d_32), start(d_21)], [end(d_13), start(d_32)] ...]
+# 	while the previous growing pair corresponding to the joint will
+# 	of course be removed.
+
+# 	Now all of this is simply handled by the function 
+# 	'soliton_propagation_2'
+# 	"""
+# 	new_solitons = soliton_propagation_2(old_soliton, old_cluster)
+# 	return new_solitons
+
+
+# def j_type_4_A_growth(old_soliton, old_cluster):
+# 	"""
+# 	Joints of type 4A are those with four two-way streets p1, p2, p3, p4
+# 	ending on them, formin a 'peace-sign' 
+
+# 		p4		p3 		 p2
+# 		  `      |      '
+# 		   `     |     '
+# 		    `    |    '
+# 		     `   |   '
+# 		      `  |  '
+# 		       ` | '
+# 		         |
+# 		         |
+# 		         |
+# 		         |
+# 		         |
+# 		         |
+# 		         p1
+
+# 	The relavant relations here are 
+# 	(from eq. A.3 of 1204.4824, but with our labels)
+# 		tau1 = nu3 + nu2 nu4
+# 		tau2 = nu4 nu1
+# 		tau3 = nu1
+# 		tau4 = nu1 nu2
+	
+# 	In terms of dashes, this means that there will be a complex behavior,
+# 	involving both the one seen in type_3 joints, 
+# 	and simple straight propagation.
+# 	"""
+
+# 	# first of all, determine on which street 
+# 	# the soliton is approaching the joint
+
+# 	new_solitons = []
+# 	joint = old_cluster[0][0].end_point
+# 	sol_slot = old_cluster[0][0].slot
+# 	av_slots = joint.available_slots
+
+# 	previous_slot = (sol_slot - 1) % 6
+# 	next_slot = (sol_slot + 1) % 6
+
+# 	incoming_street = None
+
+# 	if (
+# 		previous_slot not in av_slots and
+# 		next_slot not in av_slots
+# 	):
+# 		incoming_street = 'p1'
+# 	elif (
+# 		previous_slot not in av_slots and
+# 		next_slot in av_slots
+# 	):
+# 		incoming_street = 'p2'
+# 	elif (
+# 		previous_slot in av_slots and
+# 		next_slot in av_slots
+# 	):
+# 		incoming_street = 'p3'
+# 	elif (
+# 		previous_slot in av_slots and
+# 		next_slot not in av_slots
+# 	):
+# 		incoming_street = 'p4'
+# 	else:
+# 		raise Exception('Cannot determine position of soliton on joint.')
+
+# 	# Now handle various cases separately.
+
+# 	if incoming_street=='p1':
+# 		# In this case there is both straight propagation, and Y-propagation
+
+# 		# Start with straight propagation
+# 		new_slot = (sol_slot + 3) % 6
+# 		new_street = joint.streets[new_slot]
+# 		new_solitons = soliton_propagation_1(
+# 			old_soliton, old_cluster, new_street, new_slot
+# 		)
+
+# 		# Then proceed with Y-propagation (like in type_3 joint)
+# 		new_solitons += soliton_propagation_2(old_soliton, old_cluster)
+# 		return new_solitons
+
+# 	elif incoming_street=='p2' or incoming_street=='p4':
+# 		# In these cases there is only Y-propagation
+# 		new_solitons = soliton_propagation_2(old_soliton, old_cluster)
+# 		return new_solitons
+
+# 	elif incoming_street=='p3':
+# 		# In these cases there is only straight propagation
+# 		new_slot = (sol_slot + 3) % 6
+# 		new_street = joint.streets[new_slot]
+# 		new_solitons = soliton_propagation_1(
+# 			old_soliton, old_cluster, new_street, new_slot
+# 		)
+# 		return new_solitons
+	
+# 	else:
+# 		return NotImplementedError
+
+
+# def j_type_4_B_growth(old_soliton, old_cluster):
+# 	"""
+# 	Joints of type 4B are those with four two-way streets p1, p2, p3, p4
+# 	ending on them, forming a cross
+
+# 		p4		 		 p3
+# 		  `             '
+# 		   `           '
+# 		    `         '
+# 		     `       '
+# 		      `     '
+# 		       `   '
+# 		        ` '
+# 		        ' `
+# 		       '   `
+# 		      '     `
+# 		     '       `
+# 		    '         `
+# 		   '           `
+# 		 p1             p2
+
+# 	The relavant relations here are 
+# 	(from eq. A.3 of 1204.4824, but with our labels)
+# 		tau1 = nu3
+# 		tau2 = nu4 + nu3 nu1 nu4
+# 		tau3 = nu1
+# 		tau4 = nu2 + nu1 nu1 nu2
+	
+# 	In terms of dashes, this means that there will be a simple behavior
+# 	for p1 and p3, involving just simple straight propagation.
+# 	However for p2 and p4 there will be an additional contribution,
+# 	coming from detours.
+# 	"""
+
+# 	# first of all, determine on which street 
+# 	# the soliton is approaching the joint
+# 	# due to the symmetry of the picture, there 
+# 	# are really just two cases: p1 or p2.
+
+# 	new_solitons = []
+# 	joint = old_cluster[0][0].end_point
+# 	sol_slot = old_cluster[0][0].slot
+# 	av_slots = joint.available_slots
+
+# 	previous_slot = (sol_slot - 1) % 6
+# 	next_slot = (sol_slot + 1) % 6
+
+# 	incoming_street = None
+
+# 	if (
+# 		previous_slot not in av_slots and
+# 		next_slot in av_slots
+# 	):
+# 		incoming_street = 'p1'
+# 	elif (
+# 		previous_slot in av_slots and
+# 		next_slot not in av_slots
+# 	):
+# 		incoming_street = 'p2'
+# 	else:
+# 		raise Exception('Cannot determine position of soliton on joint.')
+
+# 	# Now handle various cases separately.
+
+# 	if incoming_street=='p1':
+# 		new_slot = (sol_slot + 3) % 6
+# 		new_street = joint.streets[new_slot]
+
+# 		new_solitons += soliton_propagation_1(
+# 			old_soliton, old_cluster, new_street, new_slot
+# 		)
+
+# 	elif incoming_street=='p2':
+# 		# In this case there is both straight propagation, and Y-propagation
+
+# 		# Start with straight propagation
+# 		new_slot = (sol_slot + 3) % 6
+# 		new_street = joint.streets[new_slot]
+# 		new_solitons = soliton_propagation_1(
+# 			old_soliton, old_cluster, new_street, new_slot
+# 		)
+
+# 		# Then proceed with Y-propagation (like in type_3 joint)
+# 		new_solitons += soliton_propagation_3(
+# 			old_soliton, old_cluster
+# 		)
+
+# 	return new_solitons
+
+
+def j_type_six_way(old_soliton, old_cluster):
 	"""
-	Joints of type 3 are those with a three two-way streets p1, p2, p3
-	ending on them, so when a soliton ends on them from one of 
-	the streets (say p1), it will keep growing on both the other two, p2, p3.
-	For definiteness, take fig 46 of GMN5 (spectral networks), then
-	p1 is the bottom steet, p2 will be the one on the top-left, 
-	and p3 on the top-right. 
-	The relavant relation here is (eq. A.3)
-		" tau1 = nu6 nu2 "
-	In terms of dashes, this means that the two incoming dashes 
-	(supported on street p1) will be grown along different streets: 
-	one called d_21, flowing from p2 into p1 (on sheet j in the picture), 
-	and another called d_13 flowing from p1 into p3 
-	(on sheet k in the picture)	(also, note the ordering!).
-	Then a third dash d_32 will be added to the soliton, 
-	flowing from p3 into p2 (on sheet i of the picture). 
-	The new growing pairs will then be: 
-	[..., [end(d_32), start(d_21)], [end(d_13), start(d_32)] ...]
-	while the previous growing pair corresponding to the joint will
-	of course be removed.
+	This function handles soliton propagation on a generic joint,
+	which could be of type 3, 4_A, 4_B, 5 or 6.
 
-	Now all of this is simply handled by the function 
-	'soliton_propagation_2'
-	"""
-	new_solitons = soliton_propagation_2(old_soliton, old_cluster)
-	return new_solitons
-
-
-def j_type_4_A_growth(old_soliton, old_cluster):
-	"""
-	Joints of type 4A are those with four two-way streets p1, p2, p3, p4
-	ending on them, formin a 'peace-sign' 
-
-		p4		p3 		 p2
+		p5		p4		 p3
 		  `      |      '
 		   `     |     '
 		    `    |    '
 		     `   |   '
 		      `  |  '
 		       ` | '
-		         |
-		         |
-		         |
-		         |
-		         |
-		         |
-		         p1
+		        `|'
+		        '|`
+		       ' | `
+		      '  |  `
+		     '   |   `
+		    '    |    `
+		   '     |     `
+		  '      |      `
+		p6      p1       p2
 
 	The relavant relations here are 
 	(from eq. A.3 of 1204.4824, but with our labels)
-		tau1 = nu3 + nu2 nu4
-		tau2 = nu4 nu1
-		tau3 = nu1
-		tau4 = nu1 nu2
+		tau1 = nu4 
+		     + nu3 nu5 
+		     + nu3 nu6 nu4 
+		     + nu3 nu5 nu1 nu4 
+		     + nu3 nu5 nu2 nu6 nu4 
+		     + nu3 nu5 nu1 nu3 nu6 nu4
+		     + ...
 	
-	In terms of dashes, this means that there will be a complex behavior,
-	involving both the one seen in type_3 joints, 
-	and simple straight propagation.
-	"""
-
-	# first of all, determine on which street 
-	# the soliton is approaching the joint
-
+	For the first piece there will be simple straight propagation.
+	For the second piece there will be Y-propagation
+	The third piace will involve four dashes now involved:, in order they are:
+	- the incoming dash of p1 will grow along p3, call it d_13
+	- a new dash from p3 to p6, call it d_36
+	- a new dash from p6 to p4, call it d_64
+	- the outgoing dash of p1 will grow (backwards) along p4, call it d_41
+	then the contribution to the soliton will be to replace the 
+	original dashes of the growing pair 
+	[..., d1_in, d1_out ,...]
+	with
+	[..., d_13, d_36, d_64, d_41,...]
+	"""	
 	new_solitons = []
 	joint = old_cluster[0][0].end_point
 	sol_slot = old_cluster[0][0].slot
 	av_slots = joint.available_slots
+	# let p1 be the street from which 
+	# the soliton is approaching the joint.
 
-	previous_slot = (sol_slot - 1) % 6
-	next_slot = (sol_slot + 1) % 6
-
-	incoming_street = None
-
-	if (
-		previous_slot not in av_slots and
-		next_slot not in av_slots
-	):
-		incoming_street = 'p1'
-	elif (
-		previous_slot not in av_slots and
-		next_slot in av_slots
-	):
-		incoming_street = 'p2'
-	elif (
-		previous_slot in av_slots and
-		next_slot in av_slots
-	):
-		incoming_street = 'p3'
-	elif (
-		previous_slot in av_slots and
-		next_slot not in av_slots
-	):
-		incoming_street = 'p4'
-	else:
-		raise Exception('Cannot determine position of soliton on joint.')
-
-	# Now handle various cases separately.
-
-	if incoming_street=='p1':
-		# In this case there is both straight propagation, and Y-propagation
-
-		# Start with straight propagation
-		new_slot = (sol_slot + 3) % 6
-		new_street = joint.streets[new_slot]
-		new_solitons = soliton_propagation_1(
-			old_soliton, old_cluster, new_street, new_slot
-		)
-
-		# Then proceed with Y-propagation (like in type_3 joint)
-		new_solitons += soliton_propagation_2(old_soliton, old_cluster)
-		return new_solitons
-
-	elif incoming_street=='p2' or incoming_street=='p4':
-		# In these cases there is only Y-propagation
-		new_solitons = soliton_propagation_2(old_soliton, old_cluster)
-		return new_solitons
-
-	elif incoming_street=='p3':
-		# In these cases there is only straight propagation
-		new_slot = (sol_slot + 3) % 6
-		new_street = joint.streets[new_slot]
-		new_solitons = soliton_propagation_1(
-			old_soliton, old_cluster, new_street, new_slot
-		)
-		return new_solitons
+	# the slot of each street
+	[s_1, s_2, s_3, s_4, s_5, s_6] = [(sol_slot + i) % 6 for i in range(6)]
+	s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
 	
-	else:
-		return NotImplementedError
-
-
-def j_type_4_B_growth(old_soliton, old_cluster):
-	"""
-	Joints of type 4B are those with four two-way streets p1, p2, p3, p4
-	ending on them, forming a cross
-
-		p4		 		 p3
-		  `             '
-		   `           '
-		    `         '
-		     `       '
-		      `     '
-		       `   '
-		        ` '
-		        ' `
-		       '   `
-		      '     `
-		     '       `
-		    '         `
-		   '           `
-		 p1             p2
-
-	The relavant relations here are 
-	(from eq. A.3 of 1204.4824, but with our labels)
-		tau1 = nu3
-		tau2 = nu4 + nu3 nu1 nu4
-		tau3 = nu1
-		tau4 = nu2 + nu1 nu1 nu2
+	# the streets
+	[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
 	
-	In terms of dashes, this means that there will be a simple behavior
-	for p1 and p3, involving just simple straight propagation.
-	However for p2 and p4 there will be an additional contribution,
-	coming from detours.
-	"""
+	# then map which streets are 'available'
+	pk_is_av = [False for i in range(6)]
+	for k in range(6):
+		if s_k[k] in av_slots:
+			pk_is_av[k] = True 
 
-	# first of all, determine on which street 
-	# the soliton is approaching the joint
-	# due to the symmetry of the picture, there 
-	# are really just two cases: p1 or p2.
+	[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = pk_is_av
 
-	new_solitons = []
-	joint = old_cluster[0][0].end_point
-	sol_slot = old_cluster[0][0].slot
-	av_slots = joint.available_slots
-
-	previous_slot = (sol_slot - 1) % 6
-	next_slot = (sol_slot + 1) % 6
-
-	incoming_street = None
-
+	# tau1 > nu4
 	if (
-		previous_slot not in av_slots and
-		next_slot in av_slots
+		p4_is_av is True
 	):
-		incoming_street = 'p1'
-	elif (
-		previous_slot in av_slots and
-		next_slot not in av_slots
-	):
-		incoming_street = 'p2'
-	else:
-		raise Exception('Cannot determine position of soliton on joint.')
-
-	# Now handle various cases separately.
-
-	if incoming_street=='p1':
-		new_slot = (sol_slot + 3) % 6
-		new_street = joint.streets[new_slot]
-
+		# Just straight propagation
 		new_solitons += soliton_propagation_1(
-			old_soliton, old_cluster, new_street, new_slot
+			old_soliton, old_cluster, p4, s_4
 		)
 
-	elif incoming_street=='p2':
-		# In this case there is both straight propagation, and Y-propagation
-
-		# Start with straight propagation
-		new_slot = (sol_slot + 3) % 6
-		new_street = joint.streets[new_slot]
-		new_solitons = soliton_propagation_1(
-			old_soliton, old_cluster, new_street, new_slot
+	# tau1 > nu3 nu5
+	if (
+		p3_is_av is True and
+		p5_is_av is True
+	):
+		# Y-propagation
+		new_solitons += soliton_propagation_2(
+			old_soliton, old_cluster
 		)
 
-		# Then proceed with Y-propagation (like in type_3 joint)
+	# tau1 > nu3 nu6 nu4 
+	if (
+		p3_is_av is True and
+		p6_is_av is True and
+		p4_is_av is True
+	):
+		# X-propagation
 		new_solitons += soliton_propagation_3(
 			old_soliton, old_cluster
 		)
 
-	return new_solitons
+	# tau1 > nu3 nu5 nu1 nu4 
+	if (
+		p3_is_av is True and
+		p5_is_av is True and
+		p1_is_av is True and
+		p4_is_av is True
+	):
+		# type-4 propagation
+		new_solitons += soliton_propagation_4(
+			old_soliton, old_cluster
+		)
 
+	# tau1 > nu3 nu5 nu2 nu6 nu4 
+	if (
+		p3_is_av is True and
+		p5_is_av is True and
+		p2_is_av is True and
+		p6_is_av is True and
+		p4_is_av is True
+	):
+		# type-5 propagation
+		new_solitons += soliton_propagation_5(
+			old_soliton, old_cluster
+		)
+
+	# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
+	if (
+		p3_is_av is True and
+		p5_is_av is True and
+		p1_is_av is True and
+		p6_is_av is True and
+		p4_is_av is True
+	):
+		# type-6 propagation
+		new_solitons += soliton_propagation_6(
+			old_soliton, old_cluster
+		)
+	
+	### TODO: if all slots are available, add more iterations!
+	
+	return new_solitons
 
 
 def soliton_capping_off(old_soliton, old_cluster):
@@ -1100,7 +1244,7 @@ def soliton_propagation_6(old_soliton, old_cluster):
 	- the incoming dash of p1 will grow along p3, call it d_13
 	- a new dash from p3 to p5, call it d_35
 	- a new dash from p5 to p1, call it d_51
-	- a new dash from p1 to p3, call it d_13
+	- a new dash from p1 to p3, call it d_13_a
 	- a new dash from p3 to p6, call it d_36
 	- a new dash from p6 to p4, call it d_64
 	- the outgoing dash of p1 will grow (backwards) along p4, call it d_41
@@ -1183,18 +1327,18 @@ def soliton_propagation_6(old_soliton, old_cluster):
 		)
 
 		# Then, we create a new dash d_13, 
-		d_13 = Dash(
+		d_13_a = Dash(
 			label='joint_new_dash_'+joint.label, 
 			growth_restriction=None
 		)
 		# and extend it first along p3
 		# NOTE: this will fix the overall orientation of the dash!
-		d_13.extend_dash_along_street(
+		d_13_a.extend_dash_along_street(
 			street=p3, end_pt=joint, slot=s_3
 		)
 		# then also extend along p1, by growing backwards 
 		# (hence specify the 'first' point for growth)
-		d_13.extend_dash_along_street(
+		d_13_a.extend_dash_along_street(
 			street=p1, end_pt='first', slot=s_1
 		)
 
@@ -1237,7 +1381,7 @@ def soliton_propagation_6(old_soliton, old_cluster):
 		# start adding
 		new_soliton.dashes.insert(indx, d_35)
 		new_soliton.dashes.insert(indx + 1, d_51)
-		new_soliton.dashes.insert(indx + 2, d_13)
+		new_soliton.dashes.insert(indx + 2, d_13_a)
 		new_soliton.dashes.insert(indx + 3, d_36)
 		new_soliton.dashes.insert(indx + 4, d_64)
 
@@ -1251,143 +1395,6 @@ def soliton_propagation_6(old_soliton, old_cluster):
 	return new_solitons
 
 
-def j_type_six_way(old_soliton, old_cluster):
-	"""
-	This function handles soliton propagation on a generic joint,
-	which could be of type 3, 4_A, 4_B, 5 or 6.
 
-		p5		p4		 p3
-		  `      |      '
-		   `     |     '
-		    `    |    '
-		     `   |   '
-		      `  |  '
-		       ` | '
-		        `|'
-		        '|`
-		       ' | `
-		      '  |  `
-		     '   |   `
-		    '    |    `
-		   '     |     `
-		  '      |      `
-		p6      p1       p2
-
-	The relavant relations here are 
-	(from eq. A.3 of 1204.4824, but with our labels)
-		tau1 = nu4 
-		     + nu3 nu5 
-		     + nu3 nu6 nu4 
-		     + nu3 nu5 nu1 nu4 
-		     + nu3 nu5 nu2 nu6 nu4 
-		     + nu3 nu5 nu1 nu3 nu6 nu4
-		     + ...
-	
-	For the first piece there will be simple straight propagation.
-	For the second piece there will be Y-propagation
-	The third piace will involve four dashes now involved:, in order they are:
-	- the incoming dash of p1 will grow along p3, call it d_13
-	- a new dash from p3 to p6, call it d_36
-	- a new dash from p6 to p4, call it d_64
-	- the outgoing dash of p1 will grow (backwards) along p4, call it d_41
-	then the contribution to the soliton will be to replace the 
-	original dashes of the growing pair 
-	[..., d1_in, d1_out ,...]
-	with
-	[..., d_13, d_36, d_64, d_41,...]
-	"""	
-	new_solitons = []
-	joint = old_cluster[0][0].end_point
-	sol_slot = old_cluster[0][0].slot
-	av_slots = joint.available_slots
-	# let p1 be the street from which 
-	# the soliton is approaching the joint.
-
-	# the slot of each street
-	[s_1, s_2, s_3, s_4, s_5, s_6] = [(sol_slot + i) % 6 for i in range(6)]
-	s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
-	
-	# the streets
-	[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
-	
-	# then map which streets are 'available'
-	pk_is_av = [False for i in range(6)]
-	for k in range(6):
-		if s_k[k] in av_slots:
-			pk_is_av[k] = True 
-
-	[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = pk_is_av
-
-	# tau1 > nu4
-	if (
-		p4_is_av is True
-	):
-		# Just straight propagation
-		new_solitons += soliton_propagation_1(
-			old_soliton, old_cluster, p4, s_4
-		)
-
-	# tau1 > nu3 nu5
-	if (
-		p3_is_av is True and
-		p5_is_av is True
-	):
-		# Y-propagation
-		new_solitons += soliton_propagation_2(
-			old_soliton, old_cluster
-		)
-
-	# tau1 > nu3 nu6 nu4 
-	if (
-		p3_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# X-propagation
-		new_solitons += soliton_propagation_3(
-			old_soliton, old_cluster
-		)
-
-	# tau1 > nu3 nu5 nu1 nu4 
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p1_is_av is True and
-		p4_is_av is True
-	):
-		# type-4 propagation
-		new_solitons += soliton_propagation_4(
-			old_soliton, old_cluster
-		)
-
-	# tau1 > nu3 nu5 nu2 nu6 nu4 
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p2_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# type-5 propagation
-		new_solitons += soliton_propagation_5(
-			old_soliton, old_cluster
-		)
-
-	# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p1_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# type-6 propagation
-		new_solitons += soliton_propagation_6(
-			old_soliton, old_cluster
-		)
-	
-	### TODO: if all slots are available, add more iterations!
-	
-	return new_solitons
 
 
