@@ -70,11 +70,18 @@ class SolitonData:
 		self.anti_oriented_solitons = new_anti_or_sols
 
 	def print_info(self, full_path=False):
-		print '\nCo-oriented solitons:\n--------------------'
+		print (
+			'\nCo-oriented solitons on {}:\n----------------------------'
+			.format(self.street.label)
+		)
+
 		for i, s in enumerate(self.co_oriented_solitons):
 			print '{}.'.format(i+1)
 			s.print_info(full_path=full_path)
-		print '\nAnti-oriented solitons:\n--------------------'
+		print (
+			'\nAnti-oriented solitons on {}:\n------------------------------'
+			.format(self.street.label)
+		)
 		for i, s in enumerate(self.anti_oriented_solitons):
 			print '{}.'.format(i+1)
 			s.print_info(full_path=full_path)
