@@ -107,15 +107,12 @@ def grow_soliton_once(soliton):
 				grow_at_node = j_type_six_way
 
 			new_solitons = []
-			print '\n\nNOW THERE ARE {} OLD SOLITONS, WE GROW THEM '.format(len(old_solitons))
-			print 'GROWTH TYPE {}'.format(node_type)
 			for sol in old_solitons:
 				# must now identify which growth cluster of each soliton 
 				# is the one corresponding to 'original_cluster'
 				sol_cl = find_corresponding_cluster(sol, cl)
 				new_solitons += grow_at_node(sol, sol_cl)
 			old_solitons = new_solitons
-			print '\n\nNOW THERE ARE {} SOLITONS'.format(len(new_solitons))
 
 		return new_solitons
 
@@ -134,7 +131,6 @@ def grow_soliton(soliton, n_steps=1):
 			for sol in old_solitons:
 				new_solitons += grow_soliton_once(sol)
 			old_solitons = new_solitons
-			print '\n\n\nAT STEP {} THERE ARE {} SOLITONS'.format(i, len(new_solitons))
 
 		return new_solitons
 
@@ -339,10 +335,7 @@ def j_type_six_way(old_soliton, old_cluster):
 	new_solitons = []
 	joint = old_cluster[0][0].end_point
 
-	print '\n\nWILL GROW SOLITON AT JOINT {}'.format(joint.label)
-
 	for old_growing_pair in old_cluster:
-		print '\nGROWING AT SLOT {}'.format(old_growing_pair[0].slot)
 		# for each growing pair of the cluster we do the evolution procedure
 		# at the joint. Each time, this may return more than one new soliton.
 		# Then we must keep evolving all of the new ones for the next growing 
@@ -462,10 +455,6 @@ def j_type_six_way(old_soliton, old_cluster):
 			
 			### TODO: if all slots are available, add more iterations!
 			old_solitons = new_solitons
-
-		print 'SLOT GAVE {} NEW SOLITONS'.format(len(new_solitons))
-
-	print '\nOVERALL FROM THE JOINT {} NEW SOLITONS\n\n\n'.format(len(new_solitons))
 
 	return new_solitons
 

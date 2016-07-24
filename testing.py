@@ -1102,6 +1102,11 @@ w.joints = {
 	),
 }
 
+w.homology_classes = {
+	'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
+	'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
+}
+
 w.attach_streets()
 w.check_network()
 #------ Finished creating network -------

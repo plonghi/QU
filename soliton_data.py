@@ -56,20 +56,16 @@ class SolitonData:
 	def grow(self, n_steps=N_MAX_GROWTH):
 		# grow co-oriented solitons
 		new_co_or_sols = []
-		print '\n\n\nGROWING CO-ORIENTED SOLITONS'
 		for sol in self.co_oriented_solitons:
 			new_sols = grow_soliton(sol, n_steps=n_steps)
-			print 'GOT {} NEW ONES'.format(len(new_sols))
 			new_co_or_sols += new_sols
 
 		self.co_oriented_solitons = new_co_or_sols
 
 		# grow anti-oriented solitons
 		new_anti_or_sols = []
-		print '\n\n\nGROWING ANTI-ORIENTED SOLITONS'
 		for sol in self.anti_oriented_solitons:
 			new_sols = grow_soliton(sol, n_steps=n_steps)
-			print 'GOT {} NEW ONES'.format(len(new_sols))
 			new_anti_or_sols += new_sols
 
 		self.anti_oriented_solitons = new_anti_or_sols

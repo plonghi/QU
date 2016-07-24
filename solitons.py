@@ -855,27 +855,44 @@ def find_corresponding_pair(soliton, ref_gr_pair, multi=False):
 	# characterize the reference growing pair by 
 	# - the nodal point (joint/branch point)
 	# - the slot on the nodal point
+	# - the paths of the two dashes of the pair
 	ref_end_point = ref_gr_pair[0].end_point
 	ref_slot = ref_gr_pair[0].slot
+	ref_path_0 = ref_gr_pair[0].dash.path
+	ref_path_1 = ref_gr_pair[1].dash.path
 
 	growing_pairs = soliton.growing_pairs
 	candidates = []
-	# collect all candidate clusters, based on their nodal point and slot
+	# collect all candidate pairs, based on their nodal point and slot, 
+	# and paths of the two dashes
 	for g_p in growing_pairs:
 		if (
 			g_p[0].end_point == ref_end_point and
-			g_p[0].slot == ref_slot
+			g_p[0].slot == ref_slot # and
+			# (
+			# 	(
+			# 		g_p[0].dash.path == ref_path_0 and 
+			# 		g_p[1].dash.path == ref_path_1
+			# 	) or
+			# 	(
+			# 		g_p[0].dash.path == ref_path_1 and 
+			# 		g_p[1].dash.path == ref_path_0
+			# 	)
+			# )
+
 		):
 			candidates.append(g_p)
 
 	if len(candidates) > 1 and multi is False:
-		raise Exception(
+		print (
+			'WARNING: '
 			'Cannot find a unique growing pair corresponding' 
-			'to the reference one'
+			'to the reference one.'
 		)
+		return candidates
 	elif len(candidates) == 0:
 		raise Exception(
-			'Cannot find any cluster corresponding to the reference one'
+			'Cannot find any growing pair corresponding to the reference one'
 		)
 	else:
 		return candidates
