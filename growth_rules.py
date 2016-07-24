@@ -1,5 +1,5 @@
 from solitons import (
-	copy_of_soliton, join_dashes, SolitonPath, Dash, 
+	copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
 	growing_pairs_from_dashes, growing_clusters, find_corresponding_cluster
 )
 
@@ -603,7 +603,7 @@ def soliton_capping_off(old_soliton, old_cluster):
 		# Then, we create a new dash, by joining the dashes of this 
 		# pair at the branch point. This is where the rule for a branch
 		# point of type 1 enters. 
-		new_dash = join_dashes(new_p)
+		new_dash = join_dashes_at_branch_point(new_p)
 
 		# collect the new dashes, by replacing the two we just merged
 		# with their union

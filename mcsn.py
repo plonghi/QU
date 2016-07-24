@@ -272,6 +272,10 @@ class MCSN:
 		# 		None
 		# 	]
 		# )}
+		self.streets = {}
+		self.branch_points = {}
+		self.joints = {}
+		self.homology_classes = {}
 
 	def attach_streets(self):
 		for b_pt in self.branch_points.values():
@@ -291,7 +295,6 @@ class MCSN:
 							street=street, end_point=j_pt, slot=i,
 						)
 					)
-					print street.endpoints
 
 	def check_network(self):
 		# Check that every street has exactly two endpoints
@@ -321,6 +324,33 @@ class MCSN:
 					'Joint {} is of type {}'.format(j_pt.label, j_type)
 				)
 		print 'All joints are of a well-defined type.'
+
+		# Check that homology classes include all streets of the network
+		# and that no street is repeated more than once
+		if len(self.homology_classes) > 0:
+			# a list with all streets in all homology classes
+			all_hom_streets = []
+			for hc_streets in self.homology_classes.values():
+				all_hom_streets += hc_streets
+
+			# check that every street of the network is contained in at 
+			# least one homology class
+			for s in self.streets.keys():
+				if not s in all_hom_streets:
+					raise Exception(
+						'Street {} is not contained in any homology class'
+						.format(s.label)
+					)
+
+			# check that no street is contained in more than one homology class
+			if not len(all_hom_streets) == len(self.streets.values()):
+				raise Exception('Two or more homology classes share a street.')
+
+			print 'All homology classes are well-defined.'
+		else:
+			print 'No homology classes have been defined.'
+
+
 		
 	def add_street(self):
 		pass

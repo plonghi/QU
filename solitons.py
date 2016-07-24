@@ -332,7 +332,7 @@ class SolitonPath:
 	# TODO: elimiate growing_pairs form the input, just keep 
 	# dashes, and use a function to determine the growing pairs.
 	def __init__(
-		self, label=None, starting_point=None, 
+		self, label='no_label', starting_point=None, 
 		ending_point=None, growing_pairs=None,
 		dashes=None, complete_dash=None,
 	):
@@ -496,17 +496,84 @@ class SolitonPath:
 		return self.dashes[-1].ending_point
 
 
-# TO DO: develop this class.
 class ClosedSoliton:
 	"""
 	The closed path obtained by joining two open paths
 	of opposite types and supported on the same street.
+	This will actually be a closed path with a basepoint,
+	the base point will be the starting point of soliton_a.
+	By convention, we will take soliton_a to be a co-oriented
+	soliton supported on the street, as defined by the class 
+	SolitonData.
 	"""
-	def __init__(self, label=None, soliton_a=None, soliton_b=None):
+	def __init__(
+		self, label='no_label', soliton_a=None, soliton_b=None, network=None
+	):
 		self.label = label
-		self.streets_set = []
-		self.path = []
-		self.homology = None
+		# check that solitons are complete
+		if not (
+			soliton_a.is_complete is True and soliton_b.is_complete is True
+		):
+			raise Exception('Open solitons are not complete.')
+		
+		# check that soliton endpoints match
+		if not (
+			soliton_a.complete_dash.path[0] == soliton_b.complete_dash.path[-1] 
+			and
+			soliton_a.complete_dash.path[-1] == soliton_b.complete_dash.path[0] 
+		):
+			raise Exception('Open solitons do not form a closed one.')
+
+		# Make copies of the paths of complete dashes of solitons a and b.
+		# But delete the first and last pieces in soliton_b's path,
+		# since they coincide with the endpoints of soliton_a.
+		new_path_a = copy(soliton_a.complete_dash.path)
+		new_path_b = copy(soliton_b.complete_dash.path[1:-1])
+		self.dash = Dash(
+				growth_restriction='both', 
+				path=new_path_a+new_path_b
+			)
+		
+		# self.streets_set = []
+		self.homology_class = self.determine_homology_class(network)
+		
+	def determine_homology_class(self, network):
+		"""
+		Returns a list of the type
+		[['gamma_1', 1], ['gamma_2',0], ['gamma_3', 2], ...]
+		"""
+		if len(network.homology_classes) == 0:
+			raise Exception('No homology classes were defined.')
+
+		homology = []
+		for hc_label in network.homology_classes.keys():
+			count = 0
+			# Check that every street of a homology class appears 
+			# an equal number of times, and that for each street
+			# there are equal occurrences of opposite orientations.
+			for street_label in network.homology_classes[hc_label]:
+				street = network.streets[street_label]
+				# count occurrences of [street, +1] in the path
+				s_count_1 = self.dash.path.count([street, +1])
+				# count occurrences of [street, -1] in the path
+				s_count_2 = self.dash.path.count([street, -1])
+				if s_count_1 == s_count_2:
+					if count == 0:
+						count = s_count_1
+					else:
+						if count == s_count_1:
+							pass
+						else:
+							raise Exception(
+								'Different streets of the same homology class '
+								'appear a different number of times in the '
+								'path of the closed soliton.'
+							)
+			homology.append([hc_label, count])
+		return homology
+
+	def print_info(self):
+		# TODO
 		pass
 
 
@@ -555,7 +622,7 @@ def set_orientation_from_starting_point(
 		)
 
 
-def copy_of_soliton(soliton, label=None):
+def copy_of_soliton(soliton, label='no_label'):
 	"""
 	This function makes a copy of a soliton.
 	This includes copying the dashes and preparing a new soliton.
@@ -603,7 +670,7 @@ def copy_of_soliton(soliton, label=None):
 	# return new_soliton
 
 
-def join_dashes(growing_pair):
+def join_dashes_at_branch_point(growing_pair):
 	"""
 	Returns a new dash.
 	"""

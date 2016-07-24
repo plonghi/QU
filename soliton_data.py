@@ -2,7 +2,7 @@
 Module to handle soliton generating functions
 """
 
-from solitons import SolitonPath 
+from solitons import SolitonPath, ClosedSoliton
 from growth_rules import grow_soliton
 
 # Default maximal growth level for solitons.
@@ -27,6 +27,7 @@ class SolitonData:
 		# anti-oriented solitons will be of ji type.
 		self.co_oriented_solitons = []
 		self.anti_oriented_solitons = []
+		self.closed_solitons = []
 
 	def initialize(self):
 		# The initial co-oriented soliton
@@ -85,6 +86,27 @@ class SolitonData:
 		for i, s in enumerate(self.anti_oriented_solitons):
 			print '{}.'.format(i+1)
 			s.print_info(full_path=full_path)
+
+	def compute_closed_solitons(self):
+		self.closed_solitons = []
+
+		complete_co_oriented_sols = (
+			[s for s in self.co_oriented_solitons if s.is_complete is True]
+		)
+		complete_anti_oriented_sols = (
+			[s for s in self.anti_oriented_solitons if s.is_complete is True]
+		)
+
+		for sol_a in complete_co_oriented_sols:
+			for sol_b in complete_anti_oriented_sols:
+				self.closed_solitons.append(
+					ClosedSoliton(
+						label=sol_a.label+'_+_'+sol_b.label, 
+						soliton_a=sol_a, 
+						soliton_b=sol_b, 
+						network=self.network
+					)
+				)
 
 
 
