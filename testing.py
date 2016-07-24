@@ -977,22 +977,22 @@ w.branch_points = {
 w.joints = {
 	'j_1': Joint(
 		label='j_1', streets=[
-			w.streets['p_1'], 
 			None,
 			w.streets['q_1'], 
 			w.streets['p_2'], 
 			None,
 			w.streets['q_2'], 
+			w.streets['p_1'], 
 		]
 	),
 	'j_2': Joint(
 		label='j_2', streets=[
-			w.streets['p_2'], 
 			None,
 			w.streets['q_2'], 
 			w.streets['p_3'], 
 			None,
 			w.streets['q_3'], 
+			w.streets['p_2'], 
 		]
 	),
 }
@@ -1013,8 +1013,6 @@ r1 = w.streets['q_1']
 r2 = w.streets['q_2']
 r3 = w.streets['q_3']
 
-
-
 print '\n\n-------------------------------------------------------'
 print 'Soliton Data'
 Q1 = SolitonData(label='Q_1', network=w , street=s1)
@@ -1023,11 +1021,11 @@ Q1.initialize()
 Q1.grow(n_steps=10)
 Q1.print_info(full_path=True)
 
-Q2 = SolitonData(label='Q_2', network=w , street=r1)
-Q2.initialize()
-# Q1.print_info(full_path=True)
-Q2.grow(n_steps=10)
-Q2.print_info(full_path=True)
+# Q2 = SolitonData(label='Q_2', network=w , street=r1)
+# Q2.initialize()
+# # Q1.print_info(full_path=True)
+# Q2.grow(n_steps=10)
+# Q2.print_info(full_path=True)
 
 print '\nHomology classes of closed solitons in Q1'
 Q1.compute_closed_solitons()

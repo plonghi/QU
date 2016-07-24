@@ -115,13 +115,20 @@ def grow_soliton(soliton, n_steps=1):
 	Repeated application of grow_soliton_once(soliton)
 	"""
 	old_solitons = [soliton]
-	for i in range(n_steps):
-		new_solitons = []
-		for sol in old_solitons:
-			new_solitons += grow_soliton_once(sol)
-		old_solitons = new_solitons
+	if n_steps == 0:
+		return old_solitons
 
-	return new_solitons
+	elif n_steps > 0:
+		for i in range(n_steps):
+			new_solitons = []
+			for sol in old_solitons:
+				new_solitons += grow_soliton_once(sol)
+			old_solitons = new_solitons
+
+		return new_solitons
+
+	else:
+		ValueError
 
 
 ### TODO: merge the handling of the three branch-point types.
@@ -313,107 +320,110 @@ def j_type_six_way(old_soliton, old_cluster):
 	"""	
 	new_solitons = []
 	joint = old_cluster[0][0].end_point
-	sol_slot = old_cluster[0][0].slot
-	if sol_slot % 2 == 0:
-		parity_reversal = False
-	else:
-		parity_reversal = True
-	av_slots = joint.available_slots
-	# let p1 be the street from which 
-	# the soliton is approaching the joint.
-
-	# the slot of each street
-	[s_1, s_2, s_3, s_4, s_5, s_6] = [(sol_slot + i) % 6 for i in range(6)]
-	s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
 	
-	# the streets
-	[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
-	
-	# then map which streets are 'available'
-	pk_is_av = [False for i in range(6)]
-	for k in range(6):
-		if s_k[k] in av_slots:
-			pk_is_av[k] = True 
+	for old_growing_pair in old_cluster:
+		# for each growing pair of the cluster we do the evolution procedure
+		# at the joint.
+		sol_slot = old_growing_pair[0].slot
+		if sol_slot % 2 == 0:
+			parity_reversal = False
+		else:
+			parity_reversal = True
+		av_slots = joint.available_slots
+		# let p1 be the street from which 
+		# the soliton is approaching the joint (for this growing pair).
 
-	[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = pk_is_av
+		# the slot of each street
+		[s_1, s_2, s_3, s_4, s_5, s_6] = [(sol_slot + i) % 6 for i in range(6)]
+		s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
+		
+		# the streets
+		[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
+		
+		# then map which streets are 'available'
+		pk_is_av = [False for i in range(6)]
+		for k in range(6):
+			if s_k[k] in av_slots:
+				pk_is_av[k] = True 
 
-	# tau1 > nu4
-	if (
-		p4_is_av is True
-	):
-		# Just straight propagation, along street at the opposite slot (+3)
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [3], 
-			parity_reversed=parity_reversal
-		)
+		[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = pk_is_av
+		# tau1 > nu4
+		if (
+			p4_is_av is True
+		):
+			# Just straight propagation, along street at the opposite slot (+3)
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [3], 
+				parity_reversed=parity_reversal
+			))
 
-	# tau1 > nu3 nu5
-	if (
-		p3_is_av is True and
-		p5_is_av is True
-	):
-		# Y-propagation on streets 3 (+2) then 5 (+4)
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [2, 4], 
-			parity_reversed=parity_reversal
-		)
+		# tau1 > nu3 nu5
+		if (
+			p3_is_av is True and
+			p5_is_av is True
+		):
+			# Y-propagation on streets 3 (+2) then 5 (+4)
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [2, 4], 
+				parity_reversed=parity_reversal
+			))
 
-	# tau1 > nu3 nu6 nu4 
-	if (
-		p3_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# X-propagation on streets 3 (+2), 6 (+5), 4 (+3)
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [2, 5, 3], 
-			parity_reversed=parity_reversal
-		)
+		# tau1 > nu3 nu6 nu4 
+		if (
+			p3_is_av is True and
+			p6_is_av is True and
+			p4_is_av is True
+		):
+			# X-propagation on streets 3 (+2), 6 (+5), 4 (+3)
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [2, 5, 3], 
+				parity_reversed=parity_reversal
+			))
 
-	# tau1 > nu3 nu5 nu1 nu4 
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p1_is_av is True and
-		p4_is_av is True
-	):
-		# propagation on streets 3 (+2), 5 (+4), 1 (+0), 4 (+3)
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [2, 4, 0, 3], 
-			parity_reversed=parity_reversal
-		)
+		# tau1 > nu3 nu5 nu1 nu4 
+		if (
+			p3_is_av is True and
+			p5_is_av is True and
+			p1_is_av is True and
+			p4_is_av is True
+		):
+			# propagation on streets 3 (+2), 5 (+4), 1 (+0), 4 (+3)
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [2, 4, 0, 3], 
+				parity_reversed=parity_reversal
+			))
 
-	# tau1 > nu3 nu5 nu2 nu6 nu4 
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p2_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# propagation on streets 3, 5, 2, 6, 4 i.e. relatively 
-		# [+2, +4, +1, +5, +3]
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [2, 4, 1, 5, 3], 
-			parity_reversed=parity_reversal
-		)
+		# tau1 > nu3 nu5 nu2 nu6 nu4 
+		if (
+			p3_is_av is True and
+			p5_is_av is True and
+			p2_is_av is True and
+			p6_is_av is True and
+			p4_is_av is True
+		):
+			# propagation on streets 3, 5, 2, 6, 4 i.e. relatively 
+			# [+2, +4, +1, +5, +3]
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [2, 4, 1, 5, 3], 
+				parity_reversed=parity_reversal
+			))
 
-	# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
-	if (
-		p3_is_av is True and
-		p5_is_av is True and
-		p1_is_av is True and
-		p6_is_av is True and
-		p4_is_av is True
-	):
-		# propagation on streets 3, 5, 1, 3, 6, 4 i.e. relatively 
-		# [+2, +4, +0, +2, +5, +3]
-		new_solitons += soliton_propagation_street_sequence(
-			old_soliton, old_cluster, [2, 4, 0, 2, 5, 3], 
-			parity_reversed=parity_reversal
-		)
-	
-	### TODO: if all slots are available, add more iterations!
+		# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
+		if (
+			p3_is_av is True and
+			p5_is_av is True and
+			p1_is_av is True and
+			p6_is_av is True and
+			p4_is_av is True
+		):
+			# propagation on streets 3, 5, 1, 3, 6, 4 i.e. relatively 
+			# [+2, +4, +0, +2, +5, +3]
+			new_solitons.append(soliton_propagation_street_sequence(
+				old_soliton, old_growing_pair, [2, 4, 0, 2, 5, 3], 
+				parity_reversed=parity_reversal
+			))
+		
+		### TODO: if all slots are available, add more iterations!
 
 	return new_solitons
 
@@ -500,7 +510,7 @@ def create_dash_through_joint(
 
 
 def soliton_propagation_street_sequence(
-	old_soliton, old_cluster, rel_street_sequence, parity_reversed=False
+	old_soliton, old_growing_pair, rel_street_sequence, parity_reversed=False
 ):
 	"""
 	Handles the propagaiton of a soliton at a joint.
@@ -528,100 +538,96 @@ def soliton_propagation_street_sequence(
 		rev_sequence = list(reversed(rel_street_sequence))
 		rel_street_sequence = rev_sequence
 
-	new_solitons = []
-	joint = old_cluster[0][0].end_point
+	joint = old_growing_pair[0].end_point
 
-	for p in old_cluster:
-		new_soliton = copy_of_soliton(old_soliton)
-		# Now for the growing pair p of DashEndpoints we 
-		# identify the new corresponding growing pair in 
-		# the new soliton
-		old_pair_index = old_soliton.growing_pairs.index(p)
-		new_p = new_soliton.growing_pairs[old_pair_index]
+	new_soliton = copy_of_soliton(old_soliton)
+	# Now for the growing pair p of DashEndpoints we 
+	# identify the new corresponding growing pair in 
+	# the new soliton
+	old_pair_index = old_soliton.growing_pairs.index(old_growing_pair)
+	new_p = new_soliton.growing_pairs[old_pair_index]
 
-		# The joint in question. 
-		# NOTE: must tart using new_p from here on!
-		# The slot of street p_1 at the joint in question is s_1
-		# but it's not necessarily 0, of course.
+	# The joint in question. 
+	# NOTE: must tart using new_p from here on!
+	# The slot of street p_1 at the joint in question is s_1
+	# but it's not necessarily 0, of course.
 
-		# the slot of each street
-		[s_1, s_2, s_3, s_4, s_5, s_6] = (
-			[(new_p[0].slot + i) % 6 for i in range(6)]
-		)
-		s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
-		
-		# the streets
-		[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
-		p_k = [p1, p2, p3, p4, p5, p6]
+	# the slot of each street
+	[s_1, s_2, s_3, s_4, s_5, s_6] = (
+		[(new_p[0].slot + i) % 6 for i in range(6)]
+	)
+	s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
+	
+	# the streets
+	[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
+	p_k = [p1, p2, p3, p4, p5, p6]
 
-		# the street sequence corresponding to the path
-		street_sequence = [p_k[k] for k in rel_street_sequence]
+	# the street sequence corresponding to the path
+	street_sequence = [p_k[k] for k in rel_street_sequence]
 
-		# the slot sequence corresponding to the path
-		slot_sequence = [s_k[k] for k in rel_street_sequence]
+	# the slot sequence corresponding to the path
+	slot_sequence = [s_k[k] for k in rel_street_sequence]
 
-		# now identify d_in (the analog of d_13 in the example) 
-		# and d_out (the analog of d_41 in the example), and grow them.
-		# It will be important to check the orientation
-		# of each growth point in the pair
-		if new_p[0].orientation=='in' and new_p[1].orientation=='out':
-			d_in = new_p[0].dash
-			d_out = new_p[1].dash
-		elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
-			d_in = new_p[1].dash
-			d_out = new_p[0].dash
-		else:
-			raise ValueError
-		
-		# Now grow dashes d_in and d_out
-		# note that the former must be grown forward on the first 
-		# street of the sequence, so we specify the 'last' point for growth	
-		d_in.extend_dash_along_street(
-			street=street_sequence[0], 
-			end_pt='last', 
-			slot=slot_sequence[0],
-		)
-		# instead the latter must be grown backward on the last
-		# street, so we specify the 'first' point for growth
-		d_out.extend_dash_along_street(
-			street=street_sequence[-1], 
-			end_pt='first', 
-			slot=slot_sequence[-1],
-		)
+	# now identify d_in (the analog of d_13 in the example) 
+	# and d_out (the analog of d_41 in the example), and grow them.
+	# It will be important to check the orientation
+	# of each growth point in the pair
+	if new_p[0].orientation=='in' and new_p[1].orientation=='out':
+		d_in = new_p[0].dash
+		d_out = new_p[1].dash
+	elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
+		d_in = new_p[1].dash
+		d_out = new_p[0].dash
+	else:
+		raise ValueError
+	
+	# Now grow dashes d_in and d_out
+	# note that the former must be grown forward on the first 
+	# street of the sequence, so we specify the 'last' point for growth	
+	d_in.extend_dash_along_street(
+		street=street_sequence[0], 
+		end_pt='last', 
+		slot=slot_sequence[0],
+	)
+	# instead the latter must be grown backward on the last
+	# street, so we specify the 'first' point for growth
+	d_out.extend_dash_along_street(
+		street=street_sequence[-1], 
+		end_pt='first', 
+		slot=slot_sequence[-1],
+	)
 
-		# Then, for each pair of streets on which propagation takes place,
-		# we create a new dash
-		intermediate_dashes = []
-		for i in range(len(street_sequence) - 1):
-			p_a = street_sequence[i]
-			p_b = street_sequence[i+1]
-			s_a = slot_sequence[i]
-			s_b = slot_sequence[i+1]
+	# Then, for each pair of streets on which propagation takes place,
+	# we create a new dash
+	intermediate_dashes = []
+	for i in range(len(street_sequence) - 1):
+		p_a = street_sequence[i]
+		p_b = street_sequence[i+1]
+		s_a = slot_sequence[i]
+		s_b = slot_sequence[i+1]
 
-			d_ab = create_dash_through_joint(joint, p_a, p_b, s_a, s_b)
-			intermediate_dashes.append(d_ab)
+		d_ab = create_dash_through_joint(joint, p_a, p_b, s_a, s_b)
+		intermediate_dashes.append(d_ab)
 
-		# At this point we add the new dashes to the soliton's dashes
-		# they must be inserted just after d_in and before d_out
-		# in the obvious order: d_ij, d_jk, d_kl, etc.
-		indx = new_soliton.dashes.index(d_in)
-		# the dashes up to d_in, included
-		dashes_before = new_soliton.dashes[0:indx+1]
-		# the dashes after to d_out, included
-		dashes_after = new_soliton.dashes[indx+1:]
-		# update the set of dashes by adding the new ones
-		new_soliton.dashes = (
-				dashes_before + intermediate_dashes + dashes_after
-			)
-
-		# Finally update the soliton's growing pairs
-		new_soliton.growing_pairs = (
-			growing_pairs_from_dashes(new_soliton.dashes)
+	# At this point we add the new dashes to the soliton's dashes
+	# they must be inserted just after d_in and before d_out
+	# in the obvious order: d_ij, d_jk, d_kl, etc.
+	indx = new_soliton.dashes.index(d_in)
+	# the dashes up to d_in, included
+	dashes_before = new_soliton.dashes[0:indx+1]
+	# the dashes after to d_out, included
+	dashes_after = new_soliton.dashes[indx+1:]
+	# update the set of dashes by adding the new ones
+	new_soliton.dashes = (
+			dashes_before + intermediate_dashes + dashes_after
 		)
 
-		new_solitons.append(new_soliton)
+	# Finally update the soliton's growing pairs
+	new_soliton.growing_pairs = (
+		growing_pairs_from_dashes(new_soliton.dashes)
+	)
 
-	return new_solitons
+	return new_soliton
 
 
 
