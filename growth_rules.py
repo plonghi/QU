@@ -97,12 +97,12 @@ def grow_soliton_once(soliton):
 			node = cl[0][0].end_point
 			node_type = node.type
 
-			if node_type == 'type_1_branch_point':
-				grow_at_node = bp_type_1_growth
-			elif node_type == 'type_2_branch_point':
-				grow_at_node = bp_type_2_growth
-			elif node_type == 'type_3_branch_point':
-				grow_at_node = bp_type_3_growth
+			if (
+				node_type == 'type_1_branch_point' or 
+				node_type == 'type_2_branch_point' or
+				node_type == 'type_3_branch_point'
+			):
+				grow_at_node = bp_growth
 			else:
 				grow_at_node = j_type_six_way
 
@@ -138,85 +138,134 @@ def grow_soliton(soliton, n_steps=1):
 		ValueError
 
 
-### TODO: merge the handling of the three branch-point types.
+# ### TODO: merge the handling of the three branch-point types.
 
-def bp_type_1_growth(old_soliton, old_cluster):
-	"""
-	Branch points of type 1 are those with a single two-way street 
-	ending on them, so all that can happen is that each pair of
-	dashes "caps off" there.
-	There can be no mixing between different pairs, this follows
-	from the algebra of tau and nu generating functions of 2d solitons.
-	"""
-	new_solitons = soliton_capping_off(old_soliton, old_cluster)
-	return new_solitons
+# def bp_type_1_growth(old_soliton, old_cluster):
+# 	"""
+# 	Branch points of type 1 are those with a single two-way street 
+# 	ending on them, so all that can happen is that each pair of
+# 	dashes "caps off" there.
+# 	There can be no mixing between different pairs, this follows
+# 	from the algebra of tau and nu generating functions of 2d solitons.
+# 	"""
+# 	new_solitons = soliton_capping_off(old_soliton, old_cluster)
+# 	return new_solitons
 
 
-def bp_type_2_growth(old_soliton, old_cluster):
-	"""
-	Branch points of type 2 are those with two two-way streets 
-	ending on them.
-	Two things can happen: 
-	1- a soliton 'caps off' there, 
-	2- it gets propagated on another street ending on the branch point,
-	   as explained in equation (A.7) of 1204.4824
-	But, note that the second option is only available to solitons
-	propagating on one street, not the other.
-	"""
-	new_solitons = []
-	branch_pt = old_cluster[0][0].end_point
-	sol_slot = old_cluster[0][0].slot
-	av_slots = branch_pt.available_slots
+# def bp_type_2_growth(old_soliton, old_cluster):
+# 	"""
+# 	Branch points of type 2 are those with two two-way streets 
+# 	ending on them.
+# 	Two things can happen: 
+# 	1- a soliton 'caps off' there, 
+# 	2- it gets propagated on another street ending on the branch point,
+# 	   as explained in equation (A.7) of 1204.4824
+# 	But, note that the second option is only available to solitons
+# 	propagating on one street, not the other.
+# 	"""
+# 	new_solitons = []
+# 	branch_pt = old_cluster[0][0].end_point
+# 	sol_slot = old_cluster[0][0].slot
+# 	av_slots = branch_pt.available_slots
 
-	# First, consider the capping off of the soliton
-	# ths is just the same as for type_1 branch points
-	new_solitons += soliton_capping_off(old_soliton, old_cluster)
+# 	# First, consider the capping off of the soliton
+# 	# ths is just the same as for type_1 branch points
+# 	new_solitons += soliton_capping_off(old_soliton, old_cluster)
 	
-	# Then, if pertinent, also handle the growth of the soliton through
-	# the branch point.
-	# It depends on the branch point's slot after the soliton's occupied 
-	# slot, counter-clockwise. If this slot is also attached to a street 
-	# (i.e. if it appears in available_slots), then the soliton 
-	# can propagate as explained in point 2. Otherwise it cannot.
-	next_slot = (sol_slot + 1) % 3
-	if next_slot in av_slots:
-		next_street = branch_pt.streets[next_slot]
-		# We use 'straight propagation'
-		new_solitons += soliton_propagation_1(
-			old_soliton, old_cluster, next_street, next_slot
-		)		
-	return new_solitons
+# 	# Then, if pertinent, also handle the growth of the soliton through
+# 	# the branch point.
+# 	# It depends on the branch point's slot after the soliton's occupied 
+# 	# slot, counter-clockwise. If this slot is also attached to a street 
+# 	# (i.e. if it appears in available_slots), then the soliton 
+# 	# can propagate as explained in point 2. Otherwise it cannot.
+# 	next_slot = (sol_slot + 1) % 3
+# 	if next_slot in av_slots:
+# 		next_street = branch_pt.streets[next_slot]
+# 		# We use 'straight propagation'
+# 		new_solitons += soliton_propagation_1(
+# 			old_soliton, old_cluster, next_street, next_slot
+# 		)		
+# 	return new_solitons
 
 
-def bp_type_3_growth(old_soliton, old_cluster):
+# def bp_type_3_growth(old_soliton, old_cluster):
+# 	"""
+# 	Branch points of type 3 are those with three two-way streets 
+# 	ending on them.
+# 	Two things can happen: 
+# 	1- a soliton 'caps off' there, 
+# 	2- it gets propagated on another street ending on the branch point,
+# 	   as explained in equation (A.7) of 1204.4824
+# 	"""
+# 	new_solitons = []
+# 	branch_pt = old_cluster[0][0].end_point
+# 	sol_slot = old_cluster[0][0].slot
+# 	av_slots = branch_pt.available_slots
+
+# 	# First, consider the capping off of the soliton
+# 	# ths is just the same as for type_1 branch points
+# 	new_solitons += soliton_capping_off(old_soliton, old_cluster)
+
+# 	# Then also handle the growth of the soliton through
+# 	# the branch point.
+# 	next_slot = (sol_slot + 1) % 3
+# 	next_street = branch_pt.streets[next_slot]
+
+# 	# We use 'straight propagation'
+# 	new_solitons += soliton_propagation_1(
+# 		old_soliton, old_cluster, next_street, next_slot
+# 	)		
+		
+# 	return new_solitons
+
+
+def bp_growth(old_soliton, old_cluster):
 	"""
-	Branch points of type 3 are those with three two-way streets 
+	Branch points can have one, two or three two-way streets 
 	ending on them.
 	Two things can happen: 
 	1- a soliton 'caps off' there, 
 	2- it gets propagated on another street ending on the branch point,
-	   as explained in equation (A.7) of 1204.4824
+	   as explained in equation (A.7) of 1204.4824 
+	Option two only happens pending certain conditions on available streets.
 	"""
 	new_solitons = []
 	branch_pt = old_cluster[0][0].end_point
 	sol_slot = old_cluster[0][0].slot
-	av_slots = branch_pt.available_slots
-
-	# First, consider the capping off of the soliton
-	# ths is just the same as for type_1 branch points
-	new_solitons += soliton_capping_off(old_soliton, old_cluster)
-
-	# Then also handle the growth of the soliton through
-	# the branch point.
 	next_slot = (sol_slot + 1) % 3
 	next_street = branch_pt.streets[next_slot]
+	av_slots = branch_pt.available_slots
 
-	# We use 'straight propagation'
-	new_solitons += soliton_propagation_1(
-		old_soliton, old_cluster, next_street, next_slot
-	)		
-		
+	# For each growing pair, we consider either of the two options.
+	# after doing so, we must generate new solitons (if option 2 is active)
+	# and consider both outcomes for new growing pairs.
+	old_solitons = [old_soliton]
+
+	for old_growing_pair in old_cluster:
+		new_solitons = []
+		for sol in old_solitons:
+			sol_growing_pair = find_corresponding_pair(
+				sol, old_growing_pair, multi=False
+			)[0]
+
+			# First, consider the capping off of the soliton
+			new_solitons.append(soliton_capping_off(sol, sol_growing_pair))
+			
+			# Then, if pertinent, also handle the growth of the soliton 
+			# through the branch point.
+			# It depends on the branch point's slot after the soliton's 
+			# occupied  slot, counter-clockwise. 
+			# If this slot is also attached to a street 
+			# (i.e. if it appears in available_slots), then the soliton 
+			# can propagate as explained in point 2. Otherwise it cannot.
+			if next_slot in av_slots:
+				new_solitons.append(soliton_propagation_through_bp(
+					sol, sol_growing_pair, next_street, next_slot
+				))
+
+		old_solitons = new_solitons
 	return new_solitons
+
 
 
 def j_type_six_way(old_soliton, old_cluster):
@@ -459,63 +508,58 @@ def j_type_six_way(old_soliton, old_cluster):
 	return new_solitons
 
 
-def soliton_capping_off(old_soliton, old_cluster):
+def soliton_capping_off(old_soliton, old_growing_pair):
 	"""
 	Handles capping-off of a soliton at a branch point, 
-	for one or more growing pairs.
-	Can only return one soliton, not more, but it will return a list
-	for convenience of integration of this function with the rest.
+	for one growing pair.
+	Can only return one soliton, not more.
 	"""
 
 	new_soliton = copy_of_soliton(old_soliton)
-	n_growing_pairs = len(old_cluster)
-	reference_pair = old_cluster[0]
-	# for the new soliton, we now look for all growing pairs
-	# that end on this branch point, and cap them off one by one.
-	for i in range(n_growing_pairs):
-		# Now for the growing pair p of DashEndpoints we 
-		# identify the new corresponding growing pair in 
-		# the new soliton. 
-		# At first there may be more than one, but as we cap 
-		# them off, the number will start decreasing.
-		# We always cap off the first one in the list at each step.
-		new_p = find_corresponding_pair(
-			new_soliton, reference_pair, multi=True
-		)[0] 
-		#the two dashes that will be merged are the following
-		new_d_1 = new_p[0].dash
-		new_d_2 = new_p[1].dash
 
-		# Then, we create a new dash, by joining the dashes of this 
-		# pair at the branch point. This is where the rule for a branch
-		# point of type 1 enters. 
-		new_dash = join_dashes_at_branch_point(new_p)
+	# Now for the growing pair p of DashEndpoints we 
+	# identify the new corresponding growing pair in 
+	# the new soliton. 
+	# At first there may be more than one, but as we cap 
+	# them off, the number will start decreasing.
+	# We always cap off the first one in the list at each step.
+	new_p = find_corresponding_pair(
+		new_soliton, old_growing_pair, multi=True
+	)[0] 
+	#the two dashes that will be merged are the following
+	new_d_1 = new_p[0].dash
+	new_d_2 = new_p[1].dash
 
-		# collect the new dashes, by replacing the two we just merged
-		# with their union
-		# the dashes are ordered, so the two that have been joined 
-		# are consecutive ones, their indices are
-		ind_1 = new_soliton.dashes.index(new_d_1)
-		ind_2 = new_soliton.dashes.index(new_d_2)
-		if (ind_1 + 1 != ind_2) and (ind_1 - 1 != ind_2):
-			raise Exception('Dashes to be concatenated are not consecutive.')
-		
-		new_dashes = (
-			new_soliton.dashes[0:min(ind_1, ind_2)] 
-			+ [new_dash] 
-			+ new_soliton.dashes[(max(ind_1, ind_2)+1):]
-		)
-		new_growing_pairs = growing_pairs_from_dashes(new_dashes)
+	# Then, we create a new dash, by joining the dashes of this 
+	# pair at the branch point. This is where the rule for a branch
+	# point of type 1 enters. 
+	new_dash = join_dashes_at_branch_point(new_p)
 
-		new_soliton.dashes = new_dashes
-		new_soliton.growing_pairs = new_growing_pairs
+	# collect the new dashes, by replacing the two we just merged
+	# with their union
+	# the dashes are ordered, so the two that have been joined 
+	# are consecutive ones, their indices are
+	ind_1 = new_soliton.dashes.index(new_d_1)
+	ind_2 = new_soliton.dashes.index(new_d_2)
+	if (ind_1 + 1 != ind_2) and (ind_1 - 1 != ind_2):
+		raise Exception('Dashes to be concatenated are not consecutive.')
+	
+	new_dashes = (
+		new_soliton.dashes[0:min(ind_1, ind_2)] 
+		+ [new_dash] 
+		+ new_soliton.dashes[(max(ind_1, ind_2)+1):]
+	)
+	new_growing_pairs = growing_pairs_from_dashes(new_dashes)
 
-		if len(new_growing_pairs) == 0: 
-			# In this case the soliton has been completed
-			new_soliton.is_complete = True
-			new_soliton.complete_dash = new_dash
+	new_soliton.dashes = new_dashes
+	new_soliton.growing_pairs = new_growing_pairs
 
-	return [new_soliton]
+	if len(new_growing_pairs) == 0: 
+		# In this case the soliton has been completed
+		new_soliton.is_complete = True
+		new_soliton.complete_dash = new_dash
+
+	return new_soliton
 
 
 def create_dash_through_joint(
@@ -670,6 +714,57 @@ def soliton_propagation_street_sequence(
 	return new_soliton
 
 
+def soliton_propagation_through_bp(
+	old_soliton, old_growing_pair, next_street, next_slot
+):
+	"""
+	Handles the propagaiton of a soliton through a branch point, 
+	as explained in eq (A.7) of 1204.4824.
+	It only deals with a single growing pair.
+	"""	
+	branch_point = old_growing_pair[0].end_point
+	new_soliton = copy_of_soliton(old_soliton)
+	# Now for the growing pair p of DashEndpoints we 
+	# identify the new corresponding growing pair in 
+	# the new soliton
+	old_pair_index = old_soliton.growing_pairs.index(old_growing_pair)
+	new_p = new_soliton.growing_pairs[old_pair_index]
+
+	# now identify d_in (the dash that's going INTO the branch point)
+	# and d_out (the dash that's coming OUT from the branch point).
+	# It will be important to check the orientation
+	# of each growth point in the pair
+	if new_p[0].orientation=='in' and new_p[1].orientation=='out':
+		d_in = new_p[0].dash
+		d_out = new_p[1].dash
+	elif new_p[0].orientation=='out' and new_p[1].orientation=='in':
+		d_in = new_p[1].dash
+		d_out = new_p[0].dash
+	else:
+		raise ValueError
+	
+	# Now grow dashes d_in and d_out
+	# note that the former must be grown forward on the first 
+	# street of the sequence, so we specify the 'last' point for growth	
+	d_in.extend_dash_along_street(
+		street=next_street, 
+		end_pt='last', 
+		slot=next_slot,
+	)
+	# instead the latter must be grown backward on the last
+	# street, so we specify the 'first' point for growth
+	d_out.extend_dash_along_street(
+		street=next_street, 
+		end_pt='first', 
+		slot=next_slot,
+	)
+
+	# Finally update the soliton's growing pairs
+	new_soliton.growing_pairs = (
+		growing_pairs_from_dashes(new_soliton.dashes)
+	)
+
+	return new_soliton
 
 
 
