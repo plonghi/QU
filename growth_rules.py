@@ -107,12 +107,15 @@ def grow_soliton_once(soliton):
 				grow_at_node = j_type_six_way
 
 			new_solitons = []
+			print '\n\nNOW THERE ARE {} OLD SOLITONS, WE GROW THEM '.format(len(old_solitons))
+			print 'GROWTH TYPE {}'.format(node_type)
 			for sol in old_solitons:
 				# must now identify which growth cluster of each soliton 
 				# is the one corresponding to 'original_cluster'
 				sol_cl = find_corresponding_cluster(sol, cl)
 				new_solitons += grow_at_node(sol, sol_cl)
 			old_solitons = new_solitons
+			print '\n\nNOW THERE ARE {} SOLITONS'.format(len(new_solitons))
 
 		return new_solitons
 
@@ -131,6 +134,7 @@ def grow_soliton(soliton, n_steps=1):
 			for sol in old_solitons:
 				new_solitons += grow_soliton_once(sol)
 			old_solitons = new_solitons
+			print '\n\n\nAT STEP {} THERE ARE {} SOLITONS'.format(i, len(new_solitons))
 
 		return new_solitons
 
@@ -335,16 +339,21 @@ def j_type_six_way(old_soliton, old_cluster):
 	new_solitons = []
 	joint = old_cluster[0][0].end_point
 
+	print '\n\nWILL GROW SOLITON AT JOINT {}'.format(joint.label)
+
 	for old_growing_pair in old_cluster:
+		print '\nGROWING AT SLOT {}'.format(old_growing_pair[0].slot)
 		# for each growing pair of the cluster we do the evolution procedure
 		# at the joint. Each time, this may return more than one new soliton.
 		# Then we must keep evolving all of the new ones for the next growing 
 		# pair.
 		new_solitons = []
 		for sol in old_solitons:
-			# must now identify which growth cluster of each soliton 
-			# is the one corresponding to 'original_cluster'
-			sol_growing_pair = find_corresponding_pair(sol, old_growing_pair)
+			# must now identify which growing pair of each soliton 
+			# is the one corresponding to 'old_growing_pair'
+			sol_growing_pair = find_corresponding_pair(
+				sol, old_growing_pair, multi=False
+			)[0]
 			sol_slot = sol_growing_pair[0].slot
 			if sol_slot % 2 == 0:
 				parity_reversal = False
@@ -454,21 +463,36 @@ def j_type_six_way(old_soliton, old_cluster):
 			### TODO: if all slots are available, add more iterations!
 			old_solitons = new_solitons
 
+		print 'SLOT GAVE {} NEW SOLITONS'.format(len(new_solitons))
+
+	print '\nOVERALL FROM THE JOINT {} NEW SOLITONS\n\n\n'.format(len(new_solitons))
+
 	return new_solitons
 
 
 def soliton_capping_off(old_soliton, old_cluster):
 	"""
-	Handles capping-off of a soliton at a branch point.
+	Handles capping-off of a soliton at a branch point, 
+	for one or more growing pairs.
+	Can only return one soliton, not more, but it will return a list
+	for convenience of integration of this function with the rest.
 	"""
-	new_solitons = []
-	for p in old_cluster:
-		new_soliton = copy_of_soliton(old_soliton)
+
+	new_soliton = copy_of_soliton(old_soliton)
+	n_growing_pairs = len(old_cluster)
+	reference_pair = old_cluster[0]
+	# for the new soliton, we now look for all growing pairs
+	# that end on this branch point, and cap them off one by one.
+	for i in range(n_growing_pairs):
 		# Now for the growing pair p of DashEndpoints we 
 		# identify the new corresponding growing pair in 
-		# the new soliton
-		old_pair_index = old_soliton.growing_pairs.index(p)
-		new_p = new_soliton.growing_pairs[old_pair_index]
+		# the new soliton. 
+		# At first there may be more than one, but as we cap 
+		# them off, the number will start decreasing.
+		# We always cap off the first one in the list at each step.
+		new_p = find_corresponding_pair(
+			new_soliton, reference_pair, multi=True
+		)[0] 
 		#the two dashes that will be merged are the following
 		new_d_1 = new_p[0].dash
 		new_d_2 = new_p[1].dash
@@ -502,9 +526,7 @@ def soliton_capping_off(old_soliton, old_cluster):
 			new_soliton.is_complete = True
 			new_soliton.complete_dash = new_dash
 
-		new_solitons.append(new_soliton)
-
-	return new_solitons
+	return [new_soliton]
 
 
 def create_dash_through_joint(

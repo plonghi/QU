@@ -847,10 +847,10 @@ def find_corresponding_cluster(soliton, ref_cluster):
 		return candidates[0]
 
 
-def find_corresponding_pair(soliton, ref_gr_pair):
+def find_corresponding_pair(soliton, ref_gr_pair, multi=False):
 	"""
-	For a given soliton, identifies which of its growing pairs
-	corresponds to a certain 'reference pair'.
+	For a given soliton, identifies which one(s) of its growing pairs
+	correspond(s) to a certain 'reference pair'.
 	"""
 	# characterize the reference growing pair by 
 	# - the nodal point (joint/branch point)
@@ -868,7 +868,7 @@ def find_corresponding_pair(soliton, ref_gr_pair):
 		):
 			candidates.append(g_p)
 
-	if len(candidates) > 1:
+	if len(candidates) > 1 and multi is False:
 		raise Exception(
 			'Cannot find a unique growing pair corresponding' 
 			'to the reference one'
@@ -878,7 +878,7 @@ def find_corresponding_pair(soliton, ref_gr_pair):
 			'Cannot find any cluster corresponding to the reference one'
 		)
 	else:
-		return candidates[0]
+		return candidates
 
 
 
