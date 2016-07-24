@@ -1,6 +1,7 @@
 from solitons import (
 	copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
-	growing_pairs_from_dashes, growing_clusters, find_corresponding_cluster
+	growing_pairs_from_dashes, growing_clusters, find_corresponding_cluster,
+	find_corresponding_pair,
 )
 
 """
@@ -75,6 +76,12 @@ def grow_soliton_once(soliton):
 	if soliton.is_complete:
 		return [soliton]
 
+	# A soliton must be grown at each one of its growth clusters.
+	# Some of these evolutions may return more than one outcome, 
+	# for example, this would happen at actual 6-way joints.
+	# So we go through the growth clusters, and grow each of them,
+	# while allowing for the possibility that, as we evolve, new 
+	# solitons will pop up.
 	else:
 		# growing_pairs = soliton.growing_pairs
 		original_clusters = growing_clusters(soliton)
@@ -318,112 +325,134 @@ def j_type_six_way(old_soliton, old_cluster):
 			with
 			[..., d_14, d_46, d_63, d_31,...]
 	"""	
+	# A soliton must be grown at each one of its growth clusters.
+	# Some of these evolutions may return more than one outcome, 
+	# for example, this would happen at actual 6-way joints.
+	# So we go through the growth clusters, and grow each of them,
+	# while allowing for the possibility that, as we evolve, new 
+	# solitons will pop up.
+	old_solitons = [old_soliton]
 	new_solitons = []
 	joint = old_cluster[0][0].end_point
-	
+
 	for old_growing_pair in old_cluster:
 		# for each growing pair of the cluster we do the evolution procedure
-		# at the joint.
-		sol_slot = old_growing_pair[0].slot
-		if sol_slot % 2 == 0:
-			parity_reversal = False
-		else:
-			parity_reversal = True
-		av_slots = joint.available_slots
-		# let p1 be the street from which 
-		# the soliton is approaching the joint (for this growing pair).
+		# at the joint. Each time, this may return more than one new soliton.
+		# Then we must keep evolving all of the new ones for the next growing 
+		# pair.
+		new_solitons = []
+		for sol in old_solitons:
+			# must now identify which growth cluster of each soliton 
+			# is the one corresponding to 'original_cluster'
+			sol_growing_pair = find_corresponding_pair(sol, old_growing_pair)
+			sol_slot = sol_growing_pair[0].slot
+			if sol_slot % 2 == 0:
+				parity_reversal = False
+			else:
+				parity_reversal = True
+			av_slots = joint.available_slots
+			# let p1 be the street from which 
+			# the soliton is approaching the joint (for this growing pair).
 
-		# the slot of each street
-		[s_1, s_2, s_3, s_4, s_5, s_6] = [(sol_slot + i) % 6 for i in range(6)]
-		s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
-		
-		# the streets
-		[p1, p2, p3, p4, p5, p6] = [joint.streets[s_k[i]] for i in range(6)]
-		
-		# then map which streets are 'available'
-		pk_is_av = [False for i in range(6)]
-		for k in range(6):
-			if s_k[k] in av_slots:
-				pk_is_av[k] = True 
+			# the slot of each street
+			[s_1, s_2, s_3, s_4, s_5, s_6] = (
+				[(sol_slot + i) % 6 for i in range(6)]
+			)
+			s_k = [s_1, s_2, s_3, s_4, s_5, s_6] 
+			
+			# the streets
+			[p1, p2, p3, p4, p5, p6] = (
+				[joint.streets[s_k[i]] for i in range(6)]
+			)
+			
+			# then map which streets are 'available'
+			pk_is_av = [False for i in range(6)]
+			for k in range(6):
+				if s_k[k] in av_slots:
+					pk_is_av[k] = True 
 
-		[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = pk_is_av
-		# tau1 > nu4
-		if (
-			p4_is_av is True
-		):
-			# Just straight propagation, along street at the opposite slot (+3)
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [3], 
-				parity_reversed=parity_reversal
-			))
+			[p1_is_av, p2_is_av, p3_is_av, p4_is_av, p5_is_av, p6_is_av] = (
+				pk_is_av
+			)
+			# tau1 > nu4
+			if (
+				p4_is_av is True
+			):
+				# Just straight propagation, along street 
+				# at the opposite slot (+3)
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [3], 
+					parity_reversed=parity_reversal
+				))
 
-		# tau1 > nu3 nu5
-		if (
-			p3_is_av is True and
-			p5_is_av is True
-		):
-			# Y-propagation on streets 3 (+2) then 5 (+4)
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [2, 4], 
-				parity_reversed=parity_reversal
-			))
+			# tau1 > nu3 nu5
+			if (
+				p3_is_av is True and
+				p5_is_av is True
+			):
+				# Y-propagation on streets 3 (+2) then 5 (+4)
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [2, 4], 
+					parity_reversed=parity_reversal
+				))
 
-		# tau1 > nu3 nu6 nu4 
-		if (
-			p3_is_av is True and
-			p6_is_av is True and
-			p4_is_av is True
-		):
-			# X-propagation on streets 3 (+2), 6 (+5), 4 (+3)
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [2, 5, 3], 
-				parity_reversed=parity_reversal
-			))
+			# tau1 > nu3 nu6 nu4 
+			if (
+				p3_is_av is True and
+				p6_is_av is True and
+				p4_is_av is True
+			):
+				# X-propagation on streets 3 (+2), 6 (+5), 4 (+3)
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [2, 5, 3], 
+					parity_reversed=parity_reversal
+				))
 
-		# tau1 > nu3 nu5 nu1 nu4 
-		if (
-			p3_is_av is True and
-			p5_is_av is True and
-			p1_is_av is True and
-			p4_is_av is True
-		):
-			# propagation on streets 3 (+2), 5 (+4), 1 (+0), 4 (+3)
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [2, 4, 0, 3], 
-				parity_reversed=parity_reversal
-			))
+			# tau1 > nu3 nu5 nu1 nu4 
+			if (
+				p3_is_av is True and
+				p5_is_av is True and
+				p1_is_av is True and
+				p4_is_av is True
+			):
+				# propagation on streets 3 (+2), 5 (+4), 1 (+0), 4 (+3)
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [2, 4, 0, 3], 
+					parity_reversed=parity_reversal
+				))
 
-		# tau1 > nu3 nu5 nu2 nu6 nu4 
-		if (
-			p3_is_av is True and
-			p5_is_av is True and
-			p2_is_av is True and
-			p6_is_av is True and
-			p4_is_av is True
-		):
-			# propagation on streets 3, 5, 2, 6, 4 i.e. relatively 
-			# [+2, +4, +1, +5, +3]
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [2, 4, 1, 5, 3], 
-				parity_reversed=parity_reversal
-			))
+			# tau1 > nu3 nu5 nu2 nu6 nu4 
+			if (
+				p3_is_av is True and
+				p5_is_av is True and
+				p2_is_av is True and
+				p6_is_av is True and
+				p4_is_av is True
+			):
+				# propagation on streets 3, 5, 2, 6, 4 i.e. relatively 
+				# [+2, +4, +1, +5, +3]
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [2, 4, 1, 5, 3], 
+					parity_reversed=parity_reversal
+				))
 
-		# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
-		if (
-			p3_is_av is True and
-			p5_is_av is True and
-			p1_is_av is True and
-			p6_is_av is True and
-			p4_is_av is True
-		):
-			# propagation on streets 3, 5, 1, 3, 6, 4 i.e. relatively 
-			# [+2, +4, +0, +2, +5, +3]
-			new_solitons.append(soliton_propagation_street_sequence(
-				old_soliton, old_growing_pair, [2, 4, 0, 2, 5, 3], 
-				parity_reversed=parity_reversal
-			))
-		
-		### TODO: if all slots are available, add more iterations!
+			# tau1 > nu3 nu5 nu1 nu3 nu6 nu4
+			if (
+				p3_is_av is True and
+				p5_is_av is True and
+				p1_is_av is True and
+				p6_is_av is True and
+				p4_is_av is True
+			):
+				# propagation on streets 3, 5, 1, 3, 6, 4 i.e. relatively 
+				# [+2, +4, +0, +2, +5, +3]
+				new_solitons.append(soliton_propagation_street_sequence(
+					sol, sol_growing_pair, [2, 4, 0, 2, 5, 3], 
+					parity_reversed=parity_reversal
+				))
+			
+			### TODO: if all slots are available, add more iterations!
+			old_solitons = new_solitons
 
 	return new_solitons
 

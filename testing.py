@@ -1018,7 +1018,7 @@ print 'Soliton Data'
 Q1 = SolitonData(label='Q_1', network=w , street=s1)
 Q1.initialize()
 # Q1.print_info(full_path=True)
-Q1.grow(n_steps=10)
+Q1.grow(n_steps=4)
 Q1.print_info(full_path=True)
 
 # Q2 = SolitonData(label='Q_2', network=w , street=r1)
