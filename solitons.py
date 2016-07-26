@@ -541,6 +541,15 @@ class ClosedSoliton:
 		"""
 		Returns a list of the type
 		[['gamma_1', 1], ['gamma_2',0], ['gamma_3', 2], ...]
+
+		Note: all homology classes will be positive sums 
+		of the basis ones, and this is fine because we are looking
+		at a specific phase, and we specified our basis on the cycles
+		appearing at this phase, so it's natural that all combinations 
+		that appear will be positive.
+		However, if one wishes to employ this function ina  more general 
+		setting, it will be necessary to disctinguish between positive 
+		and negative ortientations of paths.
 		"""
 		if len(network.basis_homology_classes) == 0:
 			raise Exception('No homology classes were defined.')
@@ -572,10 +581,10 @@ class ClosedSoliton:
 								'appear a different number of times in the '
 								'path of the closed soliton.'
 							)
-			# homology_list.append([network.basis_homology_classes[hc_label], count])
+			# homology_list.append(
+			# 	[network.basis_homology_classes[hc_label], count]
+			# )
 
-			### HOW TO HANDLE NEGATIVE PATHS??? DO WE EVEN NEED TO??? YES!!!!
-			### MUST DO THIS MORE CAREFULLY !!!!
 			for i in range(count):
 				homology = homology + network.basis_homology_classes[hc_label]
 		return homology

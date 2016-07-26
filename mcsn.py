@@ -289,23 +289,35 @@ class MCSN:
 			{s_label : Street(label=s_label) for s_label in streets}
 		)
 		
-		self.branch_points = (
-			{bp_lbl : BranchPoint(
-				label=bp_lbl, 
-				streets=[
-					self.streets[str_lbl] for str_lbl in branch_points[bp_lbl]
-				]
-			) for bp_lbl in branch_points.keys()}
-		)
+		self.branch_points = {}
+		for bp_lbl in branch_points.keys():
+			# list of streets at the branch point
+			streets_list = []
+			for str_lbl in branch_points[bp_lbl]:
+				if str_lbl is None:
+					streets_list.append(None)
+				else:
+					streets_list.append(self.streets[str_lbl])
 
-		self.joints = (
-			{j_lbl : Joint(
-				label=j_lbl, 
-				streets=[
-					self.streets[str_lbl] for str_lbl in joints[j_lbl]
-				]
-			) for j_lbl in joints.keys()}
-		)
+			# add the branch point
+			self.branch_points[bp_lbl] = BranchPoint(
+				label=bp_lbl, streets=streets_list
+			)
+
+		self.joints = {}
+		for j_lbl in joints.keys():
+			# list of streets at the joint
+			streets_list = []
+			for str_lbl in joints[j_lbl]:
+				if str_lbl is None:
+					streets_list.append(None)
+				else:
+					streets_list.append(self.streets[str_lbl])
+
+			# add the joint
+			self.joints[j_lbl] = Joint(
+				label=j_lbl, streets=streets_list
+			)
 
 		self.basis_homology_classes = (
 			{hc_lbl : HomologyClass(
@@ -325,32 +337,6 @@ class MCSN:
 			streets = [],
 		)
 
-		# self.streets = {
-		# 	'p_1' : Street(label='p_1'),
-		# 	'p_2' : Street(label='p_2'),
-		# 	'p_3' : Street(label='p_3'),
-		# }
-		# self.branch_points = {
-		# 	'b_1' : BranchPoint(
-		# 		label='b_1', streets=[self.streets['p_1'], None, None]
-		# 	), 
-		# 	'b_2' : BranchPoint(
-		# 		label='b_2', streets=[self.streets['p_2']]
-		# 	),
-		# 	'b_3' : BranchPoint(
-		# 		label='b_3', streets=[self.streets['p_3']]
-		# 	),
-		# }
-		# self.joints = {'j_1': Joint(
-		# 	label='j_1', streets=[
-		# 		self.streets['p_1'], 
-		# 		None,
-		# 		self.streets['p_2'], 
-		# 		None,
-		# 		self.streets['p_3'], 
-		# 		None
-		# 	]
-		# )}
 		self.attach_streets()
 		self.check_network()
 
@@ -381,7 +367,9 @@ class MCSN:
 			else:
 				raise Exception(
 					'Street {} does not have two endpoints, but {}'
-					.format(street.label, street.endpoints)
+					.format(
+						street.label, [pt.end_point for pt in street.endpoints]
+					)
 				)
 		print 'All streets have two well-defined endpoints.'
 
@@ -440,7 +428,7 @@ class MCSN:
 
 
 class HomologyClass:
-	def __init__(self, atomic_labels={}, streets=[]):
+	def __init__(self, atomic_labels={}, streets=[],):
 		"""
 		Atomic labels is a dictionary based on a choice of basis for the
 		homology lattice
@@ -502,7 +490,7 @@ def homology_label(atomic_labels):
 		if first_coeff == 1:
 			label = first_label
 		else:
-			label = str(first_coeff) + ' * ' + first_label
+			label = str(first_coeff) + '_*_' + first_label
 
 
 		# add the remaining homology basis elements
@@ -510,11 +498,11 @@ def homology_label(atomic_labels):
 			if atomic_labels[a_l_k] == 0:
 				pass
 			elif atomic_labels[a_l_k] == 1:
-				label += ' + ' + a_l_k
+				label += '_+_' + a_l_k
 			elif atomic_labels[a_l_k] < 0:
-				label += str(atomic_labels[a_l_k]) + ' * ' + a_l_k
+				label += str(atomic_labels[a_l_k]) + '_*_' + a_l_k
 			else:
-				label += ' + ' + str(atomic_labels[a_l_k]) + ' * ' + a_l_k
+				label += '_+_' + str(atomic_labels[a_l_k]) + '_*_' + a_l_k
 
 		return label
 

@@ -28,6 +28,7 @@ class SolitonData:
 		self.co_oriented_solitons = []
 		self.anti_oriented_solitons = []
 		self.closed_solitons = []
+		self.Q = 0
 
 	def initialize(self):
 		# The initial co-oriented soliton
@@ -97,6 +98,8 @@ class SolitonData:
 		for i, s in enumerate(self.closed_solitons):
 			print '{}.'.format(i+1)
 			s.print_info()
+		print '\nClosed Soliton generating function'
+		print self.Q
 
 	def compute_closed_solitons(self):
 		self.closed_solitons = []
@@ -118,6 +121,12 @@ class SolitonData:
 						network=self.network
 					)
 				)
+		
+		self.Q = 1
+		for c_sol in self.closed_solitons:
+			print c_sol.homology_class.symbol
+			print type(c_sol.homology_class.symbol)
+			self.Q += c_sol.homology_class.symbol
 
 
 
