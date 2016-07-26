@@ -70,6 +70,9 @@ class SolitonData:
 
 		self.anti_oriented_solitons = new_anti_or_sols
 
+		# compute closed solitons
+		self.compute_closed_solitons()
+
 	def print_info(self, full_path=False):
 		print (
 			'\nCo-oriented solitons on {}:\n----------------------------'
@@ -86,6 +89,14 @@ class SolitonData:
 		for i, s in enumerate(self.anti_oriented_solitons):
 			print '{}.'.format(i+1)
 			s.print_info(full_path=full_path)
+
+		print (
+			'\nClosed solitons on {}:\n------------------------------'
+			.format(self.street.label)
+		)
+		for i, s in enumerate(self.closed_solitons):
+			print '{}.'.format(i+1)
+			s.print_info()
 
 	def compute_closed_solitons(self):
 		self.closed_solitons = []

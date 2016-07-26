@@ -1,3 +1,5 @@
+from sympy import symbols
+
 TYPE_3_JOINTS = (
 	# 3-way
 	[
@@ -243,9 +245,86 @@ class MCSN:
 	The network is constructed by specifying 
 	the streets attached to each joint and branch point.
 	Then, the method 'attach_streets()' is called.
+
+	Arguments: 
+	
+	streets = ['p_1', 'p_2', ...] 
+		(a list of labels for network streets)
+	
+	branch_points = {
+		'b_1': ['p_1', 'p_2', 'p_3'],
+		'b_2': ['p_1', 'p_3'],
+		'b_3': ['p_2'],
+		...
+	}
+		(a dictionary of lists of labels, streets attached to a branch point 
+		are ordered counter-clockwise)
+	
+	joints = {
+		'j_1': ['p_1', 'p_2', None, 'p_3', None, None],
+		...
+	}
+		(a dictionary of lists of labels, streets attached to a joint 
+		are ordered counter-clockwise)
+	
+	homology_classes = {
+		'gamma_1' : ['p_1'],
+		'gamma_2' : ['p_2', 'p_3'],
+		...
+	}
+		(a dictionary of lists of labels, each homology class
+		is characterized as the sum of lifts of a set of streets.
+		The ordering doesn't matter)
+
 	"""
-	def __init__(self, label=None):
+	def __init__(self, label='no_label', 
+		branch_points={}, 
+		streets=[], 
+		joints={}, 
+		homology_classes={}
+	):
 		self.label=label
+		
+		self.streets = (
+			{s_label : Street(label=s_label) for s_label in streets}
+		)
+		
+		self.branch_points = (
+			{bp_lbl : BranchPoint(
+				label=bp_lbl, 
+				streets=[
+					self.streets[str_lbl] for str_lbl in branch_points[bp_lbl]
+				]
+			) for bp_lbl in branch_points.keys()}
+		)
+
+		self.joints = (
+			{j_lbl : Joint(
+				label=j_lbl, 
+				streets=[
+					self.streets[str_lbl] for str_lbl in joints[j_lbl]
+				]
+			) for j_lbl in joints.keys()}
+		)
+
+		self.basis_homology_classes = (
+			{hc_lbl : HomologyClass(
+				atomic_labels=basis_atomic_labels(i, homology_classes.keys()), 
+				streets=[
+					self.streets[str_lbl] 
+					for str_lbl in homology_classes[hc_lbl]
+				]
+			) for i, hc_lbl in enumerate(homology_classes.keys())}
+		)
+
+		# create the trivial homology class
+		self.trivial_homology_class = HomologyClass(
+			atomic_labels={
+				lbl : 0 for lbl in self.basis_homology_classes.keys()
+			},
+			streets = [],
+		)
+
 		# self.streets = {
 		# 	'p_1' : Street(label='p_1'),
 		# 	'p_2' : Street(label='p_2'),
@@ -272,10 +351,8 @@ class MCSN:
 		# 		None
 		# 	]
 		# )}
-		self.streets = {}
-		self.branch_points = {}
-		self.joints = {}
-		self.homology_classes = {}
+		self.attach_streets()
+		self.check_network()
 
 	def attach_streets(self):
 		for b_pt in self.branch_points.values():
@@ -327,15 +404,15 @@ class MCSN:
 
 		# Check that homology classes include all streets of the network
 		# and that no street is repeated more than once
-		if len(self.homology_classes) > 0:
+		if len(self.basis_homology_classes) > 0:
 			# a list with all streets in all homology classes
 			all_hom_streets = []
-			for hc_streets in self.homology_classes.values():
-				all_hom_streets += hc_streets
+			for hc in self.basis_homology_classes.values():
+				all_hom_streets += hc.streets
 
 			# check that every street of the network is contained in at 
 			# least one homology class
-			for s in self.streets.keys():
+			for s in self.streets.values():
 				if not s in all_hom_streets:
 					raise Exception(
 						'Street {} is not contained in any homology class'
@@ -360,6 +437,86 @@ class MCSN:
 
 	def add_branch_point(self):
 		pass
+
+
+class HomologyClass:
+	def __init__(self, atomic_labels={}, streets=[]):
+		"""
+		Atomic labels is a dictionary based on a choice of basis for the
+		homology lattice
+		{'gamma_1': 1, 'gamma_2': 0, 'gamma_3': 2}
+			(for gamma_1 + 2 * gamma_3)
+		"""
+
+		self.atomic_labels = atomic_labels
+		self.label = homology_label(self.atomic_labels)
+
+		self.streets = sorted(streets)
+		self.symbol = symbols('X_(' + self.label + ')')
+
+	def __add__(self, other):
+		new_atomic_labels = {
+			a_l_k : self.atomic_labels[a_l_k] + other.atomic_labels[a_l_k]
+			for a_l_k in self.atomic_labels.keys()
+		}
+		new_streets = self.streets + other.streets
+		return HomologyClass(
+			atomic_labels=new_atomic_labels, streets=new_streets
+		)
+
+
+def basis_atomic_labels(i, hc_lbls):
+	"""
+	Returns the atomic labels for the i-th basis element of the 
+	homology lattice e.g.
+	{'gamma_1': 0, 'gamma_2': 1, 'gamma_3': 0, 'gamma_4': 0, }
+	for the 2nd element (i.e. i=1)
+	"""
+	value_list = [0 for j in range(len(hc_lbls))]
+	value_list[i]=1
+	return {lbl: value_list[j] for j, lbl in enumerate(hc_lbls)}
+
+
+def homology_label(atomic_labels):
+	"""
+	Atomic labels is a dictionary based on a choice of basis for the
+	homology lattice
+	{'gamma_1': 1, 'gamma_2': 0, 'gamma_3': 2}
+		(for gamma_1 + 2 * gamma_3)
+	"""
+
+	# initialize the label
+	nonzero_labels = [
+		i for i, a_l_k in enumerate(atomic_labels.keys()) 
+		if atomic_labels[a_l_k]!=0
+	]
+	if len(nonzero_labels) == 0:
+		# the trivial homology class
+		return ''
+	else:
+		first_nonzero_label_i = nonzero_labels[0]
+
+		first_label = atomic_labels.keys()[first_nonzero_label_i]
+		first_coeff = atomic_labels[first_label]
+		
+		if first_coeff == 1:
+			label = first_label
+		else:
+			label = str(first_coeff) + ' * ' + first_label
+
+
+		# add the remaining homology basis elements
+		for a_l_k in atomic_labels.keys()[first_nonzero_label_i+1:]:
+			if atomic_labels[a_l_k] == 0:
+				pass
+			elif atomic_labels[a_l_k] == 1:
+				label += ' + ' + a_l_k
+			elif atomic_labels[a_l_k] < 0:
+				label += str(atomic_labels[a_l_k]) + ' * ' + a_l_k
+			else:
+				label += ' + ' + str(atomic_labels[a_l_k]) + ' * ' + a_l_k
+
+		return label
 
 
 # w = MCSN()

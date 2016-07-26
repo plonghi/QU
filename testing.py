@@ -535,33 +535,30 @@ from soliton_data import SolitonData
 #			  |    |	|
 #	 		  '--- b2 --'
 
-w = MCSN()
-w.streets = {
-	'p_1' : Street(label='p_1'),
-	'p_2' : Street(label='p_2'),
-	'p_3' : Street(label='p_3'),
-}
-w.branch_points = {
-	'b_1' : BranchPoint(
-		label='b_1', 
-		streets=[w.streets['p_1'], w.streets['p_2'], w.streets['p_3']]
-	), 
-	'b_2' : BranchPoint(
-		label='b_2', 
-		streets=[w.streets['p_1'], w.streets['p_3'], w.streets['p_2']]
-	),
-}
 
-w.joints = {}
+streets = ['p_1', 'p_2', 'p_3']
+branch_points = (
+	{
+		'b_1': ['p_1', 'p_2', 'p_3'],
+		'b_2': ['p_1', 'p_3', 'p_2'],
+	}
+)
 
-w.homology_classes = {
+joints = {}
+
+homology_classes = {
 	'gamma_1' : ['p_1'],
 	'gamma_2' : ['p_2'],
 	'gamma_3' : ['p_3'],
 }
 
-w.attach_streets()
-w.check_network()
+w = MCSN(
+	branch_points=branch_points, 
+	streets=streets, 
+	joints=joints, 
+	homology_classes=homology_classes
+)
+
 #------ Finished creating network -------
 
 s1 = w.streets['p_1']
@@ -582,8 +579,9 @@ print '\nHomology classes of closed solitons in Q1'
 Q1.compute_closed_solitons()
 print [sol.homology_class for sol in Q1.closed_solitons]
 
-
-
+tr = w.trivial_homology_class
+h1 = w.basis_homology_classes['gamma_1']
+print h1.atomic_labels
 # ### TEST TYPE 4_A JOINTS
 
 # # ----- Create a spectral network ------

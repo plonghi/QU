@@ -1,5 +1,5 @@
 from copy import copy, deepcopy
-from mcsn import MCSN, Street, Joint, BranchPoint
+from mcsn import MCSN, Street, Joint, BranchPoint, HomologyClass
 
 class Dash:
 	"""
@@ -542,17 +542,20 @@ class ClosedSoliton:
 		Returns a list of the type
 		[['gamma_1', 1], ['gamma_2',0], ['gamma_3', 2], ...]
 		"""
-		if len(network.homology_classes) == 0:
+		if len(network.basis_homology_classes) == 0:
 			raise Exception('No homology classes were defined.')
 
-		homology = []
-		for hc_label in network.homology_classes.keys():
+		homology = network.trivial_homology_class
+		# homology_list = []
+		# # a list of the type
+		# # [['gamma_1', 1], ['gamma_2',0], ['gamma_3', 2], ...]
+		for hc_label in network.basis_homology_classes.keys():
 			count = 0
 			# Check that every street of a homology class appears 
 			# an equal number of times, and that for each street
 			# there are equal occurrences of opposite orientations.
-			for street_label in network.homology_classes[hc_label]:
-				street = network.streets[street_label]
+			hc_streets = network.basis_homology_classes[hc_label].streets
+			for street in hc_streets:
 				# count occurrences of [street, +1] in the path
 				s_count_1 = self.dash.path.count([street, +1])
 				# count occurrences of [street, -1] in the path
@@ -569,11 +572,16 @@ class ClosedSoliton:
 								'appear a different number of times in the '
 								'path of the closed soliton.'
 							)
-			homology.append([hc_label, count])
+			# homology_list.append([network.basis_homology_classes[hc_label], count])
+
+			### HOW TO HANDLE NEGATIVE PATHS??? DO WE EVEN NEED TO??? YES!!!!
+			### MUST DO THIS MORE CAREFULLY !!!!
+			for i in range(count):
+				homology = homology + network.basis_homology_classes[hc_label]
 		return homology
 
 	def print_info(self):
-		# TODO
+		print 'Homology class : {}'.format(self.homology_class.label)
 		pass
 
 
