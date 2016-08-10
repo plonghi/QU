@@ -176,7 +176,7 @@ class Street:
         return self.endpoints[1]
 
     def print_info(self):
-        print 'Street {} goes from {} to {}\n'.format(
+        print 'Street {} is oriented {} ---> {}\n'.format(
             self.label, 
             self.initial_point().end_point.label, 
             self.final_point().end_point.label

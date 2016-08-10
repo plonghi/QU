@@ -1,42 +1,44 @@
 from mcsn import MCSN, Street, Joint, BranchPoint
 from solitons import (
-	copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
-	growing_pairs_from_dashes, growing_clusters
+    copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
+    growing_pairs_from_dashes, growing_clusters
 )
 from growth_rules import (
-	# bp_type_1_growth, j_type_3_growth, 
-	grow_soliton_once, grow_soliton,
+    # bp_type_1_growth, j_type_3_growth, 
+    grow_soliton_once, grow_soliton,
 )
 from soliton_data import SolitonData
+
+from intersections import get_dash_nodes, compute_self_intersections
 
 # # ----- Create a spectral network ------
 # #
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', streets=[w.streets['p_1'], None, None]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', streets=[w.streets['p_3']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', streets=[w.streets['p_1'], None, None]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', streets=[w.streets['p_3']]
+#   ),
 # }
 # w.joints = {'j_1': Joint(
-# 	label='j_1', streets=[
-# 		w.streets['p_1'], 
-# 		None,
-# 		w.streets['p_2'], 
-# 		None,
-# 		w.streets['p_3'], 
-# 		None
-# 	]
+#   label='j_1', streets=[
+#       w.streets['p_1'], 
+#       None,
+#       w.streets['p_2'], 
+#       None,
+#       w.streets['p_3'], 
+#       None
+#   ]
 # )}
 # w.attach_streets()
 # w.check_network()
@@ -61,11 +63,11 @@ from soliton_data import SolitonData
 # dash1.extend_dash_along_street(street=s1, end_pt=e11, slot=0)
 # dash1.print_endpoints()
 # dash1.extend_dash_along_street(
-# 	street=s2, end_pt='last', slot=j1.street_position(s2)[0]
+#   street=s2, end_pt='last', slot=j1.street_position(s2)[0]
 # )
 # dash1.print_endpoints()
 # dash1.extend_dash_along_street(
-# 	street=s1, end_pt='first', slot=b1.street_position(s1)[0]
+#   street=s1, end_pt='first', slot=b1.street_position(s1)[0]
 # )
 # dash1.print_endpoints()
 
@@ -127,12 +129,12 @@ from soliton_data import SolitonData
 
 # print '\nThe soliton is now complete: {}'.format(a2.is_complete)
 # print (
-# 	'The soliton starting point equals the dash starting point: {}'
-# 	.format(a2.starting_point==a2.complete_dash.starting_point)
+#   'The soliton starting point equals the dash starting point: {}'
+#   .format(a2.starting_point==a2.complete_dash.starting_point)
 # )
 # print (
-# 	'The soliton ending point equals the dash ending point: {}'
-# 	.format(a2.ending_point==a2.complete_dash.ending_point)
+#   'The soliton ending point equals the dash ending point: {}'
+#   .format(a2.ending_point==a2.complete_dash.ending_point)
 # )
 
 # # -------------------------------------------------------
@@ -235,12 +237,12 @@ from soliton_data import SolitonData
 # print '\nThe soliton is now complete: {}'.format(a6.is_complete)
 
 # print (
-# 	'The soliton starting point equals the dash starting point: {}'
-# 	.format(a6.starting_point()==a6.complete_dash.starting_point)
+#   'The soliton starting point equals the dash starting point: {}'
+#   .format(a6.starting_point()==a6.complete_dash.starting_point)
 # )
 # print (
-# 	'The soliton ending point equals the dash ending point: {}'
-# 	.format(a6.ending_point()==a6.complete_dash.ending_point)
+#   'The soliton ending point equals the dash ending point: {}'
+#   .format(a6.ending_point()==a6.complete_dash.ending_point)
 # )
 
 # print '\n\n-------------------------------------------------------'
@@ -278,42 +280,42 @@ from soliton_data import SolitonData
 #### TESTING LEVEL 2 ####
 
 # # ----- Create a spectral network ------
-# # 			Y-shaped network	
+# #             Y-shaped network    
 # #
-# #	b3 ---(p3)--- j1 ---(p2)--- b2
-# #				   |
-# #				   |
-# #				  (p1)
-# #				   |
-# #				   |
-# #				   b1
+# # b3 ---(p3)--- j1 ---(p2)--- b2
+# #                |
+# #                |
+# #               (p1)
+# #                |
+# #                |
+# #                b1
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', streets=[w.streets['p_1'], None, None]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', streets=[w.streets['p_3']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', streets=[w.streets['p_1'], None, None]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', streets=[w.streets['p_3']]
+#   ),
 # }
 # w.joints = {'j_1': Joint(
-# 	label='j_1', streets=[
-# 		w.streets['p_1'], 
-# 		None,
-# 		w.streets['p_2'], 
-# 		None,
-# 		w.streets['p_3'], 
-# 		None
-# 	]
+#   label='j_1', streets=[
+#       w.streets['p_1'], 
+#       None,
+#       w.streets['p_2'], 
+#       None,
+#       w.streets['p_3'], 
+#       None
+#   ]
 # )}
 # w.attach_streets()
 # w.check_network()
@@ -322,59 +324,59 @@ from soliton_data import SolitonData
 
 
 # # ----- Create a spectral network ------
-# # 			H-shaped network	
+# #             H-shaped network    
 # #
-# #	b3 ---(p3)--- j2 ---(p4)--- b4
-# #				   |
-# #				   |
-# #				  (p5)
-# #				   |
-# #				   |
-# #	b1 ---(p1)--- j1 ---(p2)--- b2
+# # b3 ---(p3)--- j2 ---(p4)--- b4
+# #                |
+# #                |
+# #               (p5)
+# #                |
+# #                |
+# # b1 ---(p1)--- j1 ---(p2)--- b2
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
-# 	'p_4' : Street(label='p_4'),
-# 	'p_5' : Street(label='p_5'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
+#   'p_4' : Street(label='p_4'),
+#   'p_5' : Street(label='p_5'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', streets=[w.streets['p_1'], None, None]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', streets=[w.streets['p_3']]
-# 	),
-# 	'b_4' : BranchPoint(
-# 		label='b_4', streets=[w.streets['p_4']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', streets=[w.streets['p_1'], None, None]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', streets=[w.streets['p_3']]
+#   ),
+#   'b_4' : BranchPoint(
+#       label='b_4', streets=[w.streets['p_4']]
+#   ),
 # }
 # w.joints = {
-# 	'j_1': Joint(
-# 		label='j_1', streets=[
-# 			w.streets['p_1'], 
-# 			None,
-# 			w.streets['p_2'], 
-# 			None,
-# 			w.streets['p_5'], 
-# 			None
-# 		]
-# 	),
-# 	'j_2': Joint(
-# 		label='j_2', streets=[
-# 			w.streets['p_5'], 
-# 			None,
-# 			w.streets['p_4'], 
-# 			None,
-# 			w.streets['p_3'], 
-# 			None
-# 		]
-# 	),
+#   'j_1': Joint(
+#       label='j_1', streets=[
+#           w.streets['p_1'], 
+#           None,
+#           w.streets['p_2'], 
+#           None,
+#           w.streets['p_5'], 
+#           None
+#       ]
+#   ),
+#   'j_2': Joint(
+#       label='j_2', streets=[
+#           w.streets['p_5'], 
+#           None,
+#           w.streets['p_4'], 
+#           None,
+#           w.streets['p_3'], 
+#           None
+#       ]
+#   ),
 # }
 
 # w.attach_streets()
@@ -412,32 +414,32 @@ from soliton_data import SolitonData
 # ### TEST TYPE 2 BRANCH POINTS
 
 # # ----- Create a spectral network ------
-# # 			H-shaped network	
+# #             H-shaped network    
 # #
-# #	b1 ---(p1)--- b2 ---(p2)--- b3
+# # b1 ---(p1)--- b2 ---(p2)--- b3
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', streets=[w.streets['p_1'], None, None]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', streets=[w.streets['p_1'], w.streets['p_2'], None]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', streets=[w.streets['p_2']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', streets=[w.streets['p_1'], None, None]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', streets=[w.streets['p_1'], w.streets['p_2'], None]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', streets=[w.streets['p_2']]
+#   ),
 # }
 
 # w.joints = {}
 
 # w.homology_classes = {
-# 	'gamma_1' : ['p_1'],
-# 	'gamma_2' : ['p_2'],
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
 # }
 
 # w.attach_streets()
@@ -479,44 +481,44 @@ from soliton_data import SolitonData
 # ## TEST TYPE 3 BRANCH POINTS
 
 # # # ----- Create a spectral network ------
-# # # 			H-shaped network	
+# # #           H-shaped network    
 # # #
-# # #	b1 ---(p1)--- b4 ---(p3)--- b3
-# # #				   |
-# # #				   |
-# # #				  (p2)
-# # #				   |
-# # #				   |
-# # #	 			   b2
+# # #   b1 ---(p1)--- b4 ---(p3)--- b3
+# # #                  |
+# # #                  |
+# # #                 (p2)
+# # #                  |
+# # #                  |
+# # #                  b2
 
 # # w = MCSN()
 # # w.streets = {
-# # 	'p_1' : Street(label='p_1'),
-# # 	'p_2' : Street(label='p_2'),
-# # 	'p_3' : Street(label='p_3'),
+# #     'p_1' : Street(label='p_1'),
+# #     'p_2' : Street(label='p_2'),
+# #     'p_3' : Street(label='p_3'),
 # # }
 # # w.branch_points = {
-# # 	'b_1' : BranchPoint(
-# # 		label='b_1', streets=[w.streets['p_1'], None, None]
-# # 	), 
-# # 	'b_2' : BranchPoint(
-# # 		label='b_2', streets=[w.streets['p_2']]
-# # 	),
-# # 	'b_3' : BranchPoint(
-# # 		label='b_3', streets=[w.streets['p_3']]
-# # 	),
-# # 	'b_4' : BranchPoint(
-# # 		label='b_3', 
-# # 		streets=[w.streets['p_1'], w.streets['p_2'], w.streets['p_3']]
-# # 	),
+# #     'b_1' : BranchPoint(
+# #         label='b_1', streets=[w.streets['p_1'], None, None]
+# #     ), 
+# #     'b_2' : BranchPoint(
+# #         label='b_2', streets=[w.streets['p_2']]
+# #     ),
+# #     'b_3' : BranchPoint(
+# #         label='b_3', streets=[w.streets['p_3']]
+# #     ),
+# #     'b_4' : BranchPoint(
+# #         label='b_3', 
+# #         streets=[w.streets['p_1'], w.streets['p_2'], w.streets['p_3']]
+# #     ),
 # # }
 
 # # w.joints = {}
 
 # # w.homology_classes = {
-# # 	'gamma_1' : ['p_1'],
-# # 	'gamma_2' : ['p_2'],
-# # 	'gamma_3' : ['p_3'],
+# #     'gamma_1' : ['p_1'],
+# #     'gamma_2' : ['p_2'],
+# #     'gamma_3' : ['p_3'],
 # # }
 
 # # w.attach_streets()
@@ -525,38 +527,38 @@ from soliton_data import SolitonData
 # # #------ Finished creating network -------
 
 # # ----- Create a spectral network ------
-# # 			  T2 network	
+# #               T2 network    
 # #
-# #			  .--- b1 --.
-# #			  |    |	|
-# #			  |    |	|
-# #			(p3)  (p1)	(p2)
-# #			  |    |	|
-# #			  |    |	|
-# #	 		  '--- b2 --'
+# #           .--- b1 --.
+# #           |    |    |
+# #           |    |    |
+# #         (p3)  (p1)  (p2)
+# #           |    |    |
+# #           |    |    |
+# #           '--- b2 --'
 
 
 # streets = ['p_1', 'p_2', 'p_3']
 # branch_points = (
-# 	{
-# 		'b_1': ['p_1', 'p_2', 'p_3'],
-# 		'b_2': ['p_1', 'p_3', 'p_2'],
-# 	}
+#   {
+#       'b_1': ['p_1', 'p_2', 'p_3'],
+#       'b_2': ['p_1', 'p_3', 'p_2'],
+#   }
 # )
 
 # joints = {}
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1'],
-# 	'gamma_2' : ['p_2'],
-# 	'gamma_3' : ['p_3'],
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -585,60 +587,60 @@ from soliton_data import SolitonData
 # ### TEST TYPE 4_A JOINTS
 
 # # ----- Create a spectral network ------
-# # 	  	 Peace-sign network
+# #          Peace-sign network
 # #
-# # 		b4		b3 		 b2
-# # 		  `      |      '
-# # 		   `     |     '
-# # 		 (p4)  (p3)   (p2)
-# # 		     `   |   '
-# # 		      `  |  '
-# # 		       ` | '
-# # 		        j1
-# # 		         |
-# # 		         |
-# # 		        (p1)
-# # 		         |
-# # 		         |
-# # 		         b1
+# #         b4      b3       b2
+# #           `      |      '
+# #            `     |     '
+# #          (p4)  (p3)   (p2)
+# #              `   |   '
+# #               `  |  '
+# #                ` | '
+# #                 j1
+# #                  |
+# #                  |
+# #                 (p1)
+# #                  |
+# #                  |
+# #                  b1
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
-# 	'p_4' : Street(label='p_4'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
+#   'p_4' : Street(label='p_4'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', 
-# 		streets=[w.streets['p_1']]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', 
-# 		streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', 
-# 		streets=[w.streets['p_3']]
-# 	),
-# 	'b_4' : BranchPoint(
-# 		label='b_4', 
-# 		streets=[w.streets['p_4']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', 
+#       streets=[w.streets['p_1']]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', 
+#       streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', 
+#       streets=[w.streets['p_3']]
+#   ),
+#   'b_4' : BranchPoint(
+#       label='b_4', 
+#       streets=[w.streets['p_4']]
+#   ),
 # }
 
 # w.joints = {
-# 	'j_1': Joint(
-# 		label='j_1', streets=[
-# 			w.streets['p_1'], 
-# 			None,
-# 			w.streets['p_2'], 	
-# 			w.streets['p_3'], 
-# 			w.streets['p_4'], 
-# 			None
-# 		]
-# 	),
+#   'j_1': Joint(
+#       label='j_1', streets=[
+#           w.streets['p_1'], 
+#           None,
+#           w.streets['p_2'],   
+#           w.streets['p_3'], 
+#           w.streets['p_4'], 
+#           None
+#       ]
+#   ),
 # }
 
 # w.attach_streets()
@@ -678,62 +680,62 @@ from soliton_data import SolitonData
 # ### TEST TYPE 4_B JOINTS
 
 # # ----- Create a spectral network ------
-# # 	  	 Cross-sign network
+# #          Cross-sign network
 # #
-# # 		b4		 		 b3
-# # 		  `             '
-# # 		   `           '
-# # 		   (p4)     (p3)
-# # 		     `       '
-# # 		      `     '
-# # 		       `   '
-# # 		        ` '
-# #				j1
-# # 		        ' `
-# # 		       '   `
-# # 		      '     `
-# # 		   (p1)     (p2)
-# # 		    '         `
-# # 		   '           `
-# # 		 b1             b2
+# #         b4               b3
+# #           `             '
+# #            `           '
+# #            (p4)     (p3)
+# #              `       '
+# #               `     '
+# #                `   '
+# #                 ` '
+# #             j1
+# #                 ' `
+# #                '   `
+# #               '     `
+# #            (p1)     (p2)
+# #             '         `
+# #            '           `
+# #          b1             b2
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
-# 	'p_4' : Street(label='p_4'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
+#   'p_4' : Street(label='p_4'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', 
-# 		streets=[w.streets['p_1']]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', 
-# 		streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', 
-# 		streets=[w.streets['p_3']]
-# 	),
-# 	'b_4' : BranchPoint(
-# 		label='b_4', 
-# 		streets=[w.streets['p_4']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', 
+#       streets=[w.streets['p_1']]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', 
+#       streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', 
+#       streets=[w.streets['p_3']]
+#   ),
+#   'b_4' : BranchPoint(
+#       label='b_4', 
+#       streets=[w.streets['p_4']]
+#   ),
 # }
 
 # w.joints = {
-# 	'j_1': Joint(
-# 		label='j_1', streets=[
-# 			w.streets['p_1'], 
-# 			w.streets['p_2'], 
-# 			None,	
-# 			w.streets['p_3'], 
-# 			w.streets['p_4'], 
-# 			None
-# 		]
-# 	),
+#   'j_1': Joint(
+#       label='j_1', streets=[
+#           w.streets['p_1'], 
+#           w.streets['p_2'], 
+#           None,   
+#           w.streets['p_3'], 
+#           w.streets['p_4'], 
+#           None
+#       ]
+#   ),
 # }
 
 # w.attach_streets()
@@ -766,67 +768,67 @@ from soliton_data import SolitonData
 # ### TEST TYPE 5 JOINTS
 
 # # ----- Create a spectral network ------
-# # 	  	 Cross-sign network
+# #          Cross-sign network
 # #
-# # 		b4		 		 b3
-# # 		  `             '
-# # 		   `           '
-# # 		   (p4)     (p3)
-# # 		     `       '
-# # 		      `     '
-# # 		       `   '
-# # 		        ` '
-# #				j1
-# # 		        '|`
-# # 		       ' | `
-# # 		      '  |  `
-# # 		   (p1) (p5)  (p2)
-# # 		    '    |    `
-# # 		   '     |     `
-# # 		 b1      b5     b2
+# #         b4               b3
+# #           `             '
+# #            `           '
+# #            (p4)     (p3)
+# #              `       '
+# #               `     '
+# #                `   '
+# #                 ` '
+# #             j1
+# #                 '|`
+# #                ' | `
+# #               '  |  `
+# #            (p1) (p5)  (p2)
+# #             '    |    `
+# #            '     |     `
+# #          b1      b5     b2
 
 # w = MCSN()
 # w.streets = {
-# 	'p_1' : Street(label='p_1'),
-# 	'p_2' : Street(label='p_2'),
-# 	'p_3' : Street(label='p_3'),
-# 	'p_4' : Street(label='p_4'),
-# 	'p_5' : Street(label='p_5'),
+#   'p_1' : Street(label='p_1'),
+#   'p_2' : Street(label='p_2'),
+#   'p_3' : Street(label='p_3'),
+#   'p_4' : Street(label='p_4'),
+#   'p_5' : Street(label='p_5'),
 # }
 # w.branch_points = {
-# 	'b_1' : BranchPoint(
-# 		label='b_1', 
-# 		streets=[w.streets['p_1']]
-# 	), 
-# 	'b_2' : BranchPoint(
-# 		label='b_2', 
-# 		streets=[w.streets['p_2']]
-# 	),
-# 	'b_3' : BranchPoint(
-# 		label='b_3', 
-# 		streets=[w.streets['p_3']]
-# 	),
-# 	'b_4' : BranchPoint(
-# 		label='b_4', 
-# 		streets=[w.streets['p_4']]
-# 	),
-# 	'b_5' : BranchPoint(
-# 		label='b_5', 
-# 		streets=[w.streets['p_5']]
-# 	),
+#   'b_1' : BranchPoint(
+#       label='b_1', 
+#       streets=[w.streets['p_1']]
+#   ), 
+#   'b_2' : BranchPoint(
+#       label='b_2', 
+#       streets=[w.streets['p_2']]
+#   ),
+#   'b_3' : BranchPoint(
+#       label='b_3', 
+#       streets=[w.streets['p_3']]
+#   ),
+#   'b_4' : BranchPoint(
+#       label='b_4', 
+#       streets=[w.streets['p_4']]
+#   ),
+#   'b_5' : BranchPoint(
+#       label='b_5', 
+#       streets=[w.streets['p_5']]
+#   ),
 # }
 
 # w.joints = {
-# 	'j_1': Joint(
-# 		label='j_1', streets=[
-# 			w.streets['p_1'], 
-# 			w.streets['p_5'], 
-# 			w.streets['p_2'], 
-# 			w.streets['p_3'], 
-# 			None,
-# 			w.streets['p_4'], 
-# 		]
-# 	),
+#   'j_1': Joint(
+#       label='j_1', streets=[
+#           w.streets['p_1'], 
+#           w.streets['p_5'], 
+#           w.streets['p_2'], 
+#           w.streets['p_3'], 
+#           None,
+#           w.streets['p_4'], 
+#       ]
+#   ),
 # }
 
 # w.attach_streets()
@@ -873,32 +875,32 @@ from soliton_data import SolitonData
 # ### TEST the 1-herd
 
 # # ----- Create a spectral network ------
-# # 	  	 1-herd network
+# #          1-herd network
 
 
 
 # streets = ['p_1','p_2','q_1','q_2']
 # branch_points = {
-# 	'b_1' : ['p_1'],
-# 	'b_2' : ['q_1'],
-# 	'b_3' : ['p_2'],
-# 	'b_4' : ['q_2']
+#   'b_1' : ['p_1'],
+#   'b_2' : ['q_1'],
+#   'b_3' : ['p_2'],
+#   'b_4' : ['q_2']
 # }
 
 # joints = {
-# 	'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ]
+#   'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ]
 # }
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1', 'p_2'],
-# 	'gamma_2' : ['q_1', 'q_2'],
+#   'gamma_1' : ['p_1', 'p_2'],
+#   'gamma_2' : ['q_1', 'q_2'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -938,33 +940,33 @@ from soliton_data import SolitonData
 # ### TEST the 2-herd
 
 # # ----- Create a spectral network ------
-# # 	  	 2-herd network
+# #          2-herd network
 
 
 
 # streets = ['p_1','p_2','p_3','q_1','q_2','q_3']
 # branch_points = {
-# 	'b_1' : ['p_1'],
-# 	'b_2' : ['q_1'],
-# 	'b_3' : ['p_3'],
-# 	'b_4' : ['q_3']
+#   'b_1' : ['p_1'],
+#   'b_2' : ['q_1'],
+#   'b_3' : ['p_3'],
+#   'b_4' : ['q_3']
 # }
 
 # joints = {
-# 	'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
-# 	'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ]
+#   'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
+#   'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ]
 # }
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1', 'p_2', 'p_3'],
-# 	'gamma_2' : ['q_1', 'q_2', 'q_3'],
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['q_1', 'q_2', 'q_3'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -1004,34 +1006,34 @@ from soliton_data import SolitonData
 # ### TEST the 3-herd
 
 # # ----- Create a spectral network ------
-# # 	  	 3-herd network
+# #          3-herd network
 
 
 
 # streets = ['p_1','p_2','p_3','p_4','q_1','q_2','q_3','q_4']
 # branch_points = {
-# 	'b_1' : ['p_1'],
-# 	'b_2' : ['q_1'],
-# 	'b_3' : ['p_4'],
-# 	'b_4' : ['q_4']
+#   'b_1' : ['p_1'],
+#   'b_2' : ['q_1'],
+#   'b_3' : ['p_4'],
+#   'b_4' : ['q_4']
 # }
 
 # joints = {
-# 	'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
-# 	'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
-# 	'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
+#   'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
+#   'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
+#   'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
 # }
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
-# 	'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
+#   'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
+#   'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -1071,41 +1073,41 @@ from soliton_data import SolitonData
 # ### T3
 
 # # ----- Create a spectral network ------
-# # 	  	 	   T3 network
+# #                T3 network
 
 
 
 # streets = ['p_'+str(i) for i in range(1, 13)]
 # branch_points = {
-# 	'b_1' : ['p_1', 'p_7', 'p_8'],
-# 	'b_2' : ['p_2', 'p_10', 'p_12'],
-# 	'b_3' : ['p_3', 'p_11', 'p_9'],
-# 	'b_4' : ['p_4','p_8','p_7'],
-# 	'b_5' : ['p_5', 'p_9', 'p_11'],
-# 	'b_6' : ['p_6', 'p_12', 'p_10']
+#   'b_1' : ['p_1', 'p_7', 'p_8'],
+#   'b_2' : ['p_2', 'p_10', 'p_12'],
+#   'b_3' : ['p_3', 'p_11', 'p_9'],
+#   'b_4' : ['p_4','p_8','p_7'],
+#   'b_5' : ['p_5', 'p_9', 'p_11'],
+#   'b_6' : ['p_6', 'p_12', 'p_10']
 # }
 
 # joints = {
-# 	'j_1': ['p_1', None, 'p_2', None, 'p_3', None ],
-# 	'j_2': ['p_4', None, 'p_5', None, 'p_6', None],
+#   'j_1': ['p_1', None, 'p_2', None, 'p_3', None ],
+#   'j_2': ['p_4', None, 'p_5', None, 'p_6', None],
 # }
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1', 'p_2', 'p_3'],
-# 	'gamma_2' : ['p_4', 'p_5', 'p_6'],
-# 	'gamma_3' : ['p_7'],
-# 	'gamma_4' : ['p_8'],
-# 	'gamma_5' : ['p_9'],
-# 	'gamma_6' : ['p_10'],
-# 	'gamma_7' : ['p_11'],
-# 	'gamma_8' : ['p_12'],
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['p_4', 'p_5', 'p_6'],
+#   'gamma_3' : ['p_7'],
+#   'gamma_4' : ['p_8'],
+#   'gamma_5' : ['p_9'],
+#   'gamma_6' : ['p_10'],
+#   'gamma_7' : ['p_11'],
+#   'gamma_8' : ['p_12'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -1138,33 +1140,33 @@ from soliton_data import SolitonData
 # ### SU(2) N_f=4
 
 # # ----- Create a spectral network ------
-# # 	  	   SU(2) N_f=4 network
+# #            SU(2) N_f=4 network
 
 
 # streets = ['p_'+str(i+1) for i in range(6)]
 # branch_points = {
-# 	'b_1': ['p_1', 'p_2', 'p_3'],
-# 	'b_2': ['p_2', 'p_4', 'p_5'],
-# 	'b_3': ['p_1', 'p_6', 'p_4'],
-# 	'b_4': ['p_3', 'p_5', 'p_6'],
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_2', 'p_4', 'p_5'],
+#   'b_3': ['p_1', 'p_6', 'p_4'],
+#   'b_4': ['p_3', 'p_5', 'p_6'],
 # }
 
 # joints = {}
 
 # homology_classes = {
-# 	'gamma_1' : ['p_1'],
-# 	'gamma_2' : ['p_2'],
-# 	'gamma_3' : ['p_3'],
-# 	'gamma_4' : ['p_4'],
-# 	'gamma_5' : ['p_5'],
-# 	'gamma_6' : ['p_6'],
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4'],
+#   'gamma_5' : ['p_5'],
+#   'gamma_6' : ['p_6'],
 # }
 
 # w = MCSN(
-# 	branch_points=branch_points, 
-# 	streets=streets, 
-# 	joints=joints, 
-# 	homology_classes=homology_classes
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
 # )
 
 # #------ Finished creating network -------
@@ -1196,28 +1198,28 @@ from soliton_data import SolitonData
 ### AD_3 theory
 
 # ----- Create a spectral network ------
-#	 	  	   AD_3 theory
+#              AD_3 theory
 
 
 streets = ['p_' + str(i + 1) for i in range(2)]
 branch_points = {
-	'b_1': ['p_1'],
-	'b_2': ['p_1', 'p_2'],
-	'b_3': ['p_2'],
+    'b_1': ['p_1'],
+    'b_2': ['p_1', 'p_2'],
+    'b_3': ['p_2'],
 }
 
 joints = {}
 
 homology_classes = {
-	'gamma_1' : ['p_2'],
-	'gamma_2' : ['p_1'],
+    'gamma_1' : ['p_2'],
+    'gamma_2' : ['p_1'],
 }
 
 w = MCSN(
-	branch_points=branch_points, 
-	streets=streets, 
-	joints=joints, 
-	homology_classes=homology_classes
+    branch_points=branch_points, 
+    streets=streets, 
+    joints=joints, 
+    homology_classes=homology_classes
 )
 
 #------ Finished creating network -------
@@ -1234,7 +1236,7 @@ Q1.initialize()
 Q1.grow(n_steps=8)
 Q1.print_info(full_path=True)
 
-Q2 = SolitonData(label='Q_2', network=w , street=s2)
+Q2 = SolitonData(label='Q_2', network=w, street=s2)
 Q2.initialize()
 # # Q1.print_info(full_path=True)
 Q2.grow(n_steps=8)
@@ -1245,7 +1247,14 @@ w.print_info()
 
 print '\n\n'
 print Q1.closed_solitons[1].dash.path
+dash_nodes = get_dash_nodes(Q1.closed_solitons[1].dash, is_closed_soliton=True)
+print dash_nodes
+print [d_n.node.__class__.__name__ for d_n in dash_nodes]
+for node in dash_nodes:
+    node.print_info()
 
+k = compute_self_intersections(Q1.closed_solitons[1].dash, is_closed_soliton=True)
+print k
 # # print '\n\n-------------------------------------------------------'
 # print '\nSoliton Data'
 # Q7 = SolitonData(label='Q_7', network=w , street=s7)
