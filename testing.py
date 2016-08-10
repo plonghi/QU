@@ -1001,30 +1001,216 @@ from soliton_data import SolitonData
 
 
 
-### TEST the 3-herd
+# ### TEST the 3-herd
+
+# # ----- Create a spectral network ------
+# # 	  	 3-herd network
+
+
+
+# streets = ['p_1','p_2','p_3','p_4','q_1','q_2','q_3','q_4']
+# branch_points = {
+# 	'b_1' : ['p_1'],
+# 	'b_2' : ['q_1'],
+# 	'b_3' : ['p_4'],
+# 	'b_4' : ['q_4']
+# }
+
+# joints = {
+# 	'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
+# 	'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
+# 	'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
+# }
+
+# homology_classes = {
+# 	'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
+# 	'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
+# }
+
+# w = MCSN(
+# 	branch_points=branch_points, 
+# 	streets=streets, 
+# 	joints=joints, 
+# 	homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+# r1 = w.streets['q_1']
+# r2 = w.streets['q_2']
+
+
+
+# print '\n\n-------------------------------------------------------'
+# print 'Soliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=10)
+# Q1.print_info(full_path=True)
+
+# Q2 = SolitonData(label='Q_2', network=w , street=r1)
+# Q2.initialize()
+# # Q1.print_info(full_path=True)
+# Q2.grow(n_steps=10)
+# Q2.print_info(full_path=True)
+
+
+# Q3 = SolitonData(label='Q_3', network=w , street=s2)
+# Q3.initialize()
+# # Q1.print_info(full_path=True)
+# Q3.grow(n_steps=10)
+# Q3.print_info(full_path=True)
+
+
+
+
+
+# ### T3
+
+# # ----- Create a spectral network ------
+# # 	  	 	   T3 network
+
+
+
+# streets = ['p_'+str(i) for i in range(1, 13)]
+# branch_points = {
+# 	'b_1' : ['p_1', 'p_7', 'p_8'],
+# 	'b_2' : ['p_2', 'p_10', 'p_12'],
+# 	'b_3' : ['p_3', 'p_11', 'p_9'],
+# 	'b_4' : ['p_4','p_8','p_7'],
+# 	'b_5' : ['p_5', 'p_9', 'p_11'],
+# 	'b_6' : ['p_6', 'p_12', 'p_10']
+# }
+
+# joints = {
+# 	'j_1': ['p_1', None, 'p_2', None, 'p_3', None ],
+# 	'j_2': ['p_4', None, 'p_5', None, 'p_6', None],
+# }
+
+# homology_classes = {
+# 	'gamma_1' : ['p_1', 'p_2', 'p_3'],
+# 	'gamma_2' : ['p_4', 'p_5', 'p_6'],
+# 	'gamma_3' : ['p_7'],
+# 	'gamma_4' : ['p_8'],
+# 	'gamma_5' : ['p_9'],
+# 	'gamma_6' : ['p_10'],
+# 	'gamma_7' : ['p_11'],
+# 	'gamma_8' : ['p_12'],
+# }
+
+# w = MCSN(
+# 	branch_points=branch_points, 
+# 	streets=streets, 
+# 	joints=joints, 
+# 	homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+# s7 = w.streets['p_7']
+
+
+# # print '\n\n-------------------------------------------------------'
+# print '\nSoliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=8)
+# Q1.print_info(full_path=True)
+
+
+# # # print '\n\n-------------------------------------------------------'
+# # print '\nSoliton Data'
+# # Q7 = SolitonData(label='Q_7', network=w , street=s7)
+# # Q7.initialize()
+# # # # Q1.print_info(full_path=True)
+# # Q7.grow(n_steps=9)
+# # Q7.print_info(full_path=True)
+
+
+
+
+# ### SU(2) N_f=4
+
+# # ----- Create a spectral network ------
+# # 	  	   SU(2) N_f=4 network
+
+
+# streets = ['p_'+str(i+1) for i in range(6)]
+# branch_points = {
+# 	'b_1': ['p_1', 'p_2', 'p_3'],
+# 	'b_2': ['p_2', 'p_4', 'p_5'],
+# 	'b_3': ['p_1', 'p_6', 'p_4'],
+# 	'b_4': ['p_3', 'p_5', 'p_6'],
+# }
+
+# joints = {}
+
+# homology_classes = {
+# 	'gamma_1' : ['p_1'],
+# 	'gamma_2' : ['p_2'],
+# 	'gamma_3' : ['p_3'],
+# 	'gamma_4' : ['p_4'],
+# 	'gamma_5' : ['p_5'],
+# 	'gamma_6' : ['p_6'],
+# }
+
+# w = MCSN(
+# 	branch_points=branch_points, 
+# 	streets=streets, 
+# 	joints=joints, 
+# 	homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+
+
+# # print '\n\n-------------------------------------------------------'
+# print '\nSoliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=8)
+# Q1.print_info(full_path=True)
+
+
+# # # print '\n\n-------------------------------------------------------'
+# # print '\nSoliton Data'
+# # Q7 = SolitonData(label='Q_7', network=w , street=s7)
+# # Q7.initialize()
+# # # # Q1.print_info(full_path=True)
+# # Q7.grow(n_steps=9)
+# # Q7.print_info(full_path=True)
+
+
+
+
+### AD_3 theory
 
 # ----- Create a spectral network ------
-# 	  	 3-herd network
+#	 	  	   AD_3 theory
 
 
-
-streets = ['p_1','p_2','p_3','p_4','q_1','q_2','q_3','q_4']
+streets = ['p_' + str(i + 1) for i in range(2)]
 branch_points = {
-	'b_1' : ['p_1'],
-	'b_2' : ['q_1'],
-	'b_3' : ['p_4'],
-	'b_4' : ['q_4']
+	'b_1': ['p_1'],
+	'b_2': ['p_1', 'p_2'],
+	'b_3': ['p_2'],
 }
 
-joints = {
-	'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
-	'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
-	'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
-}
+joints = {}
 
 homology_classes = {
-	'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
-	'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
+	'gamma_1' : ['p_2'],
+	'gamma_2' : ['p_1'],
 }
 
 w = MCSN(
@@ -1038,29 +1224,32 @@ w = MCSN(
 
 s1 = w.streets['p_1']
 s2 = w.streets['p_2']
-r1 = w.streets['q_1']
-r2 = w.streets['q_2']
 
 
-
-print '\n\n-------------------------------------------------------'
-print 'Soliton Data'
+# print '\n\n-------------------------------------------------------'
+print '\nSoliton Data'
 Q1 = SolitonData(label='Q_1', network=w , street=s1)
 Q1.initialize()
-# Q1.print_info(full_path=True)
-Q1.grow(n_steps=10)
+# # Q1.print_info(full_path=True)
+Q1.grow(n_steps=8)
 Q1.print_info(full_path=True)
 
-Q2 = SolitonData(label='Q_2', network=w , street=r1)
+Q2 = SolitonData(label='Q_2', network=w , street=s2)
 Q2.initialize()
-# Q1.print_info(full_path=True)
-Q2.grow(n_steps=10)
+# # Q1.print_info(full_path=True)
+Q2.grow(n_steps=8)
 Q2.print_info(full_path=True)
 
 
-Q3 = SolitonData(label='Q_3', network=w , street=s2)
-Q3.initialize()
-# Q1.print_info(full_path=True)
-Q3.grow(n_steps=10)
-Q3.print_info(full_path=True)
+w.print_info()
 
+print '\n\n'
+print Q1.closed_solitons[1].dash.path
+
+# # print '\n\n-------------------------------------------------------'
+# print '\nSoliton Data'
+# Q7 = SolitonData(label='Q_7', network=w , street=s7)
+# Q7.initialize()
+# # # Q1.print_info(full_path=True)
+# Q7.grow(n_steps=9)
+# Q7.print_info(full_path=True)

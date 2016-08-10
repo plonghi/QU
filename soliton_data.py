@@ -124,8 +124,6 @@ class SolitonData:
 		
 		self.Q = 1
 		for c_sol in self.closed_solitons:
-			print c_sol.homology_class.symbol
-			print type(c_sol.homology_class.symbol)
 			self.Q += c_sol.homology_class.symbol
 
 
