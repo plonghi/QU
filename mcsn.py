@@ -510,7 +510,9 @@ class HomologyClass:
         # defined as sympy symbols
         # they will correspond to the atomic 
         # labels for homology classes in the same ordering
-        variables = [symbols('X'+str(i+1)) for i in range(len(atomic_labels))]
+        variables = [symbols('X' + str(i + 1)) for i in range(
+            len(atomic_labels)
+        )]
         sorted_keys = sorted(atomic_labels.keys())
         X_expression = 1
         for i, k_i in enumerate(sorted_keys):
@@ -519,7 +521,7 @@ class HomologyClass:
 
     def __add__(self, other):
         new_atomic_labels = {
-            a_l_k : self.atomic_labels[a_l_k] + other.atomic_labels[a_l_k]
+            a_l_k: self.atomic_labels[a_l_k] + other.atomic_labels[a_l_k]
             for a_l_k in self.atomic_labels.keys()
         }
         new_streets = self.streets + other.streets
@@ -544,7 +546,7 @@ def basis_atomic_labels(i, hc_lbls):
     for the 2nd element (i.e. i=1)
     """
     value_list = [0 for j in range(len(hc_lbls))]
-    value_list[i]=1
+    value_list[i] = 1
     return {lbl: value_list[j] for j, lbl in enumerate(hc_lbls)}
 
 
@@ -559,7 +561,7 @@ def homology_label(atomic_labels):
     # initialize the label
     nonzero_labels = [
         i for i, a_l_k in enumerate(atomic_labels.keys()) 
-        if atomic_labels[a_l_k]!=0
+        if atomic_labels[a_l_k] != 0
     ]
     if len(nonzero_labels) == 0:
         # the trivial homology class
@@ -575,9 +577,8 @@ def homology_label(atomic_labels):
         else:
             label = str(first_coeff) + '_*_' + first_label
 
-
         # add the remaining homology basis elements
-        for a_l_k in atomic_labels.keys()[first_nonzero_label_i+1:]:
+        for a_l_k in atomic_labels.keys()[first_nonzero_label_i + 1:]:
             if atomic_labels[a_l_k] == 0:
                 pass
             elif atomic_labels[a_l_k] == 1:

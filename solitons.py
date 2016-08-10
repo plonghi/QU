@@ -1,5 +1,7 @@
-from copy import copy, deepcopy
-from mcsn import MCSN, Street, Joint, BranchPoint, HomologyClass
+from copy import copy  # , deepcopy
+# from mcsn import MCSN, Street, Joint, BranchPoint, HomologyClass
+from intersections import compute_self_intersections
+
 
 class Dash:
     """
@@ -400,7 +402,7 @@ class SolitonPath:
         else:
             raise Exception(
                 'Street {} doesnt end on {} at slot {}'
-                .format(street.label, starting_pt.label, starting_slot)
+                .format(street.label, source_pt.label, slot)
             )
 
         d_i = Dash(label='initial_dash', growth_restriction='forward_only')
@@ -463,10 +465,10 @@ class SolitonPath:
     def check_growing_pairs(self):
         for p in self.growing_pairs:
             if (
-                p[0].orientation=='in' and p[1].orientation=='out' or
-                p[1].orientation=='in' and p[0].orientation=='out'
+                p[0].orientation == 'in' and p[1].orientation == 'out' or
+                p[1].orientation == 'in' and p[0].orientation == 'out'
             ) and (
-                p[0].end_point==p[1].end_point
+                p[0].end_point == p[1].end_point
             ):
                 pass
             else:
@@ -532,12 +534,13 @@ class ClosedSoliton:
         new_path_a = copy(soliton_a.complete_dash.path)
         new_path_b = copy(soliton_b.complete_dash.path[1:-1])
         self.dash = Dash(
-                growth_restriction='both', 
-                path=new_path_a+new_path_b
-            )
+            growth_restriction='both', 
+            path=new_path_a + new_path_b
+        )
         
         # self.streets_set = []
         self.homology_class = self.determine_homology_class(network)
+        self.writhe = self.compute_writhe()
         
     def determine_homology_class(self, network):
         """
@@ -591,9 +594,13 @@ class ClosedSoliton:
                 homology = homology + network.basis_homology_classes[hc_label]
         return homology
 
+    def compute_writhe(self):
+        return compute_self_intersections(self.dash, is_closed_soliton=True)
+
     def print_info(self):
-        print 'Homology class : {}'.format(self.homology_class.label)
-        pass
+        print 'Homology class : {}, Writhe: {}'.format(
+            self.homology_class.label, self.writhe
+        )
 
 
 def set_orientation_from_starting_point(

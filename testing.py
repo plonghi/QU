@@ -1003,71 +1003,72 @@ from intersections import get_dash_nodes, compute_self_intersections
 
 
 
-# ### TEST the 3-herd
+### TEST the 3-herd
 
-# # ----- Create a spectral network ------
-# #          3-herd network
-
-
-
-# streets = ['p_1','p_2','p_3','p_4','q_1','q_2','q_3','q_4']
-# branch_points = {
-#   'b_1' : ['p_1'],
-#   'b_2' : ['q_1'],
-#   'b_3' : ['p_4'],
-#   'b_4' : ['q_4']
-# }
-
-# joints = {
-#   'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
-#   'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
-#   'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
-# }
-
-# homology_classes = {
-#   'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
-#   'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
-# }
-
-# w = MCSN(
-#   branch_points=branch_points, 
-#   streets=streets, 
-#   joints=joints, 
-#   homology_classes=homology_classes
-# )
-
-# #------ Finished creating network -------
-
-# s1 = w.streets['p_1']
-# s2 = w.streets['p_2']
-# r1 = w.streets['q_1']
-# r2 = w.streets['q_2']
+# ----- Create a spectral network ------
+#          3-herd network
 
 
 
-# print '\n\n-------------------------------------------------------'
-# print 'Soliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1)
-# Q1.initialize()
-# # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=10)
+streets = ['p_1','p_2','p_3','p_4','q_1','q_2','q_3','q_4']
+branch_points = {
+  'b_1' : ['p_1'],
+  'b_2' : ['q_1'],
+  'b_3' : ['p_4'],
+  'b_4' : ['q_4']
+}
+
+joints = {
+  'j_1': ['p_1', None, 'q_1', 'p_2', None, 'q_2' ],
+  'j_2': ['p_2', None, 'q_2', 'p_3', None, 'q_3' ],
+  'j_3': ['p_3', None, 'q_3', 'p_4', None, 'q_4' ]
+}
+
+homology_classes = {
+  'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_4'],
+  'gamma_2' : ['q_1', 'q_2', 'q_3', 'q_4'],
+}
+
+w = MCSN(
+  branch_points=branch_points, 
+  streets=streets, 
+  joints=joints, 
+  homology_classes=homology_classes
+)
+
+#------ Finished creating network -------
+
+s1 = w.streets['p_1']
+s2 = w.streets['p_2']
+r1 = w.streets['q_1']
+r2 = w.streets['q_2']
+
+
+
+print '\n\n-------------------------------------------------------'
+print 'Soliton Data'
+Q1 = SolitonData(label='Q_1', network=w , street=s1)
+Q1.initialize()
 # Q1.print_info(full_path=True)
+Q1.grow(n_steps=10)
+Q1.print_info(full_path=True)
 
-# Q2 = SolitonData(label='Q_2', network=w , street=r1)
-# Q2.initialize()
-# # Q1.print_info(full_path=True)
-# Q2.grow(n_steps=10)
-# Q2.print_info(full_path=True)
-
-
-# Q3 = SolitonData(label='Q_3', network=w , street=s2)
-# Q3.initialize()
-# # Q1.print_info(full_path=True)
-# Q3.grow(n_steps=10)
-# Q3.print_info(full_path=True)
+Q2 = SolitonData(label='Q_2', network=w , street=r1)
+Q2.initialize()
+# Q1.print_info(full_path=True)
+Q2.grow(n_steps=10)
+Q2.print_info(full_path=True)
 
 
+Q3 = SolitonData(label='Q_3', network=w , street=s2)
+Q3.initialize()
+# Q1.print_info(full_path=True)
+Q3.grow(n_steps=10)
+Q3.print_info(full_path=True)
 
+print "Generating function of p_1: {}".format(Q1.Q_y)
+print "Generating function of q_1: {}".format(Q2.Q_y)
+print "Generating function of p_2: {}".format(Q3.Q_y)
 
 
 # ### T3
@@ -1195,70 +1196,73 @@ from intersections import get_dash_nodes, compute_self_intersections
 
 
 
-### AD_3 theory
+# ### AD_3 theory
 
-# ----- Create a spectral network ------
-#              AD_3 theory
-
-
-streets = ['p_' + str(i + 1) for i in range(2)]
-branch_points = {
-    'b_1': ['p_1'],
-    'b_2': ['p_1', 'p_2'],
-    'b_3': ['p_2'],
-}
-
-joints = {}
-
-homology_classes = {
-    'gamma_1' : ['p_2'],
-    'gamma_2' : ['p_1'],
-}
-
-w = MCSN(
-    branch_points=branch_points, 
-    streets=streets, 
-    joints=joints, 
-    homology_classes=homology_classes
-)
-
-#------ Finished creating network -------
-
-s1 = w.streets['p_1']
-s2 = w.streets['p_2']
+# # ----- Create a spectral network ------
+# #              AD_3 theory
 
 
-# print '\n\n-------------------------------------------------------'
-print '\nSoliton Data'
-Q1 = SolitonData(label='Q_1', network=w , street=s1)
-Q1.initialize()
-# # Q1.print_info(full_path=True)
-Q1.grow(n_steps=8)
-Q1.print_info(full_path=True)
+# streets = ['p_' + str(i + 1) for i in range(2)]
+# branch_points = {
+#     'b_1': ['p_1'],
+#     'b_2': ['p_1', 'p_2'],
+#     'b_3': ['p_2'],
+# }
 
-Q2 = SolitonData(label='Q_2', network=w, street=s2)
-Q2.initialize()
-# # Q1.print_info(full_path=True)
-Q2.grow(n_steps=8)
-Q2.print_info(full_path=True)
+# joints = {}
+
+# homology_classes = {
+#     'gamma_1' : ['p_2'],
+#     'gamma_2' : ['p_1'],
+# }
+
+# w = MCSN(
+#     branch_points=branch_points, 
+#     streets=streets, 
+#     joints=joints, 
+#     homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+
+
+# # print '\n\n-------------------------------------------------------'
+# print '\nSoliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=8)
+# Q1.print_info(full_path=True)
+
+# Q2 = SolitonData(label='Q_2', network=w, street=s2)
+# Q2.initialize()
+# # # Q1.print_info(full_path=True)
+# Q2.grow(n_steps=8)
+# Q2.print_info(full_path=True)
+
+
+
+
+
+
+
+
+
+
 
 
 w.print_info()
 
-print '\n\n'
-print Q1.closed_solitons[1].dash.path
-dash_nodes = get_dash_nodes(Q1.closed_solitons[1].dash, is_closed_soliton=True)
-print dash_nodes
-print [d_n.node.__class__.__name__ for d_n in dash_nodes]
-for node in dash_nodes:
-    node.print_info()
+# print '\n\n'
+# print Q1.closed_solitons[1].dash.path
+# dash_nodes = get_dash_nodes(Q1.closed_solitons[1].dash, is_closed_soliton=True)
+# print dash_nodes
+# print [d_n.node.__class__.__name__ for d_n in dash_nodes]
+# for node in dash_nodes:
+#     node.print_info()
 
-k = compute_self_intersections(Q1.closed_solitons[1].dash, is_closed_soliton=True)
-print k
-# # print '\n\n-------------------------------------------------------'
-# print '\nSoliton Data'
-# Q7 = SolitonData(label='Q_7', network=w , street=s7)
-# Q7.initialize()
-# # # Q1.print_info(full_path=True)
-# Q7.grow(n_steps=9)
-# Q7.print_info(full_path=True)
+# k = compute_self_intersections(Q1.closed_solitons[1].dash, is_closed_soliton=True)
+# print k
