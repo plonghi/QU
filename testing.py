@@ -1196,82 +1196,31 @@ from intersections import get_dash_nodes, compute_self_intersections
 
 
 
-# ### AD_3 theory
-
-# # ----- Create a spectral network ------
-# #              AD_3 theory
-
-
-# streets = ['p_' + str(i + 1) for i in range(2)]
-# branch_points = {
-#     'b_1': ['p_1'],
-#     'b_2': ['p_1', 'p_2'],
-#     'b_3': ['p_2'],
-# }
-
-# joints = {}
-
-# homology_classes = {
-#     'gamma_1' : ['p_2'],
-#     'gamma_2' : ['p_1'],
-# }
-
-# w = MCSN(
-#     branch_points=branch_points, 
-#     streets=streets, 
-#     joints=joints, 
-#     homology_classes=homology_classes
-# )
-
-# #------ Finished creating network -------
-
-# s1 = w.streets['p_1']
-# s2 = w.streets['p_2']
-
-
-# # print '\n\n-------------------------------------------------------'
-# print '\nSoliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1)
-# Q1.initialize()
-# # # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=8)
-# Q1.print_info(full_path=True)
-
-# Q2 = SolitonData(label='Q_2', network=w, street=s2)
-# Q2.initialize()
-# # # Q1.print_info(full_path=True)
-# Q2.grow(n_steps=8)
-# Q2.print_info(full_path=True)
-
-
-
-
-### TEST pure SU(2)
+### AD_3 theory
 
 # ----- Create a spectral network ------
-#          pure SU(2) network
+#              AD_3 theory
 
 
-
-streets = ['p_1','p_2']
+streets = ['p_' + str(i + 1) for i in range(2)]
 branch_points = {
-  'b_1' : ['p_2', 'p_1'],
-  'b_2' : ['p_2', 'p_1']
+    'b_1': ['p_1'],
+    'b_2': ['p_1', 'p_2'],
+    'b_3': ['p_2'],
 }
 
-joints = {
-}
+joints = {}
 
 homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2']
+    'gamma_1' : ['p_2'],
+    'gamma_2' : ['p_1'],
 }
 
 w = MCSN(
-  branch_points=branch_points, 
-  streets=streets, 
-  joints=joints, 
-  homology_classes=homology_classes
+    branch_points=branch_points, 
+    streets=streets, 
+    joints=joints, 
+    homology_classes=homology_classes
 )
 
 #------ Finished creating network -------
@@ -1280,24 +1229,75 @@ s1 = w.streets['p_1']
 s2 = w.streets['p_2']
 
 
-
-print '\n\n-------------------------------------------------------'
-print 'Soliton Data'
-Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# print '\n\n-------------------------------------------------------'
+print '\nSoliton Data'
+Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='british')
 Q1.initialize()
-# Q1.print_info(full_path=True)
-Q1.grow(n_steps=10)
+# # Q1.print_info(full_path=True)
+Q1.grow(n_steps=8)
 Q1.print_info(full_path=True)
 
-Q2 = SolitonData(label='Q_2', network=w , street=s2)
+Q2 = SolitonData(label='Q_2', network=w, street=s2, resolution='british')
 Q2.initialize()
-# Q1.print_info(full_path=True)
-Q2.grow(n_steps=10)
+# # Q1.print_info(full_path=True)
+Q2.grow(n_steps=8)
 Q2.print_info(full_path=True)
 
-print "\n\n"
-print "Generating function of p_1: {}".format(Q1.Q_y)
-print "Generating function of p_2: {}".format(Q2.Q_y)
+
+
+
+# ### TEST pure SU(2)
+
+# # ----- Create a spectral network ------
+# #          pure SU(2) network
+
+
+
+# streets = ['p_1','p_2']
+# branch_points = {
+#   'b_1' : ['p_2', 'p_1'],
+#   'b_2' : ['p_2', 'p_1']
+# }
+
+# joints = {
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2']
+# }
+
+# w = MCSN(
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+
+
+
+# print '\n\n-------------------------------------------------------'
+# print 'Soliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1.initialize()
+# # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=10)
+# Q1.print_info(full_path=True)
+
+# Q2 = SolitonData(label='Q_2', network=w , street=s2)
+# Q2.initialize()
+# # Q1.print_info(full_path=True)
+# Q2.grow(n_steps=10)
+# Q2.print_info(full_path=True)
+
+# print "\n\n"
+# print "Generating function of p_1: {}".format(Q1.Q_y)
+# print "Generating function of p_2: {}".format(Q2.Q_y)
 
 
 

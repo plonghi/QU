@@ -24,7 +24,7 @@ We only specify < [0, 1], [0, 2] > and not its negative < [0, 2], [0, 1] >
 to minimize errors. That will be taken care of by a function.
 We also don't specify zero intersections, those will be understood.
 """
-branch_point_intersections = {
+branch_point_intersections_british = {
     '0121': Rational(-1, 2),
     '0102': Rational(1, 2),
     '0212': Rational(1, 2),
@@ -73,7 +73,7 @@ We only specify < [1, 4], [1, 5] > and not its negative < [1, 5], [1, 4] >
 to minimize errors. That will be taken care of by a function.
 We also don't specify zero intersections, those will be understood.
 """
-joint_intersections = {
+joint_intersections_american = {
     '1415': Rational(1, 2),
     '1424': Rational(1, 2),
     '1425': 1,
@@ -176,9 +176,12 @@ def get_dash_nodes(dash, is_closed_soliton=False):
     return nodes
 
 
-def compute_self_intersections(dash, is_closed_soliton=None):
+def compute_self_intersections(dash, is_closed_soliton=None, resolution=None):
     """
-    Computes the self intersections of a dash.
+    Computes the self intersections of a dash. 
+    The computation depends on the resolution chosen for the network,
+    as this determines how the dashes self-intersect at joints 
+    and branch points.
     """
     self_int = 0
 
@@ -204,13 +207,13 @@ def compute_self_intersections(dash, is_closed_soliton=None):
         # compute intersections of each chord with subsequent ones
         for i_c, c in enumerate(chords):
             self_int += intersections_with_later_chords(
-                i_c, chords, n
+                i_c, chords, n, resolution=resolution,
             )
 
     return self_int
 
 
-def intersections_with_later_chords(c_index, chords, node):
+def intersections_with_later_chords(c_index, chords, node, resolution=None):
     tot_int = 0
 
     # the current chord
@@ -218,12 +221,22 @@ def intersections_with_later_chords(c_index, chords, node):
     later_chords = chords[c_index + 1:]
 
     # the intersection dictionary
-    if node.__class__.__name__ == 'BranchPoint':
-        int_dict = branch_point_intersections
-    elif node.__class__.__name__ == 'Joint':
-        int_dict = joint_intersections
+    if resolution == 'british':
+        if node.__class__.__name__ == 'BranchPoint':
+            int_dict = branch_point_intersections_british
+        elif node.__class__.__name__ == 'Joint':
+            int_dict = joint_intersections_british
+        else:
+            raise Exception
+    elif resolution == 'american':
+        if node.__class__.__name__ == 'BranchPoint':
+            int_dict = branch_point_intersections_american
+        elif node.__class__.__name__ == 'Joint':
+            int_dict = joint_intersections_american
+        else:
+            raise Exception
     else:
-        raise Exception
+        raise ValueError('Unknown resolution type: {}'.format(resolution))
 
     for l_c in later_chords:
         intersection_string = (

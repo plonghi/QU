@@ -338,10 +338,10 @@ class SolitonPath:
     def __init__(
         self, label='no_label', starting_point=None, 
         ending_point=None, growing_pairs=None,
-        dashes=None, complete_dash=None,
+        dashes=None, complete_dash=None, resolution=None,
     ):
         self.label = label
-        self.resolution = None
+        self.resolution = resolution
         if growing_pairs is None:
             self.growing_pairs = []
         else:
@@ -355,7 +355,7 @@ class SolitonPath:
         self.is_complete = False
         self.complete_dash = complete_dash
 
-    def create(self, street=None, source_pt=None, slot=None, resolution=None):
+    def create(self, street=None, source_pt=None, slot=None):
         """
         The source point and slot characterize the direction of growth
         of each dash.
@@ -408,8 +408,6 @@ class SolitonPath:
                 'Street {} doesnt end on {} at slot {}'
                 .format(street.label, source_pt.label, slot)
             )
-
-        self.resolution = resolution
 
         d_i = Dash(label='initial_dash', growth_restriction='forward_only')
         d_f = Dash(label='final_dash', growth_restriction='backward_only')
@@ -701,6 +699,7 @@ def copy_of_soliton(soliton, label='no_label'):
         ending_point=new_ending_point, 
         growing_pairs=new_growing_pairs,
         dashes=new_dashes,
+        resolution=soliton.resolution,
     )
 
     return new_soliton
