@@ -341,6 +341,7 @@ class SolitonPath:
         dashes=None, complete_dash=None,
     ):
         self.label = label
+        self.resolution = None
         if growing_pairs is None:
             self.growing_pairs = []
         else:
@@ -354,7 +355,7 @@ class SolitonPath:
         self.is_complete = False
         self.complete_dash = complete_dash
 
-    def create(self, street=None, source_pt=None, slot=None):
+    def create(self, street=None, source_pt=None, slot=None, resolution=None):
         """
         The source point and slot characterize the direction of growth
         of each dash.
@@ -384,6 +385,9 @@ class SolitonPath:
         must reflect the ptoper time parametrization of the soliton.
         Likewise, the "growing pairs" must reflect the (matching) endpoints
         of consective dashes.
+
+        The resolution of the network determines the evolution of a soliton, 
+        as well as the computation of its writhe.
         """
         # First of all, check that the slot actually corresponds to
         # one where the street ands on the starting_point
@@ -404,6 +408,8 @@ class SolitonPath:
                 'Street {} doesnt end on {} at slot {}'
                 .format(street.label, source_pt.label, slot)
             )
+
+        self.resolution = resolution
 
         d_i = Dash(label='initial_dash', growth_restriction='forward_only')
         d_f = Dash(label='final_dash', growth_restriction='backward_only')
@@ -448,8 +454,11 @@ class SolitonPath:
                 )
             )
 
-    def print_info(self, full_path=False):
-        print 'Dashes of soliton path {} / {}:'.format(self.label, self)
+    def print_info(self, full_path=False):        
+        print (
+            'Dashes of soliton path {} / {} in {} resolution:'
+            .format(self.label, self, self.resolution)
+        )
         for d in self.dashes:
             d.print_endpoints()
         if self.is_complete is True:
@@ -511,9 +520,11 @@ class ClosedSoliton:
     SolitonData.
     """
     def __init__(
-        self, label='no_label', soliton_a=None, soliton_b=None, network=None
+        self, label='no_label', soliton_a=None, soliton_b=None, network=None,
+        resolution=None,
     ):
         self.label = label
+        self.resolution = resolution
         # check that solitons are complete
         if not (
             soliton_a.is_complete is True and soliton_b.is_complete is True
@@ -595,11 +606,13 @@ class ClosedSoliton:
         return homology
 
     def compute_writhe(self):
-        return compute_self_intersections(self.dash, is_closed_soliton=True)
+        return compute_self_intersections(
+            self.dash, is_closed_soliton=True, resolution=self.resolution
+        )
 
     def print_info(self):
-        print 'Homology class : {}, Writhe: {}'.format(
-            self.homology_class.label, self.writhe
+        print 'Homology class : {}, Writhe: {}, Resolution: {}'.format(
+            self.homology_class.label, self.writhe, self.resolution
         )
 
 

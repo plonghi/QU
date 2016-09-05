@@ -17,11 +17,23 @@ class SolitonData:
     all the solitons of each type.
     It will also provide a functionality for growing solitons,
     either by a number of steps, or until all of them are 'complete'.
+
+    The soliton data of a street will moreover depend on a choice of
+    resolution for the critical network, the resolution may be either 
+    'american' or 'british'.
     """
-    def __init__(self, label=None, network=None, street=None):
+    def __init__(self, label=None, network=None, street=None, resolution=None):
         self.label = label
         self.network = network
         self.street = street
+        self.resolution = resolution
+
+        if resolution is None:
+            raise ValueError('Must specify the resolution of the network.')
+        elif resolution=='american' or resolution=='british':
+            pass
+        else:
+            raise ValueError('Unknown resolution: {}'.format(resolution))
         
         # given the orientation of the street, let that be the 
         # orientation of the underlying one-way ij-street. 
@@ -41,7 +53,8 @@ class SolitonData:
         ij_sol.create(
             street=self.street, 
             source_pt=ij_source_pt, 
-            slot=ij_source_slot
+            slot=ij_source_slot,
+            resolution=self.resolution,
         )
 
         # The initial anti-oriented soliton
@@ -51,7 +64,8 @@ class SolitonData:
         ji_sol.create(
             street=self.street, 
             source_pt=ji_source_pt, 
-            slot=ji_source_slot
+            slot=ji_source_slot,
+            resolution=self.resolution,
         )
 
         self.co_oriented_solitons = [ij_sol]
@@ -61,7 +75,9 @@ class SolitonData:
         # grow co-oriented solitons
         new_co_or_sols = []
         for sol in self.co_oriented_solitons:
-            new_sols = grow_soliton(sol, n_steps=n_steps)
+            new_sols = grow_soliton(
+                sol, n_steps=n_steps, resolution=self.resolution
+            )
             new_co_or_sols += new_sols
 
         self.co_oriented_solitons = new_co_or_sols
@@ -69,7 +85,9 @@ class SolitonData:
         # grow anti-oriented solitons
         new_anti_or_sols = []
         for sol in self.anti_oriented_solitons:
-            new_sols = grow_soliton(sol, n_steps=n_steps)
+            new_sols = grow_soliton(
+                sol, n_steps=n_steps, resolution=self.resolution
+            )
             new_anti_or_sols += new_sols
 
         self.anti_oriented_solitons = new_anti_or_sols
@@ -78,6 +96,11 @@ class SolitonData:
         self.compute_closed_solitons()
 
     def print_info(self, full_path=False):
+        print (
+            '\nIn {} resolution\n----------------------------'
+            .format(self.resolution)
+        )
+
         print (
             '\nCo-oriented solitons on {}:\n----------------------------'
             .format(self.street.label)
@@ -123,7 +146,8 @@ class SolitonData:
                         label=sol_a.label + '_+_' + sol_b.label, 
                         soliton_a=sol_a, 
                         soliton_b=sol_b, 
-                        network=self.network
+                        network=self.network,
+                        resolution=self.resolution
                     )
                 )
         
