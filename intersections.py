@@ -73,7 +73,7 @@ We only specify < [1, 4], [1, 5] > and not its negative < [1, 5], [1, 4] >
 to minimize errors. That will be taken care of by a function.
 We also don't specify zero intersections, those will be understood.
 """
-joint_intersections_american = {
+joint_intersections_british = {
     '1415': Rational(1, 2),
     '1424': Rational(1, 2),
     '1425': 1,
@@ -90,6 +90,14 @@ joint_intersections_american = {
     '5303': Rational(1, 2),
     '0203': Rational(1, 2),
 }
+
+"""
+As it turns out the intersection dictionaries for the british
+and american resolutions are the same with our conventions. 
+See the separate notes for the details.
+"""
+branch_point_intersections_american = branch_point_intersections_british
+joint_intersections_american = joint_intersections_british
 
 
 class DashNode:
