@@ -925,7 +925,7 @@ def find_corresponding_pair(soliton, ref_gr_pair, multi=False):
         print (
             'WARNING: '
             'Cannot find a unique growing pair corresponding' 
-            'to the reference one.'
+            'to the reference one (this should not be a problem).'
         )
         return candidates
     elif len(candidates) == 0:

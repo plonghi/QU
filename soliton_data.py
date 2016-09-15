@@ -97,38 +97,43 @@ class SolitonData:
         # compute closed solitons
         self.compute_closed_solitons()
 
-    def print_info(self, full_path=False):
+    def print_info(self, full_path=False, soliton_paths=False, writhes=False):
         print (
+            '\n\nData of street {}'
             '\nIn {} resolution\n----------------------------'
-            .format(self.resolution)
+            .format(self.street.label, self.resolution)
         )
 
-        print (
-            '\nCo-oriented solitons on {}:\n----------------------------'
-            .format(self.street.label)
-        )
+        if soliton_paths is True:
+            print (
+                '\nCo-oriented solitons on {}:\n----------------------------'
+                .format(self.street.label)
+            )
 
-        for i, s in enumerate(self.co_oriented_solitons):
-            print '{}.'.format(i + 1)
-            s.print_info(full_path=full_path)
-        print (
-            '\nAnti-oriented solitons on {}:\n------------------------------'
-            .format(self.street.label)
-        )
-        for i, s in enumerate(self.anti_oriented_solitons):
-            print '{}.'.format(i + 1)
-            s.print_info(full_path=full_path)
+            for i, s in enumerate(self.co_oriented_solitons):
+                print '{}.'.format(i + 1)
+                s.print_info(full_path=full_path)
+            print (
+                '\nAnti-oriented solitons on {}:\n------------------------------'
+                .format(self.street.label)
+            )
+            for i, s in enumerate(self.anti_oriented_solitons):
+                print '{}.'.format(i + 1)
+                s.print_info(full_path=full_path)
 
-        print (
-            '\nClosed solitons on {}:\n------------------------------'
-            .format(self.street.label)
-        )
-        for i, s in enumerate(self.closed_solitons):
-            print '{}.'.format(i + 1)
-            s.print_info()
-        print '\nClosed Soliton generating function (without spin)'
-        print self.Q
-        print '\nClosed Soliton generating function (with spin)'
+            print (
+                '\nClosed solitons on {}:\n------------------------------'
+                .format(self.street.label)
+            )
+
+        if writhes is True:
+            for i, s in enumerate(self.closed_solitons):
+                print '{}.'.format(i + 1)
+                s.print_info()
+
+        # print '\n4d Soliton generating function (without spin)'
+        # print self.Q
+        print '4d Soliton generating function (with spin)'
         print self.Q_y
 
     def compute_closed_solitons(self):
@@ -168,6 +173,58 @@ class SolitonData:
         """
         # TODO
         pass
+
+
+class NetworkSolitonContent:
+    """
+    Container class for a Network's soliton content
+    """
+    def __init__(self, network=None, iterations=None):
+        self.american_data = None
+        self.british_data = None
+        self.network = network
+        self.iterations = iterations
+
+        if (self.network is not None) and (self.iterations is not None):
+            self.compute()
+
+    def compute(self):
+        self.american_data = (
+            [SolitonData(
+                label='Q_('+street_label+')', 
+                network=self.network, 
+                street=street, 
+                resolution='american'
+            ) for street_label, street in self.network.streets.iteritems()]
+        )
+
+        self.british_data = (
+            [SolitonData(
+                label='Q_('+street_label+')', 
+                network=self.network, 
+                street=street, 
+                resolution='british'
+            ) for street_label, street in self.network.streets.iteritems()]
+        )
+
+        for q in self.american_data:
+            q.initialize()
+            q.grow(n_steps=self.iterations)
+
+        for q in self.british_data:
+            q.initialize()
+            q.grow(n_steps=self.iterations)
+
+    def print_info(self):
+        for q in self.american_data:
+            q.print_info(full_path=False, soliton_paths=False, writhes=False)
+
+        for q in self.british_data:
+            q.print_info(full_path=False, soliton_paths=False, writhes=False)
+
+
+
+
 
 
 
