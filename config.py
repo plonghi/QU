@@ -38,7 +38,7 @@ class MCSNConfig:
             print ('Loading configuration from {}...'.format(file_path))
             with open(file_path, 'r') as fp:
                 self.read(fp)
-            print ('Finished loading configuration from {}.'
+            print ('Finished loading configuration from {}.\n\n'
                         .format(file_path))
 
     def __setitem__(self, option, value):
