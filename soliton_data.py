@@ -133,7 +133,7 @@ class SolitonData:
 
         # print '\n4d Soliton generating function (without spin)'
         # print self.Q
-        print '4d Soliton generating function (with spin)'
+        print '\n4d Soliton generating function (with spin)'
         print self.Q_y
 
     def compute_closed_solitons(self):
@@ -215,12 +215,20 @@ class NetworkSolitonContent:
             q.initialize()
             q.grow(n_steps=self.iterations)
 
-    def print_info(self):
+    def print_info(self, full_path=False, soliton_paths=False, writhes=False):
         for q in self.american_data:
-            q.print_info(full_path=False, soliton_paths=False, writhes=False)
+            q.print_info(
+                full_path=full_path, 
+                soliton_paths=soliton_paths, 
+                writhes=writhes
+            )
 
         for q in self.british_data:
-            q.print_info(full_path=False, soliton_paths=False, writhes=False)
+            q.print_info(
+                full_path=full_path, 
+                soliton_paths=soliton_paths, 
+                writhes=writhes
+            )
 
 
 

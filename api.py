@@ -5,7 +5,9 @@ from soliton_data import NetworkSolitonContent
 from config import MCSNConfig
 
 
-def analyze_configuration(config_file_name, saving_file_name):
+def analyze_configuration(
+	config_file_name, saving_file_name, details_options
+):
 	"""
 	both config_file_name and saving_file_name must contain the full 
 	path of the files, including the extension
@@ -13,6 +15,8 @@ def analyze_configuration(config_file_name, saving_file_name):
 	# config_file_name = 'argyres_douglas_3'
 	# sys.stdout = open('results/soliton_data_'+config_file_name+'.txt', 'w')
 	# cf = MCSNConfig(file_path='config/'+config_file_name+'.ini')
+
+	soliton_paths_details = details_options
 
 	sys.stdout = open(saving_file_name, 'w')
 	cf = MCSNConfig(file_path=config_file_name)
@@ -32,5 +36,9 @@ def analyze_configuration(config_file_name, saving_file_name):
 	w.print_info()
 
 	print '\n\n===============\nSOLITON DATA\n==============='
-	w_solitons.print_info()
+	w_solitons.print_info(
+		full_path=soliton_paths_details, # prints the paths for complete solitons as well
+		soliton_paths=soliton_paths_details, 
+		writhes=soliton_paths_details,
+	)
 

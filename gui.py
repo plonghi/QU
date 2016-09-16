@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # import Tkinter as tk       
 
 # class Application(tk.Frame):              
@@ -19,11 +21,12 @@
 
 
 import Tkinter, Tkconstants, tkFileDialog
-from main import analyze_configuration
+from api import analyze_configuration
 
 class NetworkAnalysisWindow(Tkinter.Frame):
 
   def __init__(self, root):
+    self.print_soliton_details = Tkinter.BooleanVar()
 
     self.config_filename = None
     self.saving_filename = None
@@ -36,9 +39,11 @@ class NetworkAnalysisWindow(Tkinter.Frame):
     # define buttons
     # Tkinter.Button(self, text='askopenfile', command=self.askopenfile).pack(**button_opt)
     Tkinter.Button(self, text='Load Configuration', command=self.askopenfilename).pack(**button_opt)
+    Tkinter.Checkbutton(self, text="2d-4d Soliton Details", variable=self.print_soliton_details).pack()
     # Tkinter.Button(self, text='asksaveasfile', command=self.asksaveasfile).pack(**button_opt)
     Tkinter.Button(self, text='Compute and Save Soliton Data', command=self.asksaveasfilename).pack(**button_opt)
     # Tkinter.Button(self, text='askdirectory', command=self.askdirectory).pack(**button_opt)
+    Tkinter.Button(self, text='Quit', command=self.quit).pack()
 
     # define options for opening or saving a file
     self.file_opt = options = {}
@@ -97,7 +102,10 @@ class NetworkAnalysisWindow(Tkinter.Frame):
 
     # open file on your own
     if self.saving_filename:
-        analyze_configuration(self.config_filename, self.saving_filename)
+        analyze_configuration(
+          self.config_filename, self.saving_filename,
+          self.print_soliton_details.get(), 
+        )
         self.quit()
 
   # def askdirectory(self):
