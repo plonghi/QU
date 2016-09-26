@@ -126,6 +126,10 @@ class SolitonData:
                 .format(self.street.label)
             )
 
+            for i, s in enumerate(self.closed_solitons):
+                print '{}.'.format(i + 1)
+                s.print_info()
+
         if writhes is True:
             for i, s in enumerate(self.closed_solitons):
                 print '{}.'.format(i + 1)

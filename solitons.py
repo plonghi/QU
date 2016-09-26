@@ -1,6 +1,7 @@
 from copy import copy  # , deepcopy
 # from mcsn import MCSN, Street, Joint, BranchPoint, HomologyClass
 from intersections import compute_self_intersections
+from itertools import count
 
 
 class Dash:
@@ -335,12 +336,15 @@ class SolitonPath:
     """
     # TODO: elimiate growing_pairs form the input, just keep 
     # dashes, and use a function to determine the growing pairs.
+    _ids = count(0)
+
     def __init__(
         self, label='no_label', starting_point=None, 
         ending_point=None, growing_pairs=None,
         dashes=None, complete_dash=None, resolution=None,
     ):
-        self.label = label
+        # self.label = label
+        self.label = 'Soliton #' + str(self._ids.next())
         self.resolution = resolution
         if growing_pairs is None:
             self.growing_pairs = []
@@ -550,6 +554,7 @@ class ClosedSoliton:
         # self.streets_set = []
         self.homology_class = self.determine_homology_class(network)
         self.writhe = self.compute_writhe()
+        self.parents = [soliton_a, soliton_b]
         
     def determine_homology_class(self, network):
         """
@@ -609,9 +614,13 @@ class ClosedSoliton:
         )
 
     def print_info(self):
-        print 'Homology class : {}, Writhe: {}, Resolution: {}'.format(
+        print 'Closed soliton {} is the concatenation of {} and {}'.format(
+            self.label, self.parents[0].label, self.parents[1].label
+        )
+        print 'Homology class : {}, \nWrithe: {}, \nResolution: {}'.format(
             self.homology_class.label, self.writhe, self.resolution
         )
+        print 'Monomial : {}'.format(self.homology_class.symbol)
 
 
 def set_orientation_from_starting_point(
