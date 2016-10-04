@@ -883,20 +883,20 @@ from config import MCSNConfig
 
 # print '\n\n-------------------------------------------------------'
 # print 'Soliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
 # Q1.initialize()
 # # Q1.print_info(full_path=True)
 # Q1.grow(n_steps=10)
 # Q1.print_info(full_path=True)
 
-# Q2 = SolitonData(label='Q_2', network=w , street=r1)
+# Q2 = SolitonData(label='Q_2', network=w , street=r1, resolution='american')
 # Q2.initialize()
 # # Q1.print_info(full_path=True)
 # Q2.grow(n_steps=10)
 # Q2.print_info(full_path=True)
 
 
-# Q3 = SolitonData(label='Q_3', network=w , street=s2)
+# Q3 = SolitonData(label='Q_3', network=w , street=s2,resolution='american')
 # Q3.initialize()
 # # Q1.print_info(full_path=True)
 # Q3.grow(n_steps=10)
@@ -949,20 +949,20 @@ from config import MCSNConfig
 
 # print '\n\n-------------------------------------------------------'
 # print 'Soliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1)
+# Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
 # Q1.initialize()
 # # Q1.print_info(full_path=True)
 # Q1.grow(n_steps=10)
 # Q1.print_info(full_path=True)
 
-# Q2 = SolitonData(label='Q_2', network=w , street=r1)
+# Q2 = SolitonData(label='Q_2', network=w , street=r1, resolution='american')
 # Q2.initialize()
 # # Q1.print_info(full_path=True)
 # Q2.grow(n_steps=10)
 # Q2.print_info(full_path=True)
 
 
-# Q3 = SolitonData(label='Q_3', network=w , street=s2)
+# Q3 = SolitonData(label='Q_3', network=w , street=s2, resolution='american')
 # Q3.initialize()
 # # Q1.print_info(full_path=True)
 # Q3.grow(n_steps=10)
@@ -1124,46 +1124,164 @@ from config import MCSNConfig
 
 # print "\n\n"
 # print "Generating function (american) of p_1: {}".format(Q1.Q_y)
+# print "Generating function (american) of p_1 with opposite basepoint: {}".format(Q1.Q_y_reversed)
 # print "Generating function (american) of q_1: {}".format(Q2.Q_y)
+# print "Generating function (american) of q_1 with opposite basepoint: {}".format(Q2.Q_y_reversed)
 # print "Generating function (british) of p_1: {}".format(Q3.Q_y)
+# print "Generating function (british) of p_1 with opposite basepoint: {}".format(Q3.Q_y_reversed)
 # print "Generating function (british) of q_1: {}".format(Q4.Q_y)
+# print "Generating function (british) of q_1 with opposite basepoint: {}".format(Q4.Q_y_reversed)
 
 
 
 
 
 
-# ### T3
+# # ### T3
+
+# # ----- Create a spectral network ------
+# #                T3 network
+
+
+
+# streets = ['p_'+str(i) for i in range(1, 13)]
+# branch_points = {
+#   'b_1' : ['p_1', 'p_7', 'p_8'],
+#   'b_2' : ['p_2', 'p_10', 'p_12'],
+#   'b_3' : ['p_3', 'p_11', 'p_9'],
+#   'b_4' : ['p_4','p_8','p_7'],
+#   'b_5' : ['p_5', 'p_9', 'p_11'],
+#   'b_6' : ['p_6', 'p_12', 'p_10']
+# }
+
+# joints = {
+#   'j_1': ['p_1', None, 'p_2', None, 'p_3', None ],
+#   'j_2': ['p_4', None, 'p_5', None, 'p_6', None],
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['p_4', 'p_5', 'p_6'],
+#   'gamma_3' : ['p_7'],
+#   'gamma_4' : ['p_8'],
+#   'gamma_5' : ['p_9'],
+#   'gamma_6' : ['p_10'],
+#   'gamma_7' : ['p_11'],
+#   'gamma_8' : ['p_12'],
+# }
+
+# w = MCSN(
+#   branch_points=branch_points, 
+#   streets=streets, 
+#   joints=joints, 
+#   homology_classes=homology_classes
+# )
+
+# #------ Finished creating network -------
+
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+# s3 = w.streets['p_3']
+# s4 = w.streets['p_4']
+# s5 = w.streets['p_5']
+# s6 = w.streets['p_6']
+# s7 = w.streets['p_7']
+# s8 = w.streets['p_8']
+# s9 = w.streets['p_9']
+# s10 = w.streets['p_10']
+# s11 = w.streets['p_11']
+# s12 = w.streets['p_12']
+
+
+# print '\n\n-------------------------------------------------------'
+# print 'Soliton Data'
+
+# ST = s1
+
+# # Q1 = SolitonData(label='Q_1', network=w , street=ST, resolution='american')
+# # Q1.initialize()
+# # # Q1.print_info(full_path=True)
+# # Q1.grow(n_steps=7)
+# # # Q1.print_info(full_path=True)
+
+# ST = s1
+
+# Q1m = SolitonData(label='Q_1m', network=w , street=ST, resolution='american')
+# Q1m.initialize()
+# # Q1.print_info(full_path=True)
+# Q1m.grow(n_steps=8)
+# Q1m.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+# Q1p = SolitonData(label='Q_1p', network=w , street=ST, resolution='british')
+# Q1p.initialize()
+# # Q1.print_info(full_path=True)
+# Q1p.grow(n_steps=8)
+# Q1p.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+
+# ST = s9
+
+# Q9m = SolitonData(label='Q_9m', network=w , street=ST, resolution='american')
+# Q9m.initialize()
+# # Q1.print_info(full_path=True)
+# Q9m.grow(n_steps=8)
+# Q9m.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+# Q9p = SolitonData(label='Q_9p', network=w , street=ST, resolution='british')
+# Q9p.initialize()
+# # Q1.print_info(full_path=True)
+# Q9p.grow(n_steps=8)
+# Q9p.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+
+# ST = s11
+
+# Q11m = SolitonData(label='Q_11m', network=w , street=ST, resolution='american')
+# Q11m.initialize()
+# # Q1.print_info(full_path=True)
+# Q11m.grow(n_steps=8)
+# Q11m.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+# Q11p = SolitonData(label='Q_11p', network=w , street=ST, resolution='british')
+# Q11p.initialize()
+# # Q1.print_info(full_path=True)
+# Q11p.grow(n_steps=8)
+# Q11p.print_info(full_path=True, soliton_paths=True, writhes=False)
+
+
+# print "\n\n"
+# # print "Generating function (american) of {}: {}".format(ST.label, Q1.Q_y)
+# # print "Generating function (british) of {}: {}".format(ST.label, Q2.Q_y)
+
+
+
 
 # ----- Create a spectral network ------
-#                T3 network
+#               T2 network    
+#
+#           .--- b1 --.
+#           |    |    |
+#           |    |    |
+#         (p3)  (p1)  (p2)
+#           |    |    |
+#           |    |    |
+#           '--- b2 --'
 
 
+streets = ['p_1', 'p_2', 'p_3']
+branch_points = (
+  {
+      'b_1': ['p_1', 'p_2', 'p_3'],
+      'b_2': ['p_1', 'p_3', 'p_2'],
+  }
+)
 
-streets = ['p_'+str(i) for i in range(1, 13)]
-branch_points = {
-  'b_1' : ['p_1', 'p_7', 'p_8'],
-  'b_2' : ['p_2', 'p_10', 'p_12'],
-  'b_3' : ['p_3', 'p_11', 'p_9'],
-  'b_4' : ['p_4','p_8','p_7'],
-  'b_5' : ['p_5', 'p_9', 'p_11'],
-  'b_6' : ['p_6', 'p_12', 'p_10']
-}
-
-joints = {
-  'j_1': ['p_1', None, 'p_2', None, 'p_3', None ],
-  'j_2': ['p_4', None, 'p_5', None, 'p_6', None],
-}
+joints = {}
 
 homology_classes = {
-  'gamma_1' : ['p_1', 'p_2', 'p_3'],
-  'gamma_2' : ['p_4', 'p_5', 'p_6'],
-  'gamma_3' : ['p_7'],
-  'gamma_4' : ['p_8'],
-  'gamma_5' : ['p_9'],
-  'gamma_6' : ['p_10'],
-  'gamma_7' : ['p_11'],
-  'gamma_8' : ['p_12'],
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
 }
 
 w = MCSN(
@@ -1178,58 +1296,69 @@ w = MCSN(
 s1 = w.streets['p_1']
 s2 = w.streets['p_2']
 s3 = w.streets['p_3']
-s4 = w.streets['p_4']
-s5 = w.streets['p_5']
-s6 = w.streets['p_6']
-s7 = w.streets['p_7']
-s8 = w.streets['p_8']
-s9 = w.streets['p_9']
-s10 = w.streets['p_10']
-s11 = w.streets['p_11']
-s12 = w.streets['p_12']
-
 
 print '\n\n-------------------------------------------------------'
 print 'Soliton Data'
-
-ST = s1
-
-# Q1 = SolitonData(label='Q_1', network=w , street=ST, resolution='american')
-# Q1.initialize()
-# # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=7)
-# # Q1.print_info(full_path=True)
-
-Q2 = SolitonData(label='Q_2', network=w , street=ST, resolution='british')
-Q2.initialize()
+Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
+Q1.initialize()
 # Q1.print_info(full_path=True)
-Q2.grow(n_steps=6)
-Q2.print_info(full_path=True, soliton_paths=True, writhes=False)
+Q1.grow(n_steps=2)
+Q1.print_info(full_path=True, soliton_paths=False, writhes=True)
+
+# Q2 = SolitonData(label='Q_2', network=w , street=s2, resolution='american')
+# Q2.initialize()
+# # Q1.print_info(full_path=True)
+# Q2.grow(n_steps=10)
+# Q2.print_info(full_path=True)
+
+
+# Q3 = SolitonData(label='Q_3', network=w , street=s3, resolution='american')
+# Q3.initialize()
+# # Q1.print_info(full_path=True)
+# Q3.grow(n_steps=10)
+# Q3.print_info(full_path=False)
+
+Q4 = SolitonData(label='Q_4', network=w , street=s1, resolution='british')
+Q4.initialize()
+# Q1.print_info(full_path=True)
+Q4.grow(n_steps=2)
+Q4.print_info(full_path=True, writhes=True)
+
+# Q5 = SolitonData(label='Q_5', network=w , street=s2, resolution='british')
+# Q5.initialize()
+# # Q1.print_info(full_path=True)
+# Q5.grow(n_steps=10)
+# Q5.print_info(full_path=False)
+
+# Q6 = SolitonData(label='Q_6', network=w , street=s3, resolution='british')
+# Q6.initialize()
+# # Q1.print_info(full_path=True)
+# Q6.grow(n_steps=10)
+# Q6.print_info(full_path=False)
 
 print "\n\n"
-# print "Generating function (american) of {}: {}".format(ST.label, Q1.Q_y)
-# print "Generating function (british) of {}: {}".format(ST.label, Q2.Q_y)
+print "Generating function (american) of p_1: {}".format(Q1.Q_y)
+print "Generating function (american) of p_1 with opposite basepoint: {}".format(Q1.Q_y_reversed)
+# print "Generating function (american) of p_2: {}".format(Q2.Q_y)
+# print "Generating function (american) of p_2 with opposite basepoint: {}".format(Q2.Q_y_reversed)
+# print "Generating function (american) of p_3: {}".format(Q3.Q_y)
+# print "Generating function (american) of p_3 with opposite basepoint: {}".format(Q3.Q_y_reversed)
+print "Generating function (british) of p_1: {}".format(Q4.Q_y)
+# print "Generating function (british) of p_2: {}".format(Q5.Q_y)
+# print "Generating function (british) of p_3: {}".format(Q6.Q_y)
 
 
 
 
 # # ----- Create a spectral network ------
-# #               T2 network    
+# #            N = 2^* network    
 # #
-# #           .--- b1 --.
-# #           |    |    |
-# #           |    |    |
-# #         (p3)  (p1)  (p2)
-# #           |    |    |
-# #           |    |    |
-# #           '--- b2 --'
-
 
 # streets = ['p_1', 'p_2', 'p_3']
 # branch_points = (
 #   {
 #       'b_1': ['p_1', 'p_2', 'p_3'],
-#       'b_2': ['p_1', 'p_3', 'p_2'],
+#       'b_2': ['p_1', 'p_2', 'p_3'],
 #   }
 # )
 
@@ -1295,91 +1424,11 @@ print "\n\n"
 
 # print "\n\n"
 # print "Generating function (american) of p_1: {}".format(Q1.Q_y)
+# print "Generating function (american) of p_1 with opposite basepoint: {}".format(Q1.Q_y_reversed)
 # print "Generating function (american) of p_2: {}".format(Q2.Q_y)
+# print "Generating function (american) of p_2 with opposite basepoint: {}".format(Q2.Q_y_reversed)
 # print "Generating function (american) of p_3: {}".format(Q3.Q_y)
-# print "Generating function (british) of p_1: {}".format(Q4.Q_y)
-# print "Generating function (british) of p_2: {}".format(Q5.Q_y)
-# print "Generating function (british) of p_3: {}".format(Q6.Q_y)
-
-
-
-
-# # ----- Create a spectral network ------
-# #            N = 2^* network    
-# #
-
-# streets = ['p_1', 'p_2', 'p_3']
-# branch_points = (
-#   {
-#       'b_1': ['p_1', 'p_2', 'p_3'],
-#       'b_2': ['p_1', 'p_2', 'p_3'],
-#   }
-# )
-
-# joints = {}
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-# }
-
-# w = MCSN(
-#   branch_points=branch_points, 
-#   streets=streets, 
-#   joints=joints, 
-#   homology_classes=homology_classes
-# )
-
-# #------ Finished creating network -------
-
-# s1 = w.streets['p_1']
-# s2 = w.streets['p_2']
-# s3 = w.streets['p_3']
-
-# print '\n\n-------------------------------------------------------'
-# print 'Soliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
-# Q1.initialize()
-# # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=18)
-# Q1.print_info(full_path=True)
-
-# Q2 = SolitonData(label='Q_2', network=w , street=s2, resolution='american')
-# Q2.initialize()
-# # Q1.print_info(full_path=True)
-# Q2.grow(n_steps=10)
-# Q2.print_info(full_path=True)
-
-
-# Q3 = SolitonData(label='Q_3', network=w , street=s3, resolution='american')
-# Q3.initialize()
-# # Q1.print_info(full_path=True)
-# Q3.grow(n_steps=10)
-# Q3.print_info(full_path=False)
-
-# Q4 = SolitonData(label='Q_4', network=w , street=s1, resolution='british')
-# Q4.initialize()
-# # Q1.print_info(full_path=True)
-# Q4.grow(n_steps=20)
-# Q4.print_info(full_path=False)
-
-# Q5 = SolitonData(label='Q_5', network=w , street=s2, resolution='british')
-# Q5.initialize()
-# # Q1.print_info(full_path=True)
-# Q5.grow(n_steps=10)
-# Q5.print_info(full_path=False)
-
-# Q6 = SolitonData(label='Q_6', network=w , street=s3, resolution='british')
-# Q6.initialize()
-# # Q1.print_info(full_path=True)
-# Q6.grow(n_steps=10)
-# Q6.print_info(full_path=False)
-
-# print "\n\n"
-# print "Generating function (american) of p_1: {}".format(Q1.Q_y)
-# print "Generating function (american) of p_2: {}".format(Q2.Q_y)
-# print "Generating function (american) of p_3: {}".format(Q3.Q_y)
+# print "Generating function (american) of p_3 with opposite basepoint: {}".format(Q3.Q_y_reversed)
 # print "Generating function (british) of p_1: {}".format(Q4.Q_y)
 # print "Generating function (british) of p_2: {}".format(Q5.Q_y)
 # print "Generating function (british) of p_3: {}".format(Q6.Q_y)
@@ -1441,8 +1490,10 @@ print "\n\n"
 # # Q2.print_info(full_path=True)
 
 # print "\n\n"
-# print "Generating function (american) of {}: {}".format(ST.label, Q1.Q)
-# print "Generating function (british) of {}: {}".format(ST.label, Q2.Q)
+# print "Generating function (american) of {}: {}".format(ST.label, Q1.Q_y)
+# print "Generating function (british) of {}: {}".format(ST.label, Q2.Q_y)
+# print "Generating function (american) of {} with opposite basepoint: {}".format(ST.label, Q1.Q_y_reversed)
+# print "Generating function (british) of {} with opposite basepoint: {}".format(ST.label, Q2.Q_y_reversed)
 
 
 
@@ -1685,7 +1736,7 @@ print "\n\n"
 # # #------ Finished creating network and computing soliton data-------
 
 # print '\n\n===============\nNETWORK DATA\n==============='
-# w.print_info()
+w.print_info()
 
 # print '\n\n===============\nSOLITON DATA\n==============='
 # w_solitons.print_info()

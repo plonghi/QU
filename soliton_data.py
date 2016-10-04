@@ -42,8 +42,10 @@ class SolitonData:
         self.co_oriented_solitons = []
         self.anti_oriented_solitons = []
         self.closed_solitons = []
+        self.closed_solitons_reversed = []
         self.Q = 0
         self.Q_y = 0
+        self.Q_y_reversed = 0
 
     def initialize(self):
         # The initial co-oriented soliton
@@ -121,17 +123,40 @@ class SolitonData:
                 print '{}.'.format(i + 1)
                 s.print_info(full_path=full_path)
 
+            # print (
+            #     '\nClosed solitons on {}:\n------------------------------'
+            #     .format(self.street.label)
+            # )
+
+            # for i, s in enumerate(self.closed_solitons):
+            #     print '{}.'.format(i + 1)
+            #     s.print_info()
+
+            # print (
+            #     '\nClosed solitons on {} with opposite choice of basepoint:'
+            #     '\n------------------------------'
+            #     .format(self.street.label)
+            # )
+
+            # for i, s in enumerate(self.closed_solitons_reversed):
+            #     print '{}.'.format(i + 1)
+            #     s.print_info()
+
+        if soliton_paths is True or writhes is True:
             print (
                 '\nClosed solitons on {}:\n------------------------------'
                 .format(self.street.label)
             )
-
             for i, s in enumerate(self.closed_solitons):
                 print '{}.'.format(i + 1)
                 s.print_info()
 
-        if writhes is True:
-            for i, s in enumerate(self.closed_solitons):
+            print (
+                '\nClosed solitons on {} with opposite choice of basepoint:'
+                '\n------------------------------'
+                .format(self.street.label)
+            )
+            for i, s in enumerate(self.closed_solitons_reversed):
                 print '{}.'.format(i + 1)
                 s.print_info()
 
@@ -139,9 +164,12 @@ class SolitonData:
         # print self.Q
         print '\n4d Soliton generating function (with spin)'
         print self.Q_y
+        print '\n4d Soliton generating function with opposite basepoints (with spin)'
+        print self.Q_y_reversed
 
     def compute_closed_solitons(self):
         self.closed_solitons = []
+        self.closed_solitons_reversed = []
 
         complete_co_oriented_sols = (
             [s for s in self.co_oriented_solitons if s.is_complete is True]
@@ -157,16 +185,35 @@ class SolitonData:
                         label=sol_a.label + '_+_' + sol_b.label, 
                         soliton_a=sol_a, 
                         soliton_b=sol_b, 
+                        # soliton_a=sol_b, 
+                        # soliton_b=sol_a, 
                         network=self.network,
                         resolution=self.resolution
                     )
                 )
+                self.closed_solitons_reversed.append(
+                    ClosedSoliton(
+                        label=sol_a.label + '_+_' + sol_b.label, 
+                        # soliton_a=sol_a, 
+                        # soliton_b=sol_b, 
+                        soliton_a=sol_b, 
+                        soliton_b=sol_a, 
+                        network=self.network,
+                        resolution=self.resolution
+                    )
+                )
+                
         
         self.Q = 1
         self.Q_y = 1
+        self.Q_y_reversed = 1
         for c_sol in self.closed_solitons:
             self.Q += c_sol.homology_class.symbol
             self.Q_y += (
+                (symbols('y') ** c_sol.writhe) * c_sol.homology_class.symbol
+            )
+        for c_sol in self.closed_solitons_reversed:
+            self.Q_y_reversed += (
                 (symbols('y') ** c_sol.writhe) * c_sol.homology_class.symbol
             )
 

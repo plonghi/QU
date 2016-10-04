@@ -520,6 +520,10 @@ class ClosedSoliton:
     By convention, we will take soliton_a to be a co-oriented
     soliton supported on the street, as defined by the class 
     SolitonData.
+    UPDATE: we will actualy construct both 'ab' and 'ba'
+    for applications, in each case we use this function
+    by just switching the arguments of the co-oriented
+    2d soliton and the anti-oriented one.
     """
     def __init__(
         self, label='no_label', soliton_a=None, soliton_b=None, network=None,
@@ -621,6 +625,8 @@ class ClosedSoliton:
             self.homology_class.label, self.writhe, self.resolution
         )
         print 'Monomial : {}'.format(self.homology_class.symbol)
+        print 'Detailed path info :'
+        self.dash.print_path_info()
 
 
 def set_orientation_from_starting_point(
