@@ -582,40 +582,26 @@ class ClosedSoliton:
         # # a list of the type
         # # [['gamma_1', 1], ['gamma_2',0], ['gamma_3', 2], ...]
         for hc_label in network.basis_homology_classes.keys():
-            count = 0
             # Check that every street of a homology class appears 
             # an equal number of times, and that for each street
             # there are equal occurrences of opposite orientations.
             hc_streets = network.basis_homology_classes[hc_label].streets
+            hc_street_count = []
             for street in hc_streets:
                 # count occurrences of [street, +1] in the path
                 s_count_1 = self.dash.path.count([street, +1])
                 # count occurrences of [street, -1] in the path
                 s_count_2 = self.dash.path.count([street, -1])
                 if s_count_1 == s_count_2:
-                    if count == 0:
-                        count = s_count_1
-                    else:
-                        if count == s_count_1:
-                            pass
-                        else:
-                            # Here we assume that the lift of a given street
-                            # appears in more than one homology class, say
-                            # in gamma1 and gamma2.
-                            # If there is a counting discrepancy with other 
-                            # streets in gamma1, then we keep the smaller 
-                            # number.
-                            count = min(count, s_count_1)
-                            break
-                            # raise Exception(
-                            #     'Different streets of the same homology class '
-                            #     'appear a different number of times in the '
-                            #     'path of the closed soliton.'
-                            # )
-            # homology_list.append(
-            #   [network.basis_homology_classes[hc_label], count]
-            # )
-
+                    hc_street_count.append(s_count_1)
+                    
+            # If the lift of a given street
+            # appears in more than one homology class, say
+            # in gamma1 and gamma2, then 
+            # there will be a counting discrepancy with other 
+            # streets in gamma1, so we keep the smallest
+            # number.
+            count = min(hc_street_count)
             for i in range(count):
                 homology = homology + network.basis_homology_classes[hc_label]
         if homology == network.trivial_homology_class:
