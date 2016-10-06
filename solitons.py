@@ -599,17 +599,32 @@ class ClosedSoliton:
                         if count == s_count_1:
                             pass
                         else:
-                            raise Exception(
-                                'Different streets of the same homology class '
-                                'appear a different number of times in the '
-                                'path of the closed soliton.'
-                            )
+                            # Here we assume that the lift of a given street
+                            # appears in more than one homology class, say
+                            # in gamma1 and gamma2.
+                            # If there is a counting discrepancy with other 
+                            # streets in gamma1, then we keep the smaller 
+                            # number.
+                            count = min(count, s_count_1)
+                            break
+                            # raise Exception(
+                            #     'Different streets of the same homology class '
+                            #     'appear a different number of times in the '
+                            #     'path of the closed soliton.'
+                            # )
             # homology_list.append(
             #   [network.basis_homology_classes[hc_label], count]
             # )
 
             for i in range(count):
                 homology = homology + network.basis_homology_classes[hc_label]
+        if homology == network.trivial_homology_class:
+            print (
+                'Could not determine the homology class of a soliton.'
+                'Its path is the following:'
+            )
+            self.dash.print_path_info()
+            raise Exception
         return homology
 
     def compute_writhe(self):
@@ -937,11 +952,11 @@ def find_corresponding_pair(soliton, ref_gr_pair, multi=False):
             candidates.append(g_p)
 
     if len(candidates) > 1 and multi is False:
-        print (
-            'WARNING: '
-            'Cannot find a unique growing pair corresponding' 
-            'to the reference one (this should not be a problem).'
-        )
+        # print (
+        #     'WARNING: '
+        #     'Cannot find a unique growing pair corresponding' 
+        #     'to the reference one (this should not be a problem).'
+        # )
         return candidates
     elif len(candidates) == 0:
         raise Exception(

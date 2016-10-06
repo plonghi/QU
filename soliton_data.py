@@ -164,7 +164,7 @@ class SolitonData:
         # print self.Q
         print '\n4d Soliton generating function (with spin)'
         print self.Q_y
-        print '\n4d Soliton generating function with opposite basepoints (with spin)'
+        print '\n4d Soliton generating function with opposite basepoint (with spin)'
         print self.Q_y_reversed
 
     def compute_closed_solitons(self):

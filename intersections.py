@@ -221,6 +221,52 @@ def compute_self_intersections(dash, is_closed_soliton=None, resolution=None):
     return self_int
 
 
+def compute_self_intersections_2(dash, is_closed_soliton=None, resolution=None):
+    """
+    Computes the self intersections of a dash. 
+    The computation depends on the resolution chosen for the network,
+    as this determines how the dashes self-intersect at joints 
+    and branch points.
+    """
+    self_int = 0
+
+    if is_closed_soliton is True or is_closed_soliton is False:
+        pass
+    else:
+        raise ValueError('Must specify whether it is a closed soliton or not')
+
+    dash.nodes = get_dash_nodes(dash, is_closed_soliton=is_closed_soliton)
+
+    # build a list of branch points and joints 
+    # through which the dash develops.
+    distinct_nodes = []
+    for d_n in dash.nodes:
+        if d_n.node not in distinct_nodes:
+            distinct_nodes.append(d_n.node)
+
+    print 'distinct nodes:'
+    print distinct_nodes
+
+    # compute the intersections for each branch point or joint
+    for n in distinct_nodes:
+        print '\nat node {}'.format([n.label])
+        # n is a branch point or joint, while 
+        # dn below is a dash node object
+        chords = [dn.chord for dn in dash.nodes if dn.node == n]
+        print 'chords are {}'.format(chords)
+        # compute intersections of each chord with subsequent ones
+        for i_c, c in enumerate(chords):
+            print 'chord {} has intersection {} with later chords'.format(
+                i_c, intersections_with_later_chords(
+                i_c, chords, n, resolution=resolution,)
+                )
+            self_int += intersections_with_later_chords(
+                i_c, chords, n, resolution=resolution,
+            )
+
+    return self_int
+
+
 def intersections_with_later_chords(c_index, chords, node, resolution=None):
     tot_int = 0
 
