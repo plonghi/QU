@@ -1,0 +1,292 @@
+Loading configuration from config/T_3.ini...
+Finished loading configuration from config/T_3.ini.
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+gamma_3 ---> X3
+gamma_4 ---> X4
+gamma_5 ---> X5
+gamma_6 ---> X6
+gamma_7 ---> X7
+gamma_8 ---> X8
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+WARNING: Cannot find a unique growing pair correspondingto the reference one.
+
+
+===============
+NETWORK DATA
+===============
+
+Spectral Network Data
+-------------------------
+
+STREETS:
+
+Street p_10 is oriented b_2 ---> b_6
+
+Street p_11 is oriented b_3 ---> b_5
+
+Street p_12 is oriented b_2 ---> b_6
+
+Street p_8 is oriented b_1 ---> b_4
+
+Street p_9 is oriented b_3 ---> b_5
+
+Street p_6 is oriented b_6 ---> j_2
+
+Street p_7 is oriented b_1 ---> b_4
+
+Street p_4 is oriented b_4 ---> j_2
+
+Street p_5 is oriented b_5 ---> j_2
+
+Street p_2 is oriented b_2 ---> j_1
+
+Street p_3 is oriented b_3 ---> j_1
+
+Street p_1 is oriented b_1 ---> j_1
+
+
+BRANCH POINTS:
+
+b_1 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_1', 'p_7', 'p_8']
+
+b_2 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_2', 'p_10', 'p_12']
+
+b_3 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_3', 'p_11', 'p_9']
+
+b_4 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_4', 'p_8', 'p_7']
+
+b_5 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_5', 'p_9', 'p_11']
+
+b_6 is a type_3_branch_point
+Streets attached (c.c.w.): ['p_6', 'p_12', 'p_10']
+
+
+JOINTS:
+
+j_1 is a type_3_joint
+Streets attached (c.c.w.): ['p_1', 'empty', 'p_2', 'empty', 'p_3', 'empty']
+
+j_2 is a type_3_joint
+Streets attached (c.c.w.): ['p_4', 'empty', 'p_5', 'empty', 'p_6', 'empty']
+
+
+HOMOLOGY CLASSES:
+
+Homology class gamma_8 uses symbol X8.
+Streets: ['p_12']
+
+Homology class gamma_5 uses symbol X5.
+Streets: ['p_9']
+
+Homology class gamma_4 uses symbol X4.
+Streets: ['p_8']
+
+Homology class gamma_7 uses symbol X7.
+Streets: ['p_11']
+
+Homology class gamma_6 uses symbol X6.
+Streets: ['p_10']
+
+Homology class gamma_1 uses symbol X1.
+Streets: ['p_1', 'p_2', 'p_3']
+
+Homology class gamma_3 uses symbol X3.
+Streets: ['p_7']
+
+Homology class gamma_2 uses symbol X2.
+Streets: ['p_4', 'p_5', 'p_6']
+
+
+
+===============
+SOLITON DATA
+===============
+
+
+Data of street p_10
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X4*X5*X6**3*X8**2/y**2 + X1*X4*X5*X6**2*X8**2/y + X1*X4*X5*X6**2*X8/y + X1*X4*X5*X6*X8 + X1*X4*X5*X6 + X1*X4*X6**3*X8**2/y**2 + X1*X4*X6**2*X8**2/y + X1*X4*X6**2*X8/y + X1*X4*X6*X8 + X1*X4*X6 + X1*X5*X6**3*X8**2/y**2 + X1*X5*X6**2*X8**2/y + X1*X5*X6**2*X8/y + X1*X5*X6*X8 + X1*X5*X6 + X1*X6**3*X8**2/y**2 + X1*X6**2*X8**2/y + X1*X6**2*X8/y + X1*X6*X8 + X1*X6 + X6**3*X8**2/y**2 + X6**2*X8**2/y**2 + X6**2*X8/y + X6*X8/y + X6 + 1
+
+
+Data of street p_11
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X4*X5**2*X7**3*X8/y**2 + X1*X4*X5**2*X7**3/y**2 + X1*X4*X5**2*X7**2*X8/y + X1*X4*X5**2*X7**2/y + X1*X4*X5*X7**2*X8/y + X1*X4*X5*X7**2/y + X1*X4*X5*X7*X8 + X1*X4*X5*X7 + X1*X4*X7*X8 + X1*X4*X7 + X1*X5**2*X7**3*X8/y**2 + X1*X5**2*X7**3/y**2 + X1*X5**2*X7**2*X8/y + X1*X5**2*X7**2/y + X1*X5*X7**2*X8/y + X1*X5*X7**2/y + X1*X5*X7*X8 + X1*X5*X7 + X1*X7*X8 + X1*X7 + X5**2*X7**3/y**2 + X5**2*X7**2/y**2 + X5*X7**2/y + X5*X7/y + X7 + 1
+
+
+Data of street p_12
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X3*X6**2*X7*X8**3*y**2 + X2*X3*X6**2*X7*X8**2*y + X2*X3*X6**2*X8**3*y**2 + X2*X3*X6**2*X8**2*y + X2*X3*X6*X7*X8**2*y + X2*X3*X6*X7*X8 + X2*X3*X6*X8**2*y + X2*X3*X6*X8 + X2*X3*X7*X8 + X2*X3*X8 + X2*X6**2*X7*X8**3*y**2 + X2*X6**2*X7*X8**2*y + X2*X6**2*X8**3*y**2 + X2*X6**2*X8**2*y + X2*X6*X7*X8**2*y + X2*X6*X7*X8 + X2*X6*X8**2*y + X2*X6*X8 + X2*X7*X8 + X2*X8 + X6**2*X8**3*y**2 + X6**2*X8**2*y**2 + X6*X8**2*y + X6*X8*y + X8 + 1
+
+
+Data of street p_8
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X3**2*X4**3*X6*X7*y**2 + X2*X3**2*X4**3*X6*y**2 + X2*X3**2*X4**3*X7*y**2 + X2*X3**2*X4**3*y**2 + X2*X3**2*X4**2*X6*X7*y + X2*X3**2*X4**2*X6*y + X2*X3**2*X4**2*X7*y + X2*X3**2*X4**2*y + X2*X3*X4**2*X6*X7*y + X2*X3*X4**2*X6*y + X2*X3*X4**2*X7*y + X2*X3*X4**2*y + X2*X3*X4*X6*X7 + X2*X3*X4*X6 + X2*X3*X4*X7 + X2*X3*X4 + X2*X4*X6*X7 + X2*X4*X6 + X2*X4*X7 + X2*X4 + X3**2*X4**3*y**2 + X3**2*X4**2*y**2 + X3*X4**2*y + X3*X4*y + X4 + 1
+
+
+Data of street p_9
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X3*X5**3*X6*X7**2*y**2 + X2*X3*X5**3*X7**2*y**2 + X2*X3*X5**2*X6*X7**2*y + X2*X3*X5**2*X6*X7*y + X2*X3*X5**2*X7**2*y + X2*X3*X5**2*X7*y + X2*X3*X5*X6*X7 + X2*X3*X5*X6 + X2*X3*X5*X7 + X2*X3*X5 + X2*X5**3*X6*X7**2*y**2 + X2*X5**3*X7**2*y**2 + X2*X5**2*X6*X7**2*y + X2*X5**2*X6*X7*y + X2*X5**2*X7**2*y + X2*X5**2*X7*y + X2*X5*X6*X7 + X2*X5*X6 + X2*X5*X7 + X2*X5 + X5**3*X7**2*y**2 + X5**2*X7**2*y**2 + X5**2*X7*y + X5*X7*y + X5 + 1
+
+
+Data of street p_6
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X3*X4*X5*X6*X7/y**2 + X1**3*X2*X3*X4*X6*X7/y + X1**3*X2*X3*X5*X6*X7/y + X1**3*X2*X3*X6*X7 + X1**2*X2*X3*X4*X5*X6*X7 + X1**2*X2*X3*X4*X5*X6*X7/y**2 + X1**2*X2*X3*X4*X5*X6 + X1**2*X2*X3*X4*X6*X7 + X1**2*X2*X3*X4*X6*X7/y**2 + X1**2*X2*X3*X4*X6 + X1**2*X2*X3*X5*X6*X7 + X1**2*X2*X3*X5*X6*X7/y**2 + X1**2*X2*X3*X5*X6 + X1**2*X2*X3*X6*X7*y**2 + X1**2*X2*X3*X6*X7 + X1**2*X2*X3*X6*X7/y**2 + X1**2*X2*X3*X6 + X1**2*X2*X3*X7 + X1**2*X2*X4*X5*X6*X7 + X1**2*X2*X4*X6*X7 + X1**2*X2*X5*X6*X7 + X1**2*X2*X6*X7 + X1*X2*X3*X4*X5*X6*X7 + X1*X2*X3*X4*X5*X6*y + X1*X2*X3*X4*X6*X7/y + X1*X2*X3*X4*X6 + X1*X2*X3*X5*X6*X7/y + X1*X2*X3*X5*X6 + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3 + X1*X2*X4*X5*X6*X7*y + X1*X2*X4*X5*X6*y**2 + X1*X2*X4*X6*X7 + X1*X2*X4*X6*y + X1*X2*X5*X6*X7 + X1*X2*X5*X6*y + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7 + X2*X3*X6*X7 + X2*X3*X6 + X2*X3*X7 + X2*X3 + X2*X6*X7 + X2*X6 + X2*X7 + X2 + 1
+
+
+Data of street p_7
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X3**3*X4**2*X5*X8/y**2 + X1*X3**3*X4**2*X5/y**2 + X1*X3**3*X4**2*X8/y**2 + X1*X3**3*X4**2/y**2 + X1*X3**2*X4**2*X5*X8/y + X1*X3**2*X4**2*X5/y + X1*X3**2*X4**2*X8/y + X1*X3**2*X4**2/y + X1*X3**2*X4*X5*X8/y + X1*X3**2*X4*X5/y + X1*X3**2*X4*X8/y + X1*X3**2*X4/y + X1*X3*X4*X5*X8 + X1*X3*X4*X5 + X1*X3*X4*X8 + X1*X3*X4 + X1*X3*X5*X8 + X1*X3*X5 + X1*X3*X8 + X1*X3 + X3**3*X4**2/y**2 + X3**2*X4**2/y**2 + X3**2*X4/y + X3*X4/y + X3 + 1
+
+
+Data of street p_4
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X3*X5*X6*X7*X8/y**2 + X1**3*X2*X3*X5*X6*X7/y + X1**3*X2*X3*X6*X7*X8/y + X1**3*X2*X3*X6*X7 + X1**2*X2*X3*X5*X6*X7*X8 + X1**2*X2*X3*X5*X6*X7*X8/y**2 + X1**2*X2*X3*X5*X6*X7 + X1**2*X2*X3*X5*X6*X7/y**2 + X1**2*X2*X3*X5*X6*X8 + X1**2*X2*X3*X5*X6 + X1**2*X2*X3*X5*X7*X8 + X1**2*X2*X3*X5*X7 + X1**2*X2*X3*X6*X7*X8 + X1**2*X2*X3*X6*X7*X8/y**2 + X1**2*X2*X3*X6*X7*y**2 + X1**2*X2*X3*X6*X7 + X1**2*X2*X3*X6*X7/y**2 + X1**2*X2*X3*X6*X8 + X1**2*X2*X3*X6 + X1**2*X2*X3*X7*X8 + X1**2*X2*X3*X7 + X1**2*X2*X6*X7 + X1*X2*X3*X5*X6*X7*X8 + X1*X2*X3*X5*X6*X7/y + X1*X2*X3*X5*X6*X8*y + X1*X2*X3*X5*X6 + X1*X2*X3*X5*X7*X8*y + X1*X2*X3*X5*X7 + X1*X2*X3*X5*X8*y**2 + X1*X2*X3*X5*y + X1*X2*X3*X6*X7*X8/y + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*X8 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*X8 + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3*X8*y + X1*X2*X3 + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7 + X2*X3*X6*X7 + X2*X3*X6 + X2*X3*X7 + X2*X3 + X2*X6*X7 + X2*X6 + X2*X7 + X2 + 1
+
+
+Data of street p_5
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X3*X4*X6*X7*X8/y**2 + X1**3*X2*X3*X4*X6*X7/y + X1**3*X2*X3*X6*X7*X8/y + X1**3*X2*X3*X6*X7 + X1**2*X2*X3*X4*X6*X7*X8 + X1**2*X2*X3*X4*X6*X7*X8/y**2 + X1**2*X2*X3*X4*X6*X7 + X1**2*X2*X3*X4*X6*X7/y**2 + X1**2*X2*X3*X4*X7*X8 + X1**2*X2*X3*X4*X7 + X1**2*X2*X3*X6*X7*X8 + X1**2*X2*X3*X6*X7*X8/y**2 + X1**2*X2*X3*X6*X7*y**2 + X1**2*X2*X3*X6*X7 + X1**2*X2*X3*X6*X7/y**2 + X1**2*X2*X3*X6 + X1**2*X2*X3*X7*X8 + X1**2*X2*X3*X7 + X1**2*X2*X4*X6*X7*X8 + X1**2*X2*X4*X6*X7 + X1**2*X2*X6*X7*X8 + X1**2*X2*X6*X7 + X1*X2*X3*X4*X6*X7*X8 + X1*X2*X3*X4*X6*X7/y + X1*X2*X3*X4*X7*X8*y + X1*X2*X3*X4*X7 + X1*X2*X3*X6*X7*X8/y + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*X8 + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3 + X1*X2*X4*X6*X7*X8*y + X1*X2*X4*X6*X7 + X1*X2*X4*X7*X8*y**2 + X1*X2*X4*X7*y + X1*X2*X6*X7*X8 + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7*X8*y + X1*X2*X7 + X2*X3*X6*X7 + X2*X3*X6 + X2*X3*X7 + X2*X3 + X2*X6*X7 + X2*X6 + X2*X7 + X2 + 1
+
+
+Data of street p_2
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X4*X5*X7*X8/y**2 + X1*X2**3*X3*X4*X5*X8/y + X1*X2**3*X4*X5*X7*X8/y + X1*X2**3*X4*X5*X8 + X1*X2**2*X3*X4*X5*X7*X8 + X1*X2**2*X3*X4*X5*X7*X8/y**2 + X1*X2**2*X3*X4*X5*X8 + X1*X2**2*X3*X4*X5*X8/y**2 + X1*X2**2*X3*X4*X7*X8 + X1*X2**2*X3*X4*X8 + X1*X2**2*X3*X5*X7*X8 + X1*X2**2*X3*X5*X8 + X1*X2**2*X4*X5*X7*X8 + X1*X2**2*X4*X5*X7*X8/y**2 + X1*X2**2*X4*X5*X8*y**2 + X1*X2**2*X4*X5*X8 + X1*X2**2*X4*X5*X8/y**2 + X1*X2**2*X4*X5 + X1*X2**2*X4*X7*X8 + X1*X2**2*X4*X8 + X1*X2**2*X5*X7*X8 + X1*X2**2*X5*X8 + X1*X2*X3*X4*X5*X7*X8 + X1*X2*X3*X4*X5*X8/y + X1*X2*X3*X4*X7*X8*y + X1*X2*X3*X4*X8 + X1*X2*X3*X5*X7*X8*y + X1*X2*X3*X5*X8 + X1*X2*X3*X7*X8*y**2 + X1*X2*X3*X8*y + X1*X2*X4*X5*X7*X8/y + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X7*X8 + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X7*X8 + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X7*X8*y + X1*X2*X8 + X1*X4*X5*X8 + X1*X4*X5 + X1*X4*X8 + X1*X4 + X1*X5*X8 + X1*X5 + X1*X8 + X1 + 1
+
+
+Data of street p_3
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X4*X5*X6*X8/y**2 + X1*X2**3*X3*X4*X5*X8/y + X1*X2**3*X4*X5*X6*X8/y + X1*X2**3*X4*X5*X8 + X1*X2**2*X3*X4*X5*X6*X8 + X1*X2**2*X3*X4*X5*X6*X8/y**2 + X1*X2**2*X3*X4*X5*X6 + X1*X2**2*X3*X4*X5*X8 + X1*X2**2*X3*X4*X5*X8/y**2 + X1*X2**2*X3*X4*X5 + X1*X2**2*X3*X5*X6*X8 + X1*X2**2*X3*X5*X8 + X1*X2**2*X4*X5*X6*X8 + X1*X2**2*X4*X5*X6*X8/y**2 + X1*X2**2*X4*X5*X6 + X1*X2**2*X4*X5*X8*y**2 + X1*X2**2*X4*X5*X8 + X1*X2**2*X4*X5*X8/y**2 + X1*X2**2*X4*X5 + X1*X2**2*X4*X8 + X1*X2**2*X5*X6*X8 + X1*X2**2*X5*X8 + X1*X2*X3*X4*X5*X6*X8 + X1*X2*X3*X4*X5*X6*y + X1*X2*X3*X4*X5*X8/y + X1*X2*X3*X4*X5 + X1*X2*X3*X5*X6*X8*y + X1*X2*X3*X5*X6*y**2 + X1*X2*X3*X5*X8 + X1*X2*X3*X5*y + X1*X2*X4*X5*X6*X8/y + X1*X2*X4*X5*X6 + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X6*X8 + X1*X2*X5*X6*y + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X8 + X1*X4*X5*X8 + X1*X4*X5 + X1*X4*X8 + X1*X4 + X1*X5*X8 + X1*X5 + X1*X8 + X1 + 1
+
+
+Data of street p_1
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X4*X5*X6*X7*X8/y**2 + X1*X2**3*X4*X5*X6*X8/y + X1*X2**3*X4*X5*X7*X8/y + X1*X2**3*X4*X5*X8 + X1*X2**2*X4*X5*X6*X7*X8 + X1*X2**2*X4*X5*X6*X7*X8/y**2 + X1*X2**2*X4*X5*X6*X7 + X1*X2**2*X4*X5*X6*X8 + X1*X2**2*X4*X5*X6*X8/y**2 + X1*X2**2*X4*X5*X6 + X1*X2**2*X4*X5*X7*X8 + X1*X2**2*X4*X5*X7*X8/y**2 + X1*X2**2*X4*X5*X7 + X1*X2**2*X4*X5*X8*y**2 + X1*X2**2*X4*X5*X8 + X1*X2**2*X4*X5*X8/y**2 + X1*X2**2*X4*X5 + X1*X2**2*X4*X6*X7*X8 + X1*X2**2*X4*X6*X8 + X1*X2**2*X4*X7*X8 + X1*X2**2*X4*X8 + X1*X2**2*X5*X8 + X1*X2*X4*X5*X6*X7*X8 + X1*X2*X4*X5*X6*X7*y + X1*X2*X4*X5*X6*X8/y + X1*X2*X4*X5*X6 + X1*X2*X4*X5*X7*X8/y + X1*X2*X4*X5*X7 + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X6*X7*X8*y + X1*X2*X4*X6*X7*y**2 + X1*X2*X4*X6*X8 + X1*X2*X4*X6*y + X1*X2*X4*X7*X8 + X1*X2*X4*X7*y + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X8 + X1*X4*X5*X8 + X1*X4*X5 + X1*X4*X8 + X1*X4 + X1*X5*X8 + X1*X5 + X1*X8 + X1 + 1
+
+
+Data of street p_10
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X4*X5*X6**3*X8**2/y**2 + X2*X4*X5*X6**2*X8**2/y + X2*X4*X5*X6**2*X8/y + X2*X4*X5*X6*X8 + X2*X4*X5*X6 + X2*X4*X6**3*X8**2/y**2 + X2*X4*X6**2*X8**2/y + X2*X4*X6**2*X8/y + X2*X4*X6*X8 + X2*X4*X6 + X2*X5*X6**3*X8**2/y**2 + X2*X5*X6**2*X8**2/y + X2*X5*X6**2*X8/y + X2*X5*X6*X8 + X2*X5*X6 + X2*X6**3*X8**2/y**2 + X2*X6**2*X8**2/y + X2*X6**2*X8/y + X2*X6*X8 + X2*X6 + X6**3*X8**2/y**2 + X6**2*X8**2/y**2 + X6**2*X8/y + X6*X8/y + X6 + 1
+
+
+Data of street p_11
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X4*X5**2*X7**3*X8/y**2 + X2*X4*X5**2*X7**3/y**2 + X2*X4*X5**2*X7**2*X8/y + X2*X4*X5**2*X7**2/y + X2*X4*X5*X7**2*X8/y + X2*X4*X5*X7**2/y + X2*X4*X5*X7*X8 + X2*X4*X5*X7 + X2*X4*X7*X8 + X2*X4*X7 + X2*X5**2*X7**3*X8/y**2 + X2*X5**2*X7**3/y**2 + X2*X5**2*X7**2*X8/y + X2*X5**2*X7**2/y + X2*X5*X7**2*X8/y + X2*X5*X7**2/y + X2*X5*X7*X8 + X2*X5*X7 + X2*X7*X8 + X2*X7 + X5**2*X7**3/y**2 + X5**2*X7**2/y**2 + X5*X7**2/y + X5*X7/y + X7 + 1
+
+
+Data of street p_12
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X3*X6**2*X7*X8**3*y**2 + X1*X3*X6**2*X7*X8**2*y + X1*X3*X6**2*X8**3*y**2 + X1*X3*X6**2*X8**2*y + X1*X3*X6*X7*X8**2*y + X1*X3*X6*X7*X8 + X1*X3*X6*X8**2*y + X1*X3*X6*X8 + X1*X3*X7*X8 + X1*X3*X8 + X1*X6**2*X7*X8**3*y**2 + X1*X6**2*X7*X8**2*y + X1*X6**2*X8**3*y**2 + X1*X6**2*X8**2*y + X1*X6*X7*X8**2*y + X1*X6*X7*X8 + X1*X6*X8**2*y + X1*X6*X8 + X1*X7*X8 + X1*X8 + X6**2*X8**3*y**2 + X6**2*X8**2*y**2 + X6*X8**2*y + X6*X8*y + X8 + 1
+
+
+Data of street p_8
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X3**2*X4**3*X6*X7*y**2 + X1*X3**2*X4**3*X6*y**2 + X1*X3**2*X4**3*X7*y**2 + X1*X3**2*X4**3*y**2 + X1*X3**2*X4**2*X6*X7*y + X1*X3**2*X4**2*X6*y + X1*X3**2*X4**2*X7*y + X1*X3**2*X4**2*y + X1*X3*X4**2*X6*X7*y + X1*X3*X4**2*X6*y + X1*X3*X4**2*X7*y + X1*X3*X4**2*y + X1*X3*X4*X6*X7 + X1*X3*X4*X6 + X1*X3*X4*X7 + X1*X3*X4 + X1*X4*X6*X7 + X1*X4*X6 + X1*X4*X7 + X1*X4 + X3**2*X4**3*y**2 + X3**2*X4**2*y**2 + X3*X4**2*y + X3*X4*y + X4 + 1
+
+
+Data of street p_9
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X3*X5**3*X6*X7**2*y**2 + X1*X3*X5**3*X7**2*y**2 + X1*X3*X5**2*X6*X7**2*y + X1*X3*X5**2*X6*X7*y + X1*X3*X5**2*X7**2*y + X1*X3*X5**2*X7*y + X1*X3*X5*X6*X7 + X1*X3*X5*X6 + X1*X3*X5*X7 + X1*X3*X5 + X1*X5**3*X6*X7**2*y**2 + X1*X5**3*X7**2*y**2 + X1*X5**2*X6*X7**2*y + X1*X5**2*X6*X7*y + X1*X5**2*X7**2*y + X1*X5**2*X7*y + X1*X5*X6*X7 + X1*X5*X6 + X1*X5*X7 + X1*X5 + X5**3*X7**2*y**2 + X5**2*X7**2*y**2 + X5**2*X7*y + X5*X7*y + X5 + 1
+
+
+Data of street p_6
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X3*X4*X5*X7*X8*y**2 + X1**3*X2*X3*X4*X5*X8*y + X1**3*X2*X4*X5*X7*X8*y + X1**3*X2*X4*X5*X8 + X1**2*X2*X3*X4*X5*X7*X8*y**2 + X1**2*X2*X3*X4*X5*X7*X8 + X1**2*X2*X3*X4*X5*X8*y**2 + X1**2*X2*X3*X4*X5*X8 + X1**2*X2*X3*X4*X7*X8 + X1**2*X2*X3*X4*X8 + X1**2*X2*X3*X5*X7*X8 + X1**2*X2*X3*X5*X8 + X1**2*X2*X4*X5*X7*X8*y**2 + X1**2*X2*X4*X5*X7*X8 + X1**2*X2*X4*X5*X8*y**2 + X1**2*X2*X4*X5*X8 + X1**2*X2*X4*X5*X8/y**2 + X1**2*X2*X4*X5 + X1**2*X2*X4*X7*X8 + X1**2*X2*X4*X8 + X1**2*X2*X5*X7*X8 + X1**2*X2*X5*X8 + X1*X2*X3*X4*X5*X7*X8 + X1*X2*X3*X4*X5*X8*y + X1*X2*X3*X4*X7*X8/y + X1*X2*X3*X4*X8 + X1*X2*X3*X5*X7*X8/y + X1*X2*X3*X5*X8 + X1*X2*X3*X7*X8/y**2 + X1*X2*X3*X8/y + X1*X2*X4*X5*X7*X8*y + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X7*X8 + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X7*X8 + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X7*X8/y + X1*X2*X8 + X2*X4*X5*X8 + X2*X4*X5 + X2*X4*X8 + X2*X4 + X2*X5*X8 + X2*X5 + X2*X8 + X2 + 1
+
+
+Data of street p_7
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X3**3*X4**2*X5*X8/y**2 + X2*X3**3*X4**2*X5/y**2 + X2*X3**3*X4**2*X8/y**2 + X2*X3**3*X4**2/y**2 + X2*X3**2*X4**2*X5*X8/y + X2*X3**2*X4**2*X5/y + X2*X3**2*X4**2*X8/y + X2*X3**2*X4**2/y + X2*X3**2*X4*X5*X8/y + X2*X3**2*X4*X5/y + X2*X3**2*X4*X8/y + X2*X3**2*X4/y + X2*X3*X4*X5*X8 + X2*X3*X4*X5 + X2*X3*X4*X8 + X2*X3*X4 + X2*X3*X5*X8 + X2*X3*X5 + X2*X3*X8 + X2*X3 + X3**3*X4**2/y**2 + X3**2*X4**2/y**2 + X3**2*X4/y + X3*X4/y + X3 + 1
+
+
+Data of street p_4
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X4*X5*X6*X7*X8*y**2 + X1**3*X2*X4*X5*X6*X8*y + X1**3*X2*X4*X5*X7*X8*y + X1**3*X2*X4*X5*X8 + X1**2*X2*X4*X5*X6*X7*X8*y**2 + X1**2*X2*X4*X5*X6*X7*X8 + X1**2*X2*X4*X5*X6*X7 + X1**2*X2*X4*X5*X6*X8*y**2 + X1**2*X2*X4*X5*X6*X8 + X1**2*X2*X4*X5*X6 + X1**2*X2*X4*X5*X7*X8*y**2 + X1**2*X2*X4*X5*X7*X8 + X1**2*X2*X4*X5*X7 + X1**2*X2*X4*X5*X8*y**2 + X1**2*X2*X4*X5*X8 + X1**2*X2*X4*X5*X8/y**2 + X1**2*X2*X4*X5 + X1**2*X2*X4*X6*X7*X8 + X1**2*X2*X4*X6*X8 + X1**2*X2*X4*X7*X8 + X1**2*X2*X4*X8 + X1**2*X2*X5*X8 + X1*X2*X4*X5*X6*X7*X8 + X1*X2*X4*X5*X6*X7/y + X1*X2*X4*X5*X6*X8*y + X1*X2*X4*X5*X6 + X1*X2*X4*X5*X7*X8*y + X1*X2*X4*X5*X7 + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X6*X7*X8/y + X1*X2*X4*X6*X7/y**2 + X1*X2*X4*X6*X8 + X1*X2*X4*X6/y + X1*X2*X4*X7*X8 + X1*X2*X4*X7/y + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X8 + X2*X4*X5*X8 + X2*X4*X5 + X2*X4*X8 + X2*X4 + X2*X5*X8 + X2*X5 + X2*X8 + X2 + 1
+
+
+Data of street p_5
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**3*X2*X3*X4*X5*X6*X8*y**2 + X1**3*X2*X3*X4*X5*X8*y + X1**3*X2*X4*X5*X6*X8*y + X1**3*X2*X4*X5*X8 + X1**2*X2*X3*X4*X5*X6*X8*y**2 + X1**2*X2*X3*X4*X5*X6*X8 + X1**2*X2*X3*X4*X5*X6 + X1**2*X2*X3*X4*X5*X8*y**2 + X1**2*X2*X3*X4*X5*X8 + X1**2*X2*X3*X4*X5 + X1**2*X2*X3*X5*X6*X8 + X1**2*X2*X3*X5*X8 + X1**2*X2*X4*X5*X6*X8*y**2 + X1**2*X2*X4*X5*X6*X8 + X1**2*X2*X4*X5*X6 + X1**2*X2*X4*X5*X8*y**2 + X1**2*X2*X4*X5*X8 + X1**2*X2*X4*X5*X8/y**2 + X1**2*X2*X4*X5 + X1**2*X2*X4*X8 + X1**2*X2*X5*X6*X8 + X1**2*X2*X5*X8 + X1*X2*X3*X4*X5*X6*X8 + X1*X2*X3*X4*X5*X6/y + X1*X2*X3*X4*X5*X8*y + X1*X2*X3*X4*X5 + X1*X2*X3*X5*X6*X8/y + X1*X2*X3*X5*X6/y**2 + X1*X2*X3*X5*X8 + X1*X2*X3*X5/y + X1*X2*X4*X5*X6*X8*y + X1*X2*X4*X5*X6 + X1*X2*X4*X5*X8*y**2 + X1*X2*X4*X5*X8 + X1*X2*X4*X5*X8/y**2 + X1*X2*X4*X5*y + X1*X2*X4*X5/y + X1*X2*X4*X8*y + X1*X2*X4*X8/y + X1*X2*X4 + X1*X2*X5*X6*X8 + X1*X2*X5*X6/y + X1*X2*X5*X8*y + X1*X2*X5*X8/y + X1*X2*X5 + X1*X2*X8 + X2*X4*X5*X8 + X2*X4*X5 + X2*X4*X8 + X2*X4 + X2*X5*X8 + X2*X5 + X2*X8 + X2 + 1
+
+
+Data of street p_2
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X4*X5*X6*X7*y**2 + X1*X2**3*X3*X4*X6*X7*y + X1*X2**3*X3*X5*X6*X7*y + X1*X2**3*X3*X6*X7 + X1*X2**2*X3*X4*X5*X6*X7*y**2 + X1*X2**2*X3*X4*X5*X6*X7 + X1*X2**2*X3*X4*X5*X6 + X1*X2**2*X3*X4*X6*X7*y**2 + X1*X2**2*X3*X4*X6*X7 + X1*X2**2*X3*X4*X6 + X1*X2**2*X3*X5*X6*X7*y**2 + X1*X2**2*X3*X5*X6*X7 + X1*X2**2*X3*X5*X6 + X1*X2**2*X3*X6*X7*y**2 + X1*X2**2*X3*X6*X7 + X1*X2**2*X3*X6*X7/y**2 + X1*X2**2*X3*X6 + X1*X2**2*X3*X7 + X1*X2**2*X4*X5*X6*X7 + X1*X2**2*X4*X6*X7 + X1*X2**2*X5*X6*X7 + X1*X2**2*X6*X7 + X1*X2*X3*X4*X5*X6*X7 + X1*X2*X3*X4*X5*X6/y + X1*X2*X3*X4*X6*X7*y + X1*X2*X3*X4*X6 + X1*X2*X3*X5*X6*X7*y + X1*X2*X3*X5*X6 + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3 + X1*X2*X4*X5*X6*X7/y + X1*X2*X4*X5*X6/y**2 + X1*X2*X4*X6*X7 + X1*X2*X4*X6/y + X1*X2*X5*X6*X7 + X1*X2*X5*X6/y + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7 + X1*X3*X6*X7 + X1*X3*X6 + X1*X3*X7 + X1*X3 + X1*X6*X7 + X1*X6 + X1*X7 + X1 + 1
+
+
+Data of street p_3
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X4*X6*X7*X8*y**2 + X1*X2**3*X3*X4*X6*X7*y + X1*X2**3*X3*X6*X7*X8*y + X1*X2**3*X3*X6*X7 + X1*X2**2*X3*X4*X6*X7*X8*y**2 + X1*X2**2*X3*X4*X6*X7*X8 + X1*X2**2*X3*X4*X6*X7*y**2 + X1*X2**2*X3*X4*X6*X7 + X1*X2**2*X3*X4*X7*X8 + X1*X2**2*X3*X4*X7 + X1*X2**2*X3*X6*X7*X8*y**2 + X1*X2**2*X3*X6*X7*X8 + X1*X2**2*X3*X6*X7*y**2 + X1*X2**2*X3*X6*X7 + X1*X2**2*X3*X6*X7/y**2 + X1*X2**2*X3*X6 + X1*X2**2*X3*X7*X8 + X1*X2**2*X3*X7 + X1*X2**2*X4*X6*X7*X8 + X1*X2**2*X4*X6*X7 + X1*X2**2*X6*X7*X8 + X1*X2**2*X6*X7 + X1*X2*X3*X4*X6*X7*X8 + X1*X2*X3*X4*X6*X7*y + X1*X2*X3*X4*X7*X8/y + X1*X2*X3*X4*X7 + X1*X2*X3*X6*X7*X8*y + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*X8 + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3 + X1*X2*X4*X6*X7*X8/y + X1*X2*X4*X6*X7 + X1*X2*X4*X7*X8/y**2 + X1*X2*X4*X7/y + X1*X2*X6*X7*X8 + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7*X8/y + X1*X2*X7 + X1*X3*X6*X7 + X1*X3*X6 + X1*X3*X7 + X1*X3 + X1*X6*X7 + X1*X6 + X1*X7 + X1 + 1
+
+
+Data of street p_1
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X5*X6*X7*X8*y**2 + X1*X2**3*X3*X5*X6*X7*y + X1*X2**3*X3*X6*X7*X8*y + X1*X2**3*X3*X6*X7 + X1*X2**2*X3*X5*X6*X7*X8*y**2 + X1*X2**2*X3*X5*X6*X7*X8 + X1*X2**2*X3*X5*X6*X7*y**2 + X1*X2**2*X3*X5*X6*X7 + X1*X2**2*X3*X5*X6*X8 + X1*X2**2*X3*X5*X6 + X1*X2**2*X3*X5*X7*X8 + X1*X2**2*X3*X5*X7 + X1*X2**2*X3*X6*X7*X8*y**2 + X1*X2**2*X3*X6*X7*X8 + X1*X2**2*X3*X6*X7*y**2 + X1*X2**2*X3*X6*X7 + X1*X2**2*X3*X6*X7/y**2 + X1*X2**2*X3*X6*X8 + X1*X2**2*X3*X6 + X1*X2**2*X3*X7*X8 + X1*X2**2*X3*X7 + X1*X2**2*X6*X7 + X1*X2*X3*X5*X6*X7*X8 + X1*X2*X3*X5*X6*X7*y + X1*X2*X3*X5*X6*X8/y + X1*X2*X3*X5*X6 + X1*X2*X3*X5*X7*X8/y + X1*X2*X3*X5*X7 + X1*X2*X3*X5*X8/y**2 + X1*X2*X3*X5/y + X1*X2*X3*X6*X7*X8*y + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*X8 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*X8 + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3*X8/y + X1*X2*X3 + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7 + X1*X3*X6*X7 + X1*X3*X6 + X1*X3*X7 + X1*X3 + X1*X6*X7 + X1*X6 + X1*X7 + X1 + 1

@@ -1,0 +1,152 @@
+Loading configuration from /Users/pietro/Dropbox/Projects and Papers/Spectrum generator for Networks/python code/config/argyres_douglas_6.ini...
+Finished loading configuration from /Users/pietro/Dropbox/Projects and Papers/Spectrum generator for Networks/python code/config/argyres_douglas_6.ini.
+
+
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+gamma_3 ---> X3
+gamma_4 ---> X4
+gamma_5 ---> X5
+
+
+===============
+NETWORK DATA
+===============
+
+Spectral Network Data
+-------------------------
+
+STREETS:
+
+Street p_4 is oriented b_4 ---> b_5
+
+Street p_5 is oriented b_5 ---> b_6
+
+Street p_2 is oriented b_2 ---> b_3
+
+Street p_3 is oriented b_3 ---> b_4
+
+Street p_1 is oriented b_1 ---> b_2
+
+
+BRANCH POINTS:
+
+b_1 is a type_1_branch_point
+Streets attached (c.c.w.): ['p_1', 'empty', 'empty']
+
+b_2 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_1', 'empty', 'p_2']
+
+b_3 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_2', 'p_3', 'empty']
+
+b_4 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_3', 'empty', 'p_4']
+
+b_5 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_4', 'p_5', 'empty']
+
+b_6 is a type_1_branch_point
+Streets attached (c.c.w.): ['p_5', 'empty', 'empty']
+
+
+JOINTS:
+
+
+HOMOLOGY CLASSES:
+
+Homology class gamma_5 uses symbol X5.
+Streets: ['p_5']
+
+Homology class gamma_4 uses symbol X4.
+Streets: ['p_4']
+
+Homology class gamma_1 uses symbol X1.
+Streets: ['p_1']
+
+Homology class gamma_3 uses symbol X3.
+Streets: ['p_3']
+
+Homology class gamma_2 uses symbol X2.
+Streets: ['p_2']
+
+
+
+===============
+SOLITON DATA
+===============
+
+
+Data of street p_4
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X4 + 1
+
+
+Data of street p_5
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X4*X5 + X5 + 1
+
+
+Data of street p_2
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2 + 1
+
+
+Data of street p_3
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2*X3*X4 + X2*X3 + X3*X4 + X3 + 1
+
+
+Data of street p_1
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2 + X1 + 1
+
+
+Data of street p_4
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X3*X4*X5 + X3*X4 + X4*X5 + X4 + 1
+
+
+Data of street p_5
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X5 + 1
+
+
+Data of street p_2
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2*X3 + X1*X2 + X2*X3 + X2 + 1
+
+
+Data of street p_3
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X3 + 1
+
+
+Data of street p_1
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1 + 1

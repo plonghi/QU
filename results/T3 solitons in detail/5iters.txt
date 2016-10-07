@@ -1,0 +1,736 @@
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+gamma_3 ---> X3
+gamma_4 ---> X4
+gamma_5 ---> X5
+gamma_6 ---> X6
+gamma_7 ---> X7
+gamma_8 ---> X8
+
+
+-------------------------------------------------------
+Soliton Data
+WARNING: Cannot find a unique growing pair correspondingto the reference one (this should not be a problem).
+
+
+Data of street p_1
+In british resolution
+----------------------------
+
+Co-oriented solitons on p_1:
+----------------------------
+1.
+Dashes of soliton path Soliton #2 / <solitons.SolitonPath instance at 0x7f8b066694d0> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_1', 1]]
+2.
+Dashes of soliton path Soliton #4 / <solitons.SolitonPath instance at 0x7f8b06669cf8> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_7', -1], ['p_1', 1]]
+3.
+Dashes of soliton path Soliton #9 / <solitons.SolitonPath instance at 0x7f8b0666f4d0> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_4', 1], ['p_5', -1], ['p_5', 1], ['p_6', -1], ['p_6', 1], ['p_4', -1], ['p_7', -1], ['p_1', 1]]
+4.
+Dashes of soliton path Soliton #13 / <solitons.SolitonPath instance at 0x7f8b06673710> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_4', 1], ['p_5', -1], ['p_5', 1], ['p_6', -1], ['p_12', -1], ['p_12', 1], ['p_6', 1], ['p_4', -1], ['p_7', -1], ['p_1', 1]]
+5.
+Dashes of soliton path Soliton #14 / <solitons.SolitonPath instance at 0x7f8b06673a70> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 2, street p_2), 
+Path no_label:
+	(j_1, slot 2, street p_2) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+6.
+Dashes of soliton path Soliton #15 / <solitons.SolitonPath instance at 0x7f8b06673cf8> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_4', 1], ['p_5', -1], ['p_9', -1], ['p_9', 1], ['p_5', 1], ['p_6', -1], ['p_6', 1], ['p_4', -1], ['p_7', -1], ['p_1', 1]]
+7.
+Dashes of soliton path Soliton #16 / <solitons.SolitonPath instance at 0x7f8b06737098> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 4, street p_3), 
+Path no_label:
+	(j_1, slot 4, street p_3) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+8.
+Dashes of soliton path Soliton #19 / <solitons.SolitonPath instance at 0x7f8b06737f80> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_4', 1], ['p_5', -1], ['p_9', -1], ['p_9', 1], ['p_5', 1], ['p_6', -1], ['p_12', -1], ['p_12', 1], ['p_6', 1], ['p_4', -1], ['p_7', -1], ['p_1', 1]]
+9.
+Dashes of soliton path Soliton #20 / <solitons.SolitonPath instance at 0x7f8b06737368> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 2, street p_2), 
+Path no_label:
+	(j_1, slot 2, street p_2) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+10.
+Dashes of soliton path Soliton #21 / <solitons.SolitonPath instance at 0x7f8b06673638> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 4, street p_3), 
+Path no_label:
+	(j_1, slot 4, street p_3) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+11.
+Dashes of soliton path Soliton #22 / <solitons.SolitonPath instance at 0x7f8b0666f170> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 4, street p_3), 
+Path no_label:
+	(j_1, slot 4, street p_3) ---> (j_1, slot 2, street p_2), 
+Path no_label:
+	(j_1, slot 2, street p_2) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+
+Anti-oriented solitons on p_1:
+------------------------------
+1.
+Dashes of soliton path Soliton #26 / <solitons.SolitonPath instance at 0x7f8b06669830> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_2', 1], ['p_3', -1], ['p_3', 1], ['p_1', -1]]
+2.
+Dashes of soliton path Soliton #30 / <solitons.SolitonPath instance at 0x7f8b0673ad40> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+3.
+Dashes of soliton path Soliton #48 / <solitons.SolitonPath instance at 0x7f8b0674d4d0> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_5', 1], ['p_6', -1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+4.
+Dashes of soliton path Soliton #49 / <solitons.SolitonPath instance at 0x7f8b0674d830> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+5.
+Dashes of soliton path Soliton #50 / <solitons.SolitonPath instance at 0x7f8b0674dbd8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+6.
+Dashes of soliton path Soliton #51 / <solitons.SolitonPath instance at 0x7f8b0674a098> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+7.
+Dashes of soliton path Soliton #32 / <solitons.SolitonPath instance at 0x7f8b0673d368> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_3', 1], ['p_1', -1]]
+8.
+Dashes of soliton path Soliton #54 / <solitons.SolitonPath instance at 0x7f8b06740950> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_5', 1], ['p_6', -1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_3', 1], ['p_1', -1]]
+9.
+Dashes of soliton path Soliton #55 / <solitons.SolitonPath instance at 0x7f8b06740128> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+10.
+Dashes of soliton path Soliton #56 / <solitons.SolitonPath instance at 0x7f8b0673dab8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+11.
+Dashes of soliton path Soliton #57 / <solitons.SolitonPath instance at 0x7f8b0673d290> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+12.
+Dashes of soliton path Soliton #36 / <solitons.SolitonPath instance at 0x7f8b067405f0> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+13.
+Dashes of soliton path Soliton #60 / <solitons.SolitonPath instance at 0x7f8b0673a248> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_5', 1], ['p_6', -1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+14.
+Dashes of soliton path Soliton #61 / <solitons.SolitonPath instance at 0x7f8b06669c68> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+15.
+Dashes of soliton path Soliton #62 / <solitons.SolitonPath instance at 0x7f8b0666c878> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+16.
+Dashes of soliton path Soliton #63 / <solitons.SolitonPath instance at 0x7f8b06737b90> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+17.
+Dashes of soliton path Soliton #66 / <solitons.SolitonPath instance at 0x7f8b067423f8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_5', 1], ['p_6', -1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+18.
+Dashes of soliton path Soliton #67 / <solitons.SolitonPath instance at 0x7f8b06742758> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+19.
+Dashes of soliton path Soliton #68 / <solitons.SolitonPath instance at 0x7f8b06742b00> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+20.
+Dashes of soliton path Soliton #69 / <solitons.SolitonPath instance at 0x7f8b06742f80> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+21.
+Dashes of soliton path Soliton #84 / <solitons.SolitonPath instance at 0x7f8b0673a710> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_10', 1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_5', 1], ['p_6', -1], ['p_10', -1], ['p_2', 1], ['p_3', -1], ['p_11', 1], ['p_5', 1], ['p_6', -1], ['p_6', 1], ['p_4', -1], ['p_4', 1], ['p_5', -1], ['p_11', -1], ['p_3', 1], ['p_1', -1]]
+22.
+Dashes of soliton path Soliton #85 / <solitons.SolitonPath instance at 0x7f8b0673af38> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+23.
+Dashes of soliton path Soliton #86 / <solitons.SolitonPath instance at 0x7f8b06740bd8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+24.
+Dashes of soliton path Soliton #87 / <solitons.SolitonPath instance at 0x7f8b06744518> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+25.
+Dashes of soliton path Soliton #88 / <solitons.SolitonPath instance at 0x7f8b0675d830> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+26.
+Dashes of soliton path Soliton #89 / <solitons.SolitonPath instance at 0x7f8b06754200> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+27.
+Dashes of soliton path Soliton #90 / <solitons.SolitonPath instance at 0x7f8b067546c8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+28.
+Dashes of soliton path Soliton #91 / <solitons.SolitonPath instance at 0x7f8b06754c68> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+29.
+Dashes of soliton path Soliton #92 / <solitons.SolitonPath instance at 0x7f8b06763050> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+30.
+Dashes of soliton path Soliton #93 / <solitons.SolitonPath instance at 0x7f8b067635f0> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+31.
+Dashes of soliton path Soliton #94 / <solitons.SolitonPath instance at 0x7f8b06763cb0> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+32.
+Dashes of soliton path Soliton #95 / <solitons.SolitonPath instance at 0x7f8b067663f8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+33.
+Dashes of soliton path Soliton #96 / <solitons.SolitonPath instance at 0x7f8b06766ab8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+34.
+Dashes of soliton path Soliton #97 / <solitons.SolitonPath instance at 0x7f8b06769200> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+35.
+Dashes of soliton path Soliton #98 / <solitons.SolitonPath instance at 0x7f8b06769a28> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+36.
+Dashes of soliton path Soliton #99 / <solitons.SolitonPath instance at 0x7f8b0676d2d8> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_3, slot 2, street p_9), 
+Path no_label:
+	(b_3, slot 2, street p_9) ---> (b_2, slot 2, street p_12), 
+Path no_label:
+	(b_2, slot 2, street p_12) ---> (b_1, slot 2, street p_8), 
+Path no_label:
+	(b_1, slot 2, street p_8) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+
+Closed solitons on p_1:
+------------------------------
+1.
+Closed soliton Soliton #2_+_Soliton #26 is the concatenation of Soliton #2 and Soliton #26
+Homology class : gamma_1, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1
+2.
+Closed soliton Soliton #2_+_Soliton #30 is the concatenation of Soliton #2 and Soliton #30
+Homology class : gamma_7_+_gamma_1, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X7
+3.
+Closed soliton Soliton #2_+_Soliton #48 is the concatenation of Soliton #2 and Soliton #48
+Homology class : gamma_7_+_gamma_1_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X7
+4.
+Closed soliton Soliton #2_+_Soliton #32 is the concatenation of Soliton #2 and Soliton #32
+Homology class : gamma_6_+_gamma_1, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X6
+5.
+Closed soliton Soliton #2_+_Soliton #54 is the concatenation of Soliton #2 and Soliton #54
+Homology class : gamma_6_+_gamma_1_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X6
+6.
+Closed soliton Soliton #2_+_Soliton #36 is the concatenation of Soliton #2 and Soliton #36
+Homology class : gamma_7_+_gamma_6_+_gamma_1, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X6*X7
+7.
+Closed soliton Soliton #2_+_Soliton #60 is the concatenation of Soliton #2 and Soliton #60
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X6*X7
+8.
+Closed soliton Soliton #2_+_Soliton #66 is the concatenation of Soliton #2 and Soliton #66
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2*X6*X7
+9.
+Closed soliton Soliton #2_+_Soliton #84 is the concatenation of Soliton #2 and Soliton #84
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X6*X7
+10.
+Closed soliton Soliton #4_+_Soliton #26 is the concatenation of Soliton #4 and Soliton #26
+Homology class : gamma_1_+_gamma_3, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X3
+11.
+Closed soliton Soliton #4_+_Soliton #30 is the concatenation of Soliton #4 and Soliton #30
+Homology class : gamma_7_+_gamma_1_+_gamma_3, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X3*X7
+12.
+Closed soliton Soliton #4_+_Soliton #48 is the concatenation of Soliton #4 and Soliton #48
+Homology class : gamma_7_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X7
+13.
+Closed soliton Soliton #4_+_Soliton #32 is the concatenation of Soliton #4 and Soliton #32
+Homology class : gamma_6_+_gamma_1_+_gamma_3, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X3*X6
+14.
+Closed soliton Soliton #4_+_Soliton #54 is the concatenation of Soliton #4 and Soliton #54
+Homology class : gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X6
+15.
+Closed soliton Soliton #4_+_Soliton #36 is the concatenation of Soliton #4 and Soliton #36
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X3*X6*X7
+16.
+Closed soliton Soliton #4_+_Soliton #60 is the concatenation of Soliton #4 and Soliton #60
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -2, 
+Resolution: british
+Monomial : X1*X2*X3*X6*X7
+17.
+Closed soliton Soliton #4_+_Soliton #66 is the concatenation of Soliton #4 and Soliton #66
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X6*X7
+18.
+Closed soliton Soliton #4_+_Soliton #84 is the concatenation of Soliton #4 and Soliton #84
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: -2, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X7
+19.
+Closed soliton Soliton #9_+_Soliton #26 is the concatenation of Soliton #9 and Soliton #26
+Homology class : gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3
+20.
+Closed soliton Soliton #9_+_Soliton #30 is the concatenation of Soliton #9 and Soliton #30
+Homology class : gamma_7_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2*X3*X7
+21.
+Closed soliton Soliton #9_+_Soliton #48 is the concatenation of Soliton #9 and Soliton #48
+Homology class : gamma_7_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X7
+22.
+Closed soliton Soliton #9_+_Soliton #32 is the concatenation of Soliton #9 and Soliton #32
+Homology class : gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2*X3*X6
+23.
+Closed soliton Soliton #9_+_Soliton #54 is the concatenation of Soliton #9 and Soliton #54
+Homology class : gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6
+24.
+Closed soliton Soliton #9_+_Soliton #36 is the concatenation of Soliton #9 and Soliton #36
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2*X3*X6*X7
+25.
+Closed soliton Soliton #9_+_Soliton #60 is the concatenation of Soliton #9 and Soliton #60
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X7
+26.
+Closed soliton Soliton #9_+_Soliton #66 is the concatenation of Soliton #9 and Soliton #66
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X7
+27.
+Closed soliton Soliton #9_+_Soliton #84 is the concatenation of Soliton #9 and Soliton #84
+Homology class : gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_3_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**3*X3*X6*X7
+28.
+Closed soliton Soliton #13_+_Soliton #26 is the concatenation of Soliton #13 and Soliton #26
+Homology class : gamma_8_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X8
+29.
+Closed soliton Soliton #13_+_Soliton #30 is the concatenation of Soliton #13 and Soliton #30
+Homology class : gamma_8_+_gamma_7_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X7*X8
+30.
+Closed soliton Soliton #13_+_Soliton #48 is the concatenation of Soliton #13 and Soliton #48
+Homology class : gamma_8_+_gamma_7_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X7*X8
+31.
+Closed soliton Soliton #13_+_Soliton #32 is the concatenation of Soliton #13 and Soliton #32
+Homology class : gamma_8_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X6*X8
+32.
+Closed soliton Soliton #13_+_Soliton #54 is the concatenation of Soliton #13 and Soliton #54
+Homology class : gamma_8_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X8
+33.
+Closed soliton Soliton #13_+_Soliton #36 is the concatenation of Soliton #13 and Soliton #36
+Homology class : gamma_8_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2*X3*X6*X7*X8
+34.
+Closed soliton Soliton #13_+_Soliton #60 is the concatenation of Soliton #13 and Soliton #60
+Homology class : gamma_8_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X7*X8
+35.
+Closed soliton Soliton #13_+_Soliton #66 is the concatenation of Soliton #13 and Soliton #66
+Homology class : gamma_8_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2**2*X3*X6*X7*X8
+36.
+Closed soliton Soliton #13_+_Soliton #84 is the concatenation of Soliton #13 and Soliton #84
+Homology class : gamma_8_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_3_*_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2**3*X3*X6*X7*X8
+37.
+Closed soliton Soliton #15_+_Soliton #26 is the concatenation of Soliton #15 and Soliton #26
+Homology class : gamma_5_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X5
+38.
+Closed soliton Soliton #15_+_Soliton #30 is the concatenation of Soliton #15 and Soliton #30
+Homology class : gamma_5_+_gamma_7_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X7
+39.
+Closed soliton Soliton #15_+_Soliton #48 is the concatenation of Soliton #15 and Soliton #48
+Homology class : gamma_5_+_gamma_7_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X7
+40.
+Closed soliton Soliton #15_+_Soliton #32 is the concatenation of Soliton #15 and Soliton #32
+Homology class : gamma_5_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X6
+41.
+Closed soliton Soliton #15_+_Soliton #54 is the concatenation of Soliton #15 and Soliton #54
+Homology class : gamma_5_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6
+42.
+Closed soliton Soliton #15_+_Soliton #36 is the concatenation of Soliton #15 and Soliton #36
+Homology class : gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X6*X7
+43.
+Closed soliton Soliton #15_+_Soliton #60 is the concatenation of Soliton #15 and Soliton #60
+Homology class : gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6*X7
+44.
+Closed soliton Soliton #15_+_Soliton #66 is the concatenation of Soliton #15 and Soliton #66
+Homology class : gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6*X7
+45.
+Closed soliton Soliton #15_+_Soliton #84 is the concatenation of Soliton #15 and Soliton #84
+Homology class : gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_3_*_gamma_2, 
+Writhe: 1, 
+Resolution: british
+Monomial : X1*X2**3*X3*X5*X6*X7
+46.
+Closed soliton Soliton #19_+_Soliton #26 is the concatenation of Soliton #19 and Soliton #26
+Homology class : gamma_8_+_gamma_5_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -2, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X8
+47.
+Closed soliton Soliton #19_+_Soliton #30 is the concatenation of Soliton #19 and Soliton #30
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X7*X8
+48.
+Closed soliton Soliton #19_+_Soliton #48 is the concatenation of Soliton #19 and Soliton #48
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X7*X8
+49.
+Closed soliton Soliton #19_+_Soliton #32 is the concatenation of Soliton #19 and Soliton #32
+Homology class : gamma_8_+_gamma_5_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: -1, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X6*X8
+50.
+Closed soliton Soliton #19_+_Soliton #54 is the concatenation of Soliton #19 and Soliton #54
+Homology class : gamma_8_+_gamma_5_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6*X8
+51.
+Closed soliton Soliton #19_+_Soliton #36 is the concatenation of Soliton #19 and Soliton #36
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2*X3*X5*X6*X7*X8
+52.
+Closed soliton Soliton #19_+_Soliton #60 is the concatenation of Soliton #19 and Soliton #60
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6*X7*X8
+53.
+Closed soliton Soliton #19_+_Soliton #66 is the concatenation of Soliton #19 and Soliton #66
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_2_*_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2**2*X3*X5*X6*X7*X8
+54.
+Closed soliton Soliton #19_+_Soliton #84 is the concatenation of Soliton #19 and Soliton #84
+Homology class : gamma_8_+_gamma_5_+_gamma_7_+_gamma_6_+_gamma_1_+_gamma_3_+_3_*_gamma_2, 
+Writhe: 2, 
+Resolution: british
+Monomial : X1*X2**3*X3*X5*X6*X7*X8
+
+4d Soliton generating function (with spin)
+X1*X2**3*X3*X5*X6*X7*X8*y**2 + X1*X2**3*X3*X5*X6*X7*y + X1*X2**3*X3*X6*X7*X8*y + X1*X2**3*X3*X6*X7 + X1*X2**2*X3*X5*X6*X7*X8*y**2 + X1*X2**2*X3*X5*X6*X7*X8 + X1*X2**2*X3*X5*X6*X7*y**2 + X1*X2**2*X3*X5*X6*X7 + X1*X2**2*X3*X5*X6*X8 + X1*X2**2*X3*X5*X6 + X1*X2**2*X3*X5*X7*X8 + X1*X2**2*X3*X5*X7 + X1*X2**2*X3*X6*X7*X8*y**2 + X1*X2**2*X3*X6*X7*X8 + X1*X2**2*X3*X6*X7*y**2 + X1*X2**2*X3*X6*X7 + X1*X2**2*X3*X6*X7/y**2 + X1*X2**2*X3*X6*X8 + X1*X2**2*X3*X6 + X1*X2**2*X3*X7*X8 + X1*X2**2*X3*X7 + X1*X2**2*X6*X7 + X1*X2*X3*X5*X6*X7*X8 + X1*X2*X3*X5*X6*X7*y + X1*X2*X3*X5*X6*X8/y + X1*X2*X3*X5*X6 + X1*X2*X3*X5*X7*X8/y + X1*X2*X3*X5*X7 + X1*X2*X3*X5*X8/y**2 + X1*X2*X3*X5/y + X1*X2*X3*X6*X7*X8*y + X1*X2*X3*X6*X7*y**2 + X1*X2*X3*X6*X7 + X1*X2*X3*X6*X7/y**2 + X1*X2*X3*X6*X8 + X1*X2*X3*X6*y + X1*X2*X3*X6/y + X1*X2*X3*X7*X8 + X1*X2*X3*X7*y + X1*X2*X3*X7/y + X1*X2*X3*X8/y + X1*X2*X3 + X1*X2*X6*X7*y + X1*X2*X6*X7/y + X1*X2*X6 + X1*X2*X7 + X1*X3*X6*X7 + X1*X3*X6 + X1*X3*X7 + X1*X3 + X1*X6*X7 + X1*X6 + X1*X7 + X1 + 1
+
+
+
+[Finished in 0.5s]

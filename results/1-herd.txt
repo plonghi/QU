@@ -1,0 +1,129 @@
+Loading configuration from /Users/pietro/Dropbox/Projects and Papers/Spectrum generator for Networks/python code/config/1-herd.ini...
+Finished loading configuration from /Users/pietro/Dropbox/Projects and Papers/Spectrum generator for Networks/python code/config/1-herd.ini.
+
+
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+
+
+===============
+NETWORK DATA
+===============
+
+Spectral Network Data
+-------------------------
+
+STREETS:
+
+Street p_2 is oriented b_3 ---> j_1
+
+Street q_2 is oriented b_4 ---> j_1
+
+Street q_1 is oriented b_2 ---> j_1
+
+Street p_1 is oriented b_1 ---> j_1
+
+
+BRANCH POINTS:
+
+b_1 is a type_1_branch_point
+Streets attached (c.c.w.): ['p_1', 'empty', 'empty']
+
+b_2 is a type_1_branch_point
+Streets attached (c.c.w.): ['q_1', 'empty', 'empty']
+
+b_3 is a type_1_branch_point
+Streets attached (c.c.w.): ['p_2', 'empty', 'empty']
+
+b_4 is a type_1_branch_point
+Streets attached (c.c.w.): ['q_2', 'empty', 'empty']
+
+
+JOINTS:
+
+j_1 is a type_4_B_joint
+Streets attached (c.c.w.): ['p_1', 'empty', 'q_1', 'p_2', 'empty', 'q_2']
+
+
+HOMOLOGY CLASSES:
+
+Homology class gamma_1 uses symbol X1.
+Streets: ['p_1', 'p_2']
+
+Homology class gamma_2 uses symbol X2.
+Streets: ['q_1', 'q_2']
+
+
+
+===============
+SOLITON DATA
+===============
+
+
+Data of street p_2
+In american resolution
+----------------------------
+
+4d Soliton generating function (with spin)
+X1/y + 1
+
+
+Data of street q_2
+In american resolution
+----------------------------
+
+4d Soliton generating function (with spin)
+X1*X2/y + X2/y + 1
+
+
+Data of street q_1
+In american resolution
+----------------------------
+
+4d Soliton generating function (with spin)
+X1*X2/y + X2/y + 1
+
+
+Data of street p_1
+In american resolution
+----------------------------
+
+4d Soliton generating function (with spin)
+X1/y + 1
+
+
+Data of street p_2
+In british resolution
+----------------------------
+
+4d Soliton generating function (opposite basepoint, with spin)
+X1*X2/y + X1/y + 1
+
+
+Data of street q_2
+In british resolution
+----------------------------
+
+4d Soliton generating function (opposite basepoint, with spin)
+X2/y + 1
+
+
+Data of street q_1
+In british resolution
+----------------------------
+
+4d Soliton generating function (opposite basepoint, with spin)
+X2/y + 1
+
+
+Data of street p_1
+In british resolution
+----------------------------
+
+4d Soliton generating function (opposite basepoint, with spin)
+X1*X2/y + X1/y + 1

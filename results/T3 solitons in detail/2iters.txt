@@ -1,0 +1,101 @@
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+gamma_3 ---> X3
+gamma_4 ---> X4
+gamma_5 ---> X5
+gamma_6 ---> X6
+gamma_7 ---> X7
+gamma_8 ---> X8
+
+
+-------------------------------------------------------
+Soliton Data
+
+
+Data of street p_1
+In british resolution
+----------------------------
+
+Co-oriented solitons on p_1:
+----------------------------
+1.
+Dashes of soliton path Soliton #2 / <solitons.SolitonPath instance at 0x7fbc3a2a14d0> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_1', 1]]
+2.
+Dashes of soliton path Soliton #4 / <solitons.SolitonPath instance at 0x7fbc3a2a1cf8> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', -1], ['p_7', 1], ['p_7', -1], ['p_1', 1]]
+3.
+Dashes of soliton path Soliton #5 / <solitons.SolitonPath instance at 0x7fbc3a2a4170> in british resolution:
+Path no_label:
+	(j_1, slot 0, street p_1) ---> (j_2, slot 0, street p_4), 
+Path no_label:
+	(j_2, slot 0, street p_4) ---> (j_1, slot 0, street p_1), 
+This soliton is not complete
+
+Anti-oriented solitons on p_1:
+------------------------------
+1.
+Dashes of soliton path Soliton #9 / <solitons.SolitonPath instance at 0x7fbc3a2a84d0> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_1, slot 0, street p_1), 
+This soliton is complete
+The full path of the soliton is
+[['p_1', 1], ['p_2', -1], ['p_2', 1], ['p_3', -1], ['p_3', 1], ['p_1', -1]]
+2.
+Dashes of soliton path Soliton #10 / <solitons.SolitonPath instance at 0x7fbc3a2a8908> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_5, slot 2, street p_11), 
+Path no_label:
+	(b_5, slot 2, street p_11) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+3.
+Dashes of soliton path Soliton #11 / <solitons.SolitonPath instance at 0x7fbc3a2a8e60> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_6, slot 2, street p_10), 
+Path no_label:
+	(b_6, slot 2, street p_10) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+4.
+Dashes of soliton path Soliton #12 / <solitons.SolitonPath instance at 0x7fbc3a2ab440> in british resolution:
+Path no_label:
+	(b_1, slot 0, street p_1) ---> (b_6, slot 2, street p_10), 
+Path no_label:
+	(b_6, slot 2, street p_10) ---> (b_5, slot 2, street p_11), 
+Path no_label:
+	(b_5, slot 2, street p_11) ---> (b_1, slot 0, street p_1), 
+This soliton is not complete
+
+Closed solitons on p_1:
+------------------------------
+1.
+Closed soliton Soliton #2_+_Soliton #9 is the concatenation of Soliton #2 and Soliton #9
+Homology class : gamma_1, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1
+2.
+Closed soliton Soliton #4_+_Soliton #9 is the concatenation of Soliton #4 and Soliton #9
+Homology class : gamma_1_+_gamma_3, 
+Writhe: 0, 
+Resolution: british
+Monomial : X1*X3
+
+4d Soliton generating function (with spin)
+X1*X3 + X1 + 1
+
+
+
+[Finished in 0.4s]

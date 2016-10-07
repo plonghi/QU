@@ -1,0 +1,78 @@
+Loading configuration from config/SU_2_SYM.ini...
+Finished loading configuration from config/SU_2_SYM.ini.
+All streets have two well-defined endpoints.
+All joints are of a well-defined type.
+All homology classes are well-defined.
+
+Dictionary of formal variables and homology basis:
+gamma_1 ---> X1
+gamma_2 ---> X2
+
+
+===============
+NETWORK DATA
+===============
+
+Spectral Network Data
+-------------------------
+
+STREETS:
+
+Street p_2 is oriented b_1 ---> b_2
+
+Street p_1 is oriented b_1 ---> b_2
+
+
+BRANCH POINTS:
+
+b_1 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_2', 'p_1', 'empty']
+
+b_2 is a type_2_branch_point
+Streets attached (c.c.w.): ['p_2', 'p_1', 'empty']
+
+
+JOINTS:
+
+
+HOMOLOGY CLASSES:
+
+Homology class gamma_1 uses symbol X1.
+Streets: ['p_1']
+
+Homology class gamma_2 uses symbol X2.
+Streets: ['p_2']
+
+
+
+===============
+SOLITON DATA
+===============
+
+
+Data of street p_2
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X2 + 1
+
+
+Data of street p_1
+In american resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1*X2**2 + X1*X2*y + X1*X2/y + X1 + 1
+
+
+Data of street p_2
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1**2*X2 + X1*X2*y + X1*X2/y + X2 + 1
+
+
+Data of street p_1
+In british resolution
+----------------------------
+4d Soliton generating function (with spin)
+X1 + 1
