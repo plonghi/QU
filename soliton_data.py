@@ -41,11 +41,13 @@ class SolitonData:
         # anti-oriented solitons will be of ji type.
         self.co_oriented_solitons = []
         self.anti_oriented_solitons = []
-        self.closed_solitons = []
-        self.closed_solitons_reversed = []
+        self.closed_solitons = []   # closed solitons with a choice of basepoint e.g. ab
+        self.closed_solitons_reversed = []  # closed solitons with OPPOSITE choice of basepoint e.g. ba
         self.Q = 0
-        self.Q_y = 0
-        self.Q_y_reversed = 0
+        self.Q_y = 0    # generating function with writhe computed with one basepoint
+        self.Q_y_reversed = 0   # generating function with writhe computed with OPPOSITE basepoint
+        self.Q_y_shifted = 0 # shifts due to extracting Y_\wp from F
+        self.Q_y_reversed_shifted = 0 # shifts due to extracting Y_\wp from F AND inversion y->1/y
 
     def initialize(self):
         # The initial co-oriented soliton
@@ -143,29 +145,32 @@ class SolitonData:
             #     s.print_info()
 
         if soliton_paths is True or writhes is True:
-            print (
-                '\nClosed solitons on {}:\n------------------------------'
-                .format(self.street.label)
-            )
-            for i, s in enumerate(self.closed_solitons):
-                print '{}.'.format(i + 1)
-                s.print_info()
-
-            print (
-                '\nClosed solitons on {} with opposite choice of basepoint:'
-                '\n------------------------------'
-                .format(self.street.label)
-            )
-            for i, s in enumerate(self.closed_solitons_reversed):
-                print '{}.'.format(i + 1)
-                s.print_info()
+            if self.resolution == 'american':
+                print (
+                    '\nClosed solitons on {}:\n------------------------------'
+                    .format(self.street.label)
+                )
+                for i, s in enumerate(self.closed_solitons):
+                    print '{}.'.format(i + 1)
+                    s.print_info()
+            elif self.resolution == 'british':
+                print (
+                    '\nClosed solitons on {} (opposite basepoint):'
+                    '\n------------------------------'
+                    .format(self.street.label)
+                )
+                for i, s in enumerate(self.closed_solitons_reversed):
+                    print '{}.'.format(i + 1)
+                    s.print_info()
 
         # print '\n4d Soliton generating function (without spin)'
         # print self.Q
-        print '\n4d Soliton generating function (with spin)'
-        print self.Q_y
-        print '\n4d Soliton generating function with opposite basepoint (with spin)'
-        print self.Q_y_reversed
+        if self.resolution == 'american':
+            print '\n4d Soliton generating function (with spin)'
+            print self.Q_y_shifted
+        elif self.resolution == 'british':
+            print '\n4d Soliton generating function (opposite basepoint, with spin)'
+            print self.Q_y_reversed_shifted
 
     def compute_closed_solitons(self):
         self.closed_solitons = []
@@ -207,6 +212,8 @@ class SolitonData:
         self.Q = 1
         self.Q_y = 1
         self.Q_y_reversed = 1
+        self.Q_y_shifted = 1
+        self.Q_y_reversed_shifted = 1
         for c_sol in self.closed_solitons:
             self.Q += c_sol.homology_class.symbol
             self.Q_y += (
@@ -215,6 +222,19 @@ class SolitonData:
         for c_sol in self.closed_solitons_reversed:
             self.Q_y_reversed += (
                 (symbols('y') ** c_sol.writhe) * c_sol.homology_class.symbol
+            )
+        for c_sol in self.closed_solitons:
+            self.Q += c_sol.homology_class.symbol
+            self.Q_y_shifted += (
+                (symbols('y') ** (
+                    c_sol.writhe - c_sol.contains_street(self.street)
+                )) * c_sol.homology_class.symbol
+            )
+        for c_sol in self.closed_solitons_reversed:
+            self.Q_y_reversed_shifted += (
+                (symbols('y') ** (
+                    - c_sol.writhe - c_sol.contains_street(self.street)
+                )) * c_sol.homology_class.symbol
             )
 
     def compute_open_solitons(self):

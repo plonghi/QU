@@ -629,6 +629,14 @@ class ClosedSoliton:
         print 'Detailed path info :'
         self.dash.print_path_info()
 
+    def contains_street(self, street):
+        count_i = len([st for [st, sgn] in self.dash.path if st==street and sgn == +1])
+        count_j = len([st for [st, sgn] in self.dash.path if st==street and sgn == -1])
+        if count_i == count_j:
+            return count_i
+        else:
+            raise Exception()
+
 
 def set_orientation_from_starting_point(
         street, starting_pt, starting_slot, opposite=False
