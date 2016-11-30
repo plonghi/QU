@@ -176,10 +176,12 @@ class Street:
         return self.endpoints[1]
 
     def print_info(self):
-        print 'Street {} is oriented {} ---> {}\n'.format(
+        print 'Street {} is oriented ({}, slot {}) ---> ({}, slot {})\n'.format(
             self.label, 
             self.initial_point().end_point.label, 
-            self.final_point().end_point.label
+            self.initial_point().slot, 
+            self.final_point().end_point.label,
+            self.final_point().slot
         )
 
 

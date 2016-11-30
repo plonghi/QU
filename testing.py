@@ -1773,6 +1773,7 @@ w = MCSN(
 )
 
 #------ Finished creating network -------
+# w.print_info()
 
 s1 = w.streets['p_1']
 s2 = w.streets['p_2']
@@ -1781,11 +1782,11 @@ s3 = w.streets['p_3']
 
 # print '\n\n-------------------------------------------------------'
 print '\nSoliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
-# Q1.initialize()
-# # # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=8)
-# Q1.print_info(full_path=False)
+Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
+Q1.initialize()
+# # Q1.print_info(full_path=True)
+Q1.grow(n_steps=3)
+Q1.print_info(full_path=False)
 
 # Q2 = SolitonData(label='Q_2', network=w, street=s2, resolution='american')
 # Q2.initialize()
@@ -1793,17 +1794,17 @@ print '\nSoliton Data'
 # Q2.grow(n_steps=8)
 # Q2.print_info(full_path=False)
 
-Q3 = SolitonData(label='Q_3', network=w , street=s1, resolution='british')
-Q3.initialize()
-# # Q1.print_info(full_path=True)
-Q3.grow(n_steps=8)
-Q3.print_info(full_path=False)
+# Q3 = SolitonData(label='Q_3', network=w , street=s1, resolution='british')
+# Q3.initialize()
+# # # Q1.print_info(full_path=True)
+# Q3.grow(n_steps=8)
+# Q3.print_info(full_path=False)
 
-Q4 = SolitonData(label='Q_4', network=w, street=s2, resolution='british')
-Q4.initialize()
-# # Q1.print_info(full_path=True)
-Q4.grow(n_steps=8)
-Q4.print_info(full_path=False)
+# Q4 = SolitonData(label='Q_4', network=w, street=s2, resolution='british')
+# Q4.initialize()
+# # # Q1.print_info(full_path=True)
+# Q4.grow(n_steps=8)
+# Q4.print_info(full_path=False)
 
 
 # config_file_name = 'T_3'

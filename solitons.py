@@ -98,13 +98,17 @@ class Dash:
                 )
                 self.path.append([street, new_street_orientation])
             else:
-                raise Exception(
-                    'Loops on a single branch point not implemented.'
-                )
-                # new_street_orientation = -set_orientation_from_starting_point(
+                # self.print_path_info()
+                # print 'new street {}'.format(street.label)
+                # print 'new slot {}'.format(slot)
+                # print 'new street orientation: {}'.format(set_orientation_from_starting_point(
                 #     street, intermediate_pt, slot
-                # )
-                # self.path.append([street, new_street_orientation])
+                # ))
+                new_street_orientation = set_orientation_from_starting_point(
+                    street, intermediate_pt, slot
+                )
+                self.path.append([street, new_street_orientation])
+                # self.print_path_info()
 
         elif end_pt == 'first' and (
             self.growth_restriction == 'backward_only' or 
@@ -152,13 +156,17 @@ class Dash:
                 )
                 self.path.insert(0, [street, new_street_orientation])
             else:
-                raise Exception(
-                    'Loops on a single branch point not implemented.'
+                # self.print_path_info()
+                # print 'new street {}'.format(street.label)
+                # print 'new slot {}'.format(slot)
+                # print 'new street orientation: {}'.format(set_orientation_from_starting_point(
+                #     street, intermediate_pt, slot, opposite=True
+                # ))
+                new_street_orientation = set_orientation_from_starting_point(
+                    street, intermediate_pt, slot, opposite=True
                 )
-                # new_street_orientation = -set_orientation_from_starting_point(
-                #     street, intermediate_pt, slot
-                # )
-                # self.path.insert(0, [street, new_street_orientation])
+                self.path.append([street, new_street_orientation])
+                # self.print_path_info()
 
         else:
             raise Exception(
