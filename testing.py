@@ -1751,42 +1751,42 @@ from config import MCSNConfig
 #            Flipped T2 theory
 
 
-streets = ['p_' + str(i + 1) for i in range(3)]
-branch_points = {
-    'b_1': ['p_1', 'p_2', 'p_1'],
-    'b_2': ['p_2', 'p_3', 'p_3'],
-}
+# streets = ['p_' + str(i + 1) for i in range(3)]
+# branch_points = {
+#     'b_1': ['p_1', 'p_2', 'p_1'],
+#     'b_2': ['p_2', 'p_3', 'p_3'],
+# }
 
-joints = {}
+# joints = {}
 
-homology_classes = {
-    'gamma_1' : ['p_1'],
-    'gamma_2' : ['p_2'],
-    'gamma_3' : ['p_3'],
-}
+# homology_classes = {
+#     'gamma_1' : ['p_1'],
+#     'gamma_2' : ['p_2'],
+#     'gamma_3' : ['p_3'],
+# }
 
-w = MCSN(
-    branch_points=branch_points, 
-    streets=streets, 
-    joints=joints, 
-    homology_classes=homology_classes
-)
+# w = MCSN(
+#     branch_points=branch_points, 
+#     streets=streets, 
+#     joints=joints, 
+#     homology_classes=homology_classes
+# )
 
-#------ Finished creating network -------
-# w.print_info()
+# #------ Finished creating network -------
+# # w.print_info()
 
-s1 = w.streets['p_1']
-s2 = w.streets['p_2']
-s3 = w.streets['p_3']
+# s1 = w.streets['p_1']
+# s2 = w.streets['p_2']
+# s3 = w.streets['p_3']
 
 
 # print '\n\n-------------------------------------------------------'
-print '\nSoliton Data'
-Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
-Q1.initialize()
-# # Q1.print_info(full_path=True)
-Q1.grow(n_steps=3)
-Q1.print_info(full_path=False)
+# print '\nSoliton Data'
+# Q1 = SolitonData(label='Q_1', network=w , street=s1, resolution='american')
+# Q1.initialize()
+# # # Q1.print_info(full_path=True)
+# Q1.grow(n_steps=3)
+# Q1.print_info(full_path=False)
 
 # Q2 = SolitonData(label='Q_2', network=w, street=s2, resolution='american')
 # Q2.initialize()
@@ -1805,6 +1805,57 @@ Q1.print_info(full_path=False)
 # # # Q1.print_info(full_path=True)
 # Q4.grow(n_steps=8)
 # Q4.print_info(full_path=False)
+
+
+# --------------- N-punctured sphere -- middle edges -----------------
+
+
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8']
+
+branch_points = {
+      'b_1': ['p_1', None, 'p_2'],
+      'b_2': ['p_1', 'p_3', 'p_2'],
+      'b_3': ['p_3', 'p_4', 'p_5'],
+      'b_4': ['p_4', 'p_5', 'p_6'],
+      'b_5': ['p_6', 'p_8', 'p_7'],
+      'b_6': ['p_7', None, 'p_8']
+      }
+
+joints = {}
+
+homology_classes = {
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+  'gamma_4' : ['p_4'],
+  'gamma_5' : ['p_5'],
+  'gamma_6' : ['p_6'],
+  'gamma_7' : ['p_7'],
+  'gamma_8' : ['p_8'],}
+
+
+w = MCSN(
+    branch_points=branch_points, 
+    streets=streets, 
+    joints=joints, 
+    homology_classes=homology_classes
+)
+
+#------ Finished creating network -------
+# w.print_info()
+
+s1 = w.streets['p_1']
+s2 = w.streets['p_2']
+s3 = w.streets['p_3']
+
+
+print '\n\n-------------------------------------------------------'
+print '\nSoliton Data'
+Q1 = SolitonData(label='Q_1', network=w , street=s3, resolution='british')
+Q1.initialize()
+# # Q1.print_info(full_path=True)
+Q1.grow(n_steps=4)
+Q1.print_info(full_path=True, soliton_paths=True)
 
 
 # config_file_name = 'T_3'
