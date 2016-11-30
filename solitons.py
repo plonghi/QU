@@ -98,11 +98,13 @@ class Dash:
                 )
                 self.path.append([street, new_street_orientation])
             else:
-                raise Exception('Review code here before proceeding.')
-                new_street_orientation = -set_orientation_from_starting_point(
-                    street, intermediate_pt, slot
+                raise Exception(
+                    'Loops on a single branch point not implemented.'
                 )
-                self.path.append([street, new_street_orientation])
+                # new_street_orientation = -set_orientation_from_starting_point(
+                #     street, intermediate_pt, slot
+                # )
+                # self.path.append([street, new_street_orientation])
 
         elif end_pt == 'first' and (
             self.growth_restriction == 'backward_only' or 
@@ -150,11 +152,13 @@ class Dash:
                 )
                 self.path.insert(0, [street, new_street_orientation])
             else:
-                raise Exception('Review code here before proceeding.')
-                new_street_orientation = -set_orientation_from_starting_point(
-                    street, intermediate_pt, slot
+                raise Exception(
+                    'Loops on a single branch point not implemented.'
                 )
-                self.path.insert(0, [street, new_street_orientation])
+                # new_street_orientation = -set_orientation_from_starting_point(
+                #     street, intermediate_pt, slot
+                # )
+                # self.path.insert(0, [street, new_street_orientation])
 
         else:
             raise Exception(
@@ -823,7 +827,7 @@ def check_dashes_ordering(dash_sequence):
             print '\nDashes are not ordered properly:'
             for d in dash_sequence:
                 d.print_endpoints()
-            raise Exception
+            raise Exception('\nDashes are not ordered properly')
     pass
 
 
