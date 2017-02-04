@@ -4,6 +4,7 @@ from mcsn import MCSN
 from soliton_data import NetworkSolitonContent
 from config import MCSNConfig
 
+VERBOSE = False
 
 def analyze_configuration(
 	config_file_name, saving_file_name, details_options

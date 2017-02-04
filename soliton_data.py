@@ -5,6 +5,7 @@ Module to handle soliton generating functions
 from solitons import SolitonPath, ClosedSoliton
 from growth_rules import grow_soliton
 from sympy import symbols
+from api import VERBOSE
 
 # Default maximal growth level for solitons.
 N_MAX_GROWTH = 10
@@ -50,6 +51,12 @@ class SolitonData:
         self.Q_y_reversed_shifted = 0 # shifts due to extracting Y_\wp from F AND inversion y->1/y
 
     def initialize(self):
+        if VERBOSE is True:
+            print (
+                '\nInitializing soliton data of street {} with resolution {}'
+                .format(self.street.label, self.resolution)
+            )
+
         # The initial co-oriented soliton
         ij_sol = SolitonPath(
             label=self.label + '_ij_sol',resolution=self.resolution,
@@ -78,6 +85,13 @@ class SolitonData:
         self.anti_oriented_solitons = [ji_sol]
 
     def grow(self, n_steps=N_MAX_GROWTH):
+        if VERBOSE is True:
+            print (
+                'GROW soliton data of street {} with resolution {}'
+                .format(self.street.label, self.resolution)
+            )
+            print 'co oriented solitons'
+
         # grow co-oriented solitons
         new_co_or_sols = []
         for sol in self.co_oriented_solitons:
@@ -88,6 +102,9 @@ class SolitonData:
 
         self.co_oriented_solitons = new_co_or_sols
 
+        if VERBOSE is True:
+            print 'anti oriented solitons'
+
         # grow anti-oriented solitons
         new_anti_or_sols = []
         for sol in self.anti_oriented_solitons:
@@ -97,6 +114,9 @@ class SolitonData:
             new_anti_or_sols += new_sols
 
         self.anti_oriented_solitons = new_anti_or_sols
+
+        if VERBOSE is True:
+            print 'compute closed solitons'
 
         # compute closed solitons
         self.compute_closed_solitons()
