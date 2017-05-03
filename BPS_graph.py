@@ -189,10 +189,7 @@ def flip_edge(graph, edge):
     ep0, ep1 = p.endpoints
 
     # check that we can perform a flip on this edge: must be an I-web
-    if (
-        ep0.end_point.__class__.__name__ != 'BranchPoint' or
-        ep1.end_point.__class__.__name__ != 'BranchPoint'
-    ):
+    if can_be_flipped(p) is False:
         raise Exception('Cannot flip on edge {}.'.format(edge))
 
     new_streets = graph.streets.keys()
@@ -251,11 +248,8 @@ def cootie_face(graph, face):
         # the street
         f = graph.faces[face]
 
-    # check that we can perform a cootie on this edge:
-    if (
-        f.face_type != ['j', 'b', 'j', 'b'] and
-        f.face_type != ['b', 'j', 'b', 'j']
-    ):
+    # check that we can perform a cootie on this face:
+    if can_cootie(graph, f) is False:
         raise Exception('Cannot perform a cootie on face {}.'.format(face))
 
     nodes = f.node_sequence
@@ -292,14 +286,6 @@ def cootie_face(graph, face):
         b_1 = f.node_sequence[2]
         j_0 = f.node_sequence[1]
         j_1 = f.node_sequence[3]
-
-    # now I check that the joints are both tri-valent, 
-    # otherwise we cannot perform a cootie move
-    if (
-        graph.joints[j_0].type != 'type_3_joint' or
-        graph.joints[j_1].type != 'type_3_joint'
-    ):
-        raise Exception('Joints must be trivalent.')
 
     del new_branch_points[b_0]
     del new_branch_points[b_1]
@@ -354,6 +340,80 @@ def get_label(obj):
         return obj.label
     else:
         return obj
+
+
+def can_be_flipped(street):
+    """
+    Determines whether an edge can be flipped.
+    Minimal requirements are that it is bounded by two branch points,
+    and that each branch point is trivalent.
+    (the second can be relaxed, but for now we enforce this)
+    """
+    ep0, ep1 = street.endpoints
+
+    # check that both endpoints are tri-valent branch points
+    if (
+        ep0.end_point.type != 'type_3_branch_point' or
+        ep1.end_point.type != 'type_3_branch_point'
+    ):
+        return False
+    else:
+        return True
+
+
+def can_cootie(graph, face):
+    """
+    Determines whether a cootie can be performed on a face.
+    Minimal requirements are that it is bounded by two trivalent 
+    branch points, and two trivalent joints.
+    (the second can be relaxed, but for now we enforce this)
+    """
+    
+    # check that the face is bounded by two branch points 
+    # and two joints which alternate
+    if (
+        face.face_type != ['j', 'b', 'j', 'b'] and
+        face.face_type != ['b', 'j', 'b', 'j']
+    ):
+        return False
+    else:
+        pass
+
+    # identify the branch points and the joints involved in the cootie move
+    if face.face_type == ['j', 'b', 'j', 'b']:
+        b_0 = face.node_sequence[1]
+        b_1 = face.node_sequence[3]
+        j_0 = face.node_sequence[2]
+        j_1 = face.node_sequence[0]
+    elif face.face_type == ['b', 'j', 'b', 'j']:
+        b_0 = face.node_sequence[0]
+        b_1 = face.node_sequence[2]
+        j_0 = face.node_sequence[1]
+        j_1 = face.node_sequence[3]
+
+    # now I check that the joints are both tri-valent, 
+    # and that also the branch points are tri-valent,
+    # otherwise we cannot perform a cootie move
+    if (
+        graph.joints[j_0].type != 'type_3_joint' or
+        graph.joints[j_1].type != 'type_3_joint' or
+        graph.branch_points[b_0].type != 'type_3_branch_point' or
+        graph.branch_points[b_1].type != 'type_3_branch_point'
+    ):
+        return False
+    else:
+        return True
+
+
+    # check that both endpoints are tri-valent branch points
+    if (
+        ep0.end_point.type != 'type_3_branch_point' or
+        ep1.end_point.type != 'type_3_branch_point'
+    ):
+        return False
+    else:
+        return True
+
 
 # --------- torus graph with two joints and two branch points ----------
 
@@ -438,9 +498,9 @@ w = BPSgraph(
 
 w.print_face_info()
 
-# w1 = flip_edge(w, 'p_1')
+w1 = flip_edge(w, 'p_5')
 
-w1 = cootie_face(w, 'f_1')
+w2 = cootie_face(w, 'f_1')
 
 w1.print_face_info()
 
