@@ -317,7 +317,8 @@ class MCSN:
         branch_points={}, 
         streets=[], 
         joints={}, 
-        homology_classes={}
+        homology_classes={},
+        quiet=False,
     ):
         self.label = label
         
@@ -376,7 +377,7 @@ class MCSN:
         )
 
         self.attach_streets()
-        self.check_network()
+        self.check_network(quiet=quiet)
 
     def attach_streets(self):
         for b_pt in self.branch_points.values():
@@ -397,7 +398,7 @@ class MCSN:
                         )
                     )
 
-    def check_network(self):
+    def check_network(self, quiet=False):
         # Check that every street has exactly two endpoints
         for street in self.streets.values():
             if len(street.endpoints) == 2:
@@ -409,7 +410,8 @@ class MCSN:
                         street.label, [pt.end_point for pt in street.endpoints]
                     )
                 )
-        print 'All streets have two well-defined endpoints.'
+        if quiet is False:
+            print 'All streets have two well-defined endpoints.'
 
         # Check that every joint is of an allowed type
         for j_pt in self.joints.values():
@@ -426,7 +428,8 @@ class MCSN:
                 raise Exception(
                     'Joint {} is of type {}'.format(j_pt.label, j_type)
                 )
-        print 'All joints are of a well-defined type.'
+        if quiet is False:
+            print 'All joints are of a well-defined type.'
 
         # Check that homology classes include all streets of the network
         # and that no street is repeated more than once
@@ -452,15 +455,17 @@ class MCSN:
                 #     'Two or more homology classes share a street.'
                 # )
 
-            print 'All homology classes are well-defined.'
+            if quiet is False:
+                print 'All homology classes are well-defined.'
         else:
             print 'No homology classes have been defined.'
 
         # Print info about homology classes and the formal variables
-        print '\nDictionary of formal variables and homology basis:'
-        for hc_k in sorted(self.basis_homology_classes.keys()):
-            hc_v = self.basis_homology_classes[hc_k]
-            print '{} ---> {}'.format(hc_v.label, hc_v.symbol)
+        if quiet is False:
+            print '\nDictionary of formal variables and homology basis:'
+            for hc_k in sorted(self.basis_homology_classes.keys()):
+                hc_v = self.basis_homology_classes[hc_k]
+                print '{} ---> {}'.format(hc_v.label, hc_v.symbol)
         
     def add_street(self):
         pass

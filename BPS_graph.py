@@ -39,7 +39,8 @@ class BPSgraph(MCSN):
             branch_points, 
             streets, 
             joints, 
-            homology_classes
+            homology_classes,
+            quiet=True
         )
         self.faces = {}
         self.mutable_faces = []
@@ -283,9 +284,6 @@ def cootie_face(graph, face):
     nodes = f.node_sequence
     streets = f.street_sequence
 
-    print nodes
-    print streets
-
     new_streets = graph.streets.keys()
     new_branch_points = {
         b.label : [s.label for s in b.streets] 
@@ -353,7 +351,7 @@ def cootie_face(graph, face):
 
     print (
         '\n\t **** WARNING **** \n'
-        'The homology classes are not handled correctly for the moment.'
+        'Homology classes not handled correctly in cootie for the moment.\n'
     )
 
     return BPSgraph(
@@ -381,6 +379,8 @@ def can_be_flipped(street):
     Minimal requirements are that it is bounded by two branch points,
     and that each branch point is trivalent.
     (the second can be relaxed, but for now we enforce this)
+    Also require that an edge does not end twice on the same branch point.
+    (cannot flip the internal edge of a self-folded triangle)
     """
     ep0, ep1 = street.endpoints
 
@@ -389,6 +389,8 @@ def can_be_flipped(street):
         ep0.end_point.type != 'type_3_branch_point' or
         ep1.end_point.type != 'type_3_branch_point'
     ):
+        return False
+    elif ep0.end_point == ep1.end_point:
         return False
     else:
         return True
@@ -488,23 +490,101 @@ def have_same_face_types(graph_1, graph_2):
     else:
         return True
 
+def find_invariant_sequences(
+    graph, depth, level=0, ref_graph=None, sequence=None,
+):
+    """
+    Find all sequences of flips or cootie moves, up to length 
+    'depth' which take a BPS graph back to itself, up to an automorphism.
+    The criterion for the automorphism is that the two graphs must 
+    coincide up to a permutation of the streets.
+    Since the permutation of streets can take much time, 
+    to speed up the comparison we first make weaker checks.
+    For instance we check that two graphs have the same types of faces.
+    """
 
-# --------- torus graph with two joints and two branch points ----------
+    if level == depth:
+        # print 'max depth reached'
+        return []
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+    if sequence is None:
+        sequence = []
 
-branch_points = {
-  'b_1': ['p_2', 'p_5', 'p_6'],
-  'b_2': ['p_3', 'p_4', 'p_5'],}
+    # print '\nStudying sequence {}'.format(sequence)
+    
+    if ref_graph is None:
+        ref_graph = graph
 
-joints = {
-    'j_1' : ['p_1', None, 'p_2', None, 'p_3', None],
-    'j_2' : ['p_1', None, 'p_4', None, 'p_6', None]
-}
+    self_similar_graphs = []
 
-homology_classes = {
-  'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_6', 'p_4'],
-  'gamma_2' : ['p_5']}
+    for f in graph.mutable_faces:
+        # avoid repeating the last move in the sequence
+        # that would be a trivial result (it's involutive)
+        if len(sequence) > 0:
+            if f == sequence[-1]:
+                # print 'cootie on {} is the same as last move'.format(f)
+                continue
+
+        g_new = cootie_face(graph, f)
+        new_sequence = sequence + [f]
+        if have_same_face_types(ref_graph, g_new) is True:
+            print 'This is a good sequence: {}'.format(new_sequence)
+            self_similar_graphs.append(new_sequence)
+        else:
+            # print 'Will try going deeper with: {}'.format(new_sequence)
+            deeper_sequences = find_invariant_sequences(
+                g_new,
+                depth,
+                level=level+1,
+                ref_graph=ref_graph,
+                sequence=new_sequence
+            )
+            self_similar_graphs += deeper_sequences
+
+    for e in graph.mutable_edges:
+        # avoid repeating the last move in the sequence
+        # that would be a trivial result (it's involutive)
+        # print 'studying mutation on {}'.format(e)
+        if len(sequence) > 0:
+            if e == sequence[-1]:
+                # print 'flipping {} is the same as last move'.format(e)
+                continue
+
+        g_new = flip_edge(graph, e)
+        new_sequence = sequence + [e]
+        if have_same_face_types(ref_graph, g_new) is True:
+            print 'This is a good sequence: {}'.format(new_sequence)
+            self_similar_graphs.append(new_sequence)
+        else:
+            # print 'Will try going deeper with: {}'.format(new_sequence)
+            deeper_sequences = find_invariant_sequences(
+                g_new,
+                depth,
+                level=level+1,
+                ref_graph=ref_graph,
+                sequence=new_sequence
+            )
+            self_similar_graphs += deeper_sequences
+
+    return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
+
+
+# # --------- torus graph with two joints and two branch points ----------
+
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+
+# branch_points = {
+#   'b_1': ['p_2', 'p_5', 'p_6'],
+#   'b_2': ['p_3', 'p_4', 'p_5'],}
+
+# joints = {
+#     'j_1' : ['p_1', None, 'p_2', None, 'p_3', None],
+#     'j_2' : ['p_1', None, 'p_4', None, 'p_6', None]
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1', 'p_2', 'p_3', 'p_6', 'p_4'],
+#   'gamma_2' : ['p_5']}
 
 
 # # --------------- N-punctured sphere -- 4 punctures -----------------
@@ -561,6 +641,30 @@ homology_classes = {
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
+# --------------- [2,1]-punctured torus -----------------
+
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
+
+branch_points = {
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_1', 'p_4', 'p_8'],
+  'b_3': ['p_2', 'p_5', 'p_9'],
+  'b_4': ['p_3', 'p_6', 'p_7'],}
+
+joints = {
+    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
+}
+
+homology_classes = {
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+  'gamma_4' : ['p_4', 'p_5', 'p_6'],
+  'gamma_5' : ['p_7', 'p_8', 'p_9'],
+}
+
+
 
 w = BPSgraph(
     branch_points=branch_points, 
@@ -570,21 +674,26 @@ w = BPSgraph(
 )
 
 
-w.print_face_info()
+# w.print_face_info()
 
-w.print_mutable_info()
+# w.print_mutable_info()
 
-w1 = flip_edge(w, 'p_5')
+# w1 = flip_edge(w, 'p_6')
+# w2 = flip_edge(w, 'p_4')
+# w3 = flip_edge(w, 'p_5')
+# print have_same_face_types(w, w3)
 
-w2 = cootie_face(w, 'f_1')
+# w2 = cootie_face(w, 'f_1')
 
-w1.print_face_info()
+# w1.print_face_info()
 
-print have_same_face_types(w, w)
-print have_same_face_types(w, w1)
-print have_same_face_types(w, w2)
-print have_same_face_types(w1, w2)
+# print have_same_face_types(w, w)
+# print have_same_face_types(w, w1)
+# print have_same_face_types(w, w2)
+# print have_same_face_types(w1, w2)
 
+seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
+print seq
 
 # print '\n\n-------------------------------------------------------'
 # print '\nSoliton Data'
