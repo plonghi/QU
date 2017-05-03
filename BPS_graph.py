@@ -351,6 +351,11 @@ def cootie_face(graph, face):
         streets_b_0[0], None, streets_b_0[1], None, streets_b_0[2], None
     ]
 
+    print (
+        '\n\t **** WARNING **** \n'
+        'The homology classes are not handled correctly for the moment.'
+    )
+
     return BPSgraph(
         branch_points=new_branch_points, 
         streets=new_streets, 
@@ -438,6 +443,47 @@ def can_cootie(graph, face):
         ep0.end_point.type != 'type_3_branch_point' or
         ep1.end_point.type != 'type_3_branch_point'
     ):
+        return False
+    else:
+        return True
+
+
+def are_same_cycle(c_1, c_2):
+    """
+    determine whether c_1 and c_2 are related by a cyclic permutation
+    """
+    l_1 = len(c_1) 
+    l_2 = len(c_2) 
+    
+    if l_1 != l_2:
+        return False
+    
+    for i in range(l_1):
+        c_1_prime = [c_1[(j + i) % l_1] for j in range(l_1)]
+        if c_1_prime == c_2:
+            return True
+
+    return False
+
+def have_same_face_types(graph_1, graph_2):
+    """
+    Determine whether two graphs have faces of the 
+    same types, in terms of their 'type' as determined
+    by the ordered sequence of nodes bounding a face
+    e.g. ['b', 'b', 'j', 'j']
+    """
+    face_types_1 = [f.face_type for f in graph_1.faces.values()]
+    face_types_2 = [f.face_type for f in graph_2.faces.values()]
+    # for each element in the first list, 
+    # sort through the elements of the second list.
+    # If a match is found, remove that element from the second 
+    # list, then keep checking.
+    for i_1, ft_1 in enumerate(face_types_1):
+        for i_2, ft_2 in enumerate(face_types_2):
+            if are_same_cycle(ft_1, ft_2):
+                face_types_2.pop(i_2)
+                break
+    if len(face_types_2) > 0:
         return False
     else:
         return True
@@ -534,7 +580,10 @@ w2 = cootie_face(w, 'f_1')
 
 w1.print_face_info()
 
-
+print have_same_face_types(w, w)
+print have_same_face_types(w, w1)
+print have_same_face_types(w, w2)
+print have_same_face_types(w1, w2)
 
 
 # print '\n\n-------------------------------------------------------'
