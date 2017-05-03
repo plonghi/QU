@@ -20,6 +20,10 @@ from config import MCSNConfig
 class BPSgraph(MCSN):
     """
     A class for BPS graphs.
+    The attribute 'mutable_edges' collects (labels of) edges
+    which can be flipped.
+    The attribute 'mutable_faces' collects (labels of) faces
+    on which a cootie move can be performed.
     """
     def __init__(
         self, 
@@ -38,7 +42,10 @@ class BPSgraph(MCSN):
             homology_classes
         )
         self.faces = {}
+        self.mutable_faces = []
+        self.mutable_edges = []
         self.determine_faces()
+        self.determine_mutable_elements()
     
 
     def determine_faces(self):
@@ -70,6 +77,27 @@ class BPSgraph(MCSN):
             print '\nFace {}.'.format(i)
             f.print_info()
 
+    def print_mutable_info(self):
+        print '\nThe are {} mutable edges, they are: {}'.format(
+            len(self.mutable_edges), self.mutable_edges
+        )
+        print 'The are {} mutable faces, they are: {}\n'.format(
+            len(self.mutable_faces), self.mutable_faces
+        )
+
+    def determine_mutable_elements(self):
+        mutable_edges = []
+        for s_k, s_v in self.streets.iteritems():
+            if can_be_flipped(s_v) is True:
+                mutable_edges.append(s_k)
+
+        mutable_faces = []
+        for f_k, f_v in self.faces.iteritems():
+            if can_cootie(self, f_v) is True:
+                mutable_faces.append(f_k)
+
+        self.mutable_edges = mutable_edges
+        self.mutable_faces = mutable_faces
 
 
 class Face():
@@ -497,6 +525,8 @@ w = BPSgraph(
 
 
 w.print_face_info()
+
+w.print_mutable_info()
 
 w1 = flip_edge(w, 'p_5')
 
