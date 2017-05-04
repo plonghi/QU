@@ -533,11 +533,10 @@ def are_equivalent(graph_1, graph_2):
     for p in all_perms:
         # start by checking equality of branch points
         bp_1_perm = replace(s_1, p, bp_1)
-        # print 'comparing {} and {} gives\n{}'.format(bp_1_perm, bp_2, bp_1_perm == bp_2)
-        if bp_1_perm == bp_2:
+        if equivalent_as_dictionaries(bp_1_perm, bp_2) is True:
             # then also check equality of joints
             j_1_perm = replace(s_1, p, j_1)
-            if j_1_perm == j_2:
+            if equivalent_as_dictionaries(j_1_perm, j_2) is True:
                 return [s_1, p]
 
     return None
@@ -567,8 +566,6 @@ def equivalent_as_dictionaries(dic_1, dic_2):
         return False
     else:
         return True
-
-
 
 def replace(old_vars, new_vars, dic):
     """
@@ -698,25 +695,25 @@ def find_invariant_sequences(
 #   'gamma_2' : ['p_5']}
 
 
-# --------------- N-punctured sphere -- 4 punctures -----------------
+# # --------------- N-punctured sphere -- 4 punctures -----------------
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
 
-branch_points = {
-  'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_2', 'p_4', 'p_5'],
-  'b_3': ['p_1', 'p_6', 'p_4'],
-  'b_4': ['p_3', 'p_5', 'p_6'],}
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_2', 'p_4', 'p_5'],
+#   'b_3': ['p_1', 'p_6', 'p_4'],
+#   'b_4': ['p_3', 'p_5', 'p_6'],}
 
-joints = {}
+# joints = {}
 
-homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3'],
-  'gamma_4' : ['p_4'],
-  'gamma_5' : ['p_5'],
-  'gamma_6' : ['p_6'],}
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4'],
+#   'gamma_5' : ['p_5'],
+#   'gamma_6' : ['p_6'],}
 
 
 # # --------------- T3 -----------------
@@ -750,28 +747,28 @@ homology_classes = {
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# # --------------- [2,1]-punctured torus -----------------
+# --------------- [2,1]-punctured torus -----------------
 
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
 
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_1', 'p_4', 'p_8'],
-#   'b_3': ['p_2', 'p_5', 'p_9'],
-#   'b_4': ['p_3', 'p_6', 'p_7'],}
+branch_points = {
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_1', 'p_4', 'p_8'],
+  'b_3': ['p_2', 'p_5', 'p_9'],
+  'b_4': ['p_3', 'p_6', 'p_7'],}
 
-# joints = {
-#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
-# }
+joints = {
+    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
+}
 
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
-#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
-# }
+homology_classes = {
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+  'gamma_4' : ['p_4', 'p_5', 'p_6'],
+  'gamma_5' : ['p_7', 'p_8', 'p_9'],
+}
 
 
 
@@ -823,8 +820,8 @@ w = BPSgraph(
 # print have_same_face_types(w, w2)
 # print have_same_face_types(w1, w2)
 
-# seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
-# print seq
+seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
+print seq
 
 # w.print_face_info()
 
@@ -836,49 +833,49 @@ w = BPSgraph(
 # print have_same_face_types(w, w_5)
 # print are_equivalent(w, w_5)
 
-w_1 = flip_edge(w, 'p_1')
-w_2 = flip_edge(w_1, 'p_5')
+# w_1 = flip_edge(w, 'p_1')
+# w_2 = flip_edge(w_1, 'p_5')
 
-print have_same_face_types(w, w_2)
+# print have_same_face_types(w, w_2)
 # print are_equivalent(w, w_2)
-# w_2.print_face_info()
+# # w_2.print_face_info()
 
-# now reshuffle the streets of the network
+# # now reshuffle the streets of the network
 
 
 
-graph_1 = w
-graph_2 = w_2
+# graph_1 = w
+# graph_2 = w_2
 
-s_1 = graph_1.streets.keys()
-bp_1 = {
-    b.label : [s.label for s in b.streets] 
-    for b in graph_1.branch_points.values()
-}
-j_1 = {
-    j.label : [get_label(s) for s in j.streets] 
-    for j in graph_1.joints.values()
-}
+# s_1 = graph_1.streets.keys()
+# bp_1 = {
+#     b.label : [s.label for s in b.streets] 
+#     for b in graph_1.branch_points.values()
+# }
+# j_1 = {
+#     j.label : [get_label(s) for s in j.streets] 
+#     for j in graph_1.joints.values()
+# }
 
-s_2 = graph_2.streets.keys()
-bp_2 = {
-    b.label : [s.label for s in b.streets] 
-    for b in graph_2.branch_points.values()
-}
-j_2 = {
-    j.label : [get_label(s) for s in j.streets] 
-    for j in graph_2.joints.values()
-}
+# s_2 = graph_2.streets.keys()
+# bp_2 = {
+#     b.label : [s.label for s in b.streets] 
+#     for b in graph_2.branch_points.values()
+# }
+# j_2 = {
+#     j.label : [get_label(s) for s in j.streets] 
+#     for j in graph_2.joints.values()
+# }
 
-old_vars = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
-new_vars = ['p_1', 'p_4', 'p_2', 'p_6', 'p_5', 'p_3']
-print 'old vars = {}'.format(old_vars)
-print 'new vars = {}'.format(new_vars)
-new_bp = replace(old_vars, new_vars, bp_1)
+# old_vars = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+# new_vars = ['p_1', 'p_4', 'p_2', 'p_6', 'p_5', 'p_3']
+# print 'old vars = {}'.format(old_vars)
+# print 'new vars = {}'.format(new_vars)
+# new_bp = replace(old_vars, new_vars, bp_1)
 
-print new_bp
-print bp_2
-print equivalent_as_dictionaries(new_bp, bp_2)
+# print new_bp
+# print bp_2
+# print equivalent_as_dictionaries(new_bp, bp_2)
 
 
 # print 'the two graphs have same faces: {}'.format(have_same_face_types(w, w1))
