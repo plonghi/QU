@@ -46,6 +46,11 @@ class BPSgraph(MCSN):
         self.mutable_faces = []
         self.mutable_edges = []
         self.determine_faces()
+        for f in self.faces.values():
+            f.determine_neighbors(self)
+        self.tessellation_data = {
+            f.label : f.neighbors for f in self.faces.values()
+        }
         self.determine_mutable_elements()
     
 
@@ -67,16 +72,17 @@ class BPSgraph(MCSN):
             if ep in all_face_paths:
                 continue
             else:
-                new_face = Face(ep)
-                self.faces['f_'+str(i_f)] = new_face
+                f_label = 'f_'+str(i_f)
+                new_face = Face(ep, label=f_label)
+                self.faces[f_label] = new_face
                 all_face_paths += new_face.full_sequence
                 i_f += 1
 
     def print_face_info(self):
         print '\nThere are {} faces, they are:'.format(len(self.faces))
-        for i, f in enumerate(self.faces.values()):
-            print '\nFace {}.'.format(i)
-            f.print_info()
+        for f_k, f_v in self.faces.iteritems():
+            print '\nFace {}.'.format(f_k)
+            f_v.print_info()
 
     def print_mutable_info(self):
         print '\nThe are {} mutable edges, they are: {}'.format(
@@ -105,10 +111,14 @@ class Face():
     """
     A class for faces of BPS graphs
     """
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, label=None):
         self.full_sequence = []
         self.node_sequence = []
         self.street_sequence = []
+        self.neighbors = []
+        self.face_type = []
+        self.label = label
+
         [
             self.full_sequence, 
             self.node_sequence, 
@@ -118,7 +128,6 @@ class Face():
         # the face type is a list of letters like ['b', 'b', 'j',...]
         # which records the types of nodes at the feca boundary
         # (b is for branch point, j for joint)
-        self.face_type = []
         for el in self.full_sequence:
             if el.__class__.__name__ == 'StreetEndpoint':
                 if el.end_point.__class__.__name__ == 'BranchPoint':
@@ -127,6 +136,9 @@ class Face():
                     self.face_type += ['j']
                 else:
                     pass
+
+    def determine_neighbors(self, graph):
+        self.neighbors = face_neighbors(graph, self.label)
 
     def print_info(self):
         print 'Edges of the face\n{}'.format(self.street_sequence)
@@ -490,7 +502,7 @@ def have_same_face_types(graph_1, graph_2):
     else:
         return True
 
-def are_equivalent(graph_1, graph_2):
+def are_equivalent_by_edge_perm(graph_1, graph_2):
     """
     Determine whether two graphs are equivalent, in the 
     sense that there exists a permutation of the edges
@@ -540,6 +552,8 @@ def are_equivalent(graph_1, graph_2):
                 return [s_1, p]
 
     return None
+
+
 
 def equivalent_as_dictionaries(dic_1, dic_2):
     """
@@ -631,10 +645,15 @@ def find_invariant_sequences(
         g_new = cootie_face(graph, f)
         new_sequence = sequence + [f]
         if have_same_face_types(ref_graph, g_new) is True:
-            perm = are_equivalent(ref_graph, g_new)
-            if perm is not None:
-                print 'This is a good sequence: {}'.format(new_sequence)
-                self_similar_graphs.append([new_sequence, perm])
+            ################################################################
+            # REMOVE FOLLOWING TWO LINES
+            print 'This is a good sequence: {}'.format(new_sequence)
+            self_similar_graphs.append([new_sequence])
+            ###     TEMPORARILY DISABLE EXACT EQUIVALENCE CHECK
+            # perm = are_equivalent(ref_graph, g_new)
+            # if perm is not None:
+            #     print 'This is a good sequence: {}'.format(new_sequence)
+            #     self_similar_graphs.append([new_sequence, perm])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -658,11 +677,15 @@ def find_invariant_sequences(
         g_new = flip_edge(graph, e)
         new_sequence = sequence + [e]
         if have_same_face_types(ref_graph, g_new) is True:
-            # print 'HAVE SAME FACES with sequence {}'.format(new_sequence)
-            perm = are_equivalent(ref_graph, g_new)
-            if perm is not None:
-                print 'This is a good sequence: {}'.format(new_sequence)
-                self_similar_graphs.append([new_sequence, perm])
+            ################################################################
+            # REMOVE FOLLOWING TWO LINES
+            print 'This is a good sequence: {}'.format(new_sequence)
+            self_similar_graphs.append([new_sequence])
+            ###     TEMPORARILY DISABLE EXACT EQUIVALENCE CHECK
+            # perm = are_equivalent(ref_graph, g_new)
+            # if perm is not None:
+            #     print 'This is a good sequence: {}'.format(new_sequence)
+            #     self_similar_graphs.append([new_sequence, perm])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -675,6 +698,88 @@ def find_invariant_sequences(
             self_similar_graphs += deeper_sequences
 
     return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
+
+
+def apply_sequence(graph, seq):
+    """
+    Perform a sequence of moves.
+    """
+    faces = graph.faces.keys()
+    edges = graph.streets.keys()
+
+    new_graph = graph
+    for el in seq:
+        if el in faces:
+            new_graph = cootie_face(new_graph, el)
+        elif el in edges:
+            new_graph = flip_edge(new_graph, el)
+        else:
+            raise Exception('Unknown step.')
+
+    return new_graph
+
+
+def check_sequence(graph, seq):
+    """
+    Perform a sequence of moves, then check if the final graph is
+    equivalent to the initial one.
+    """
+    new_graph = apply_sequence(graph, seq)
+    perm = are_equivalent(graph, new_graph)
+    if perm is not None:
+        print 'The sequence produces an equivalent graph.'
+        print 'The permutation is: {}'.format(perm)
+        return True
+    else:
+        print 'The sequence produces an inequivalent graph.'
+        return False
+
+def faces_across_edge(graph, street):
+    """
+    Returns the faces that bound an edge.
+    If an edge bounds the same face twice it returns that twice.
+    """
+    faces = []
+    for f_k, f_v in graph.faces.iteritems():
+        if street in f_v.street_sequence:
+            faces.append(f_k)
+
+    # check if the edge is included in two faces, or only in one
+    if len(faces) == 2:
+        return faces
+    elif len(faces) == 1:
+        return faces + faces
+    else:
+        raise Exception(
+            'Edge {} doesnt delimit faces correctly'.format(street)
+        )
+
+def other_face(graph, street, face):
+    """
+    Returns the other face across an edge which bounds it.
+    If an edge bounds the same face twice it returns the original face.
+    """
+    faces = faces_across_edge(graph, street)
+
+    if faces.count(face) == 0:
+        raise Exception('Edge does not bound face.')        
+    elif faces.count(face) == 1:
+        if faces[0] == face:
+            return faces[1]
+        else:
+            return faces[0]
+    elif faces.count(face) == 2:
+        return face
+
+def face_neighbors(graph, face):
+    """
+    Return the neighboring faces around a given face,
+    ordered counter-clockwise.
+    """ 
+    boundary_edges = graph.faces[face].street_sequence
+    neighbors = [other_face(graph, s, face) for s in boundary_edges]
+
+    return neighbors
 
 
 # # --------- torus graph with two joints and two branch points ----------
@@ -811,9 +916,81 @@ w = BPSgraph(
     homology_classes=homology_classes
 )
 
+print 'tessellation data'
+print w.tessellation_data
 
-seq = find_invariant_sequences(w, 4, level=0, ref_graph=w,)
-print seq
+
+# seq = find_invariant_sequences(w, 0, level=0, ref_graph=w,)
+# print seq
+
+# check_sequence(w, ['p_13'])
+
+
+w_1 = apply_sequence(w, ['p_13', 'f_4', 'p_4', 'f_4', 'p_8'])
+
+w_1.print_face_info()
+
+print have_same_face_types(w, w_1)
+
+# all edges around a face
+f0 = w.faces.values()[0]
+s0 = f0.street_sequence
+print s0
+
+faces_1 = faces_across_edge(w, 'p_1')
+print faces_1
+
+
+def are_equivalent_by_face_perm(graph_1, graph_2):
+    """
+    Determine whether two graphs are equivalent, in the 
+    sense that there exists a permutation of the faces
+    which makes them identical.
+    If they are inequivalent, returns None.
+    If they are equivalent, returns the permutation of faces.
+    """
+
+    s_1 = graph_1.streets.keys()
+    bp_1 = {
+        b.label : [s.label for s in b.streets] 
+        for b in graph_1.branch_points.values()
+    }
+    j_1 = {
+        j.label : [get_label(s) for s in j.streets] 
+        for j in graph_1.joints.values()
+    }
+
+    s_2 = graph_2.streets.keys()
+    bp_2 = {
+        b.label : [s.label for s in b.streets] 
+        for b in graph_2.branch_points.values()
+    }
+    j_2 = {
+        j.label : [get_label(s) for s in j.streets] 
+        for j in graph_2.joints.values()
+    }
+
+    # Now apply a permutation to the set of streets s_1
+    # and recast branch points bp_1 and joints j_1
+    # in the new labels
+    # If they both coincide with bp_2 and j_2 respectively,
+    # the two graphs are equivalent!
+
+    # create all permutations of the list of streets
+    all_perms = map(list, list(itertools.permutations(
+        s_1
+    )))
+
+    for p in all_perms:
+        # start by checking equality of branch points
+        bp_1_perm = replace(s_1, p, bp_1)
+        if equivalent_as_dictionaries(bp_1_perm, bp_2) is True:
+            # then also check equality of joints
+            j_1_perm = replace(s_1, p, j_1)
+            if equivalent_as_dictionaries(j_1_perm, j_2) is True:
+                return [s_1, p]
+
+    return None
 
 # w_1 = flip_edge(w, 'p_2')
 # w_2 = flip_edge(w_1, 'p_1')
