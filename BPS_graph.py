@@ -542,6 +542,34 @@ def are_equivalent(graph_1, graph_2):
 
     return None
 
+def equivalent_as_dictionaries(dic_1, dic_2):
+    """
+    Determine whether two dictionaries (of branch points or joints)
+    are equivalent.
+    Include the possibility of relabeling of branch points/joints
+    as well as the possibility of cyclic shifts among the streets 
+    ending at a node.
+    In practice, we just compare dic.values() and see if the two sets 
+    are equivalent (up to cyclic permutations of the entries)
+    """
+    v_1 = dic_1.values()
+    v_2 = dic_2.values()
+    # for each element in the first list, 
+    # sort through the elements of the second list.
+    # If a match is found, remove that element from the second 
+    # list, then keep checking.
+    for i_1, el_1 in enumerate(v_1):
+        for i_2, el_2 in enumerate(v_2):
+            if are_same_cycle(el_1, el_2):
+                v_2.pop(i_2)
+                break
+    if len(v_2) > 0:
+        return False
+    else:
+        return True
+
+
+
 def replace(old_vars, new_vars, dic):
     """
     Replace the variables appearing in the values of a dictionary
@@ -795,12 +823,67 @@ w = BPSgraph(
 # print have_same_face_types(w, w2)
 # print have_same_face_types(w1, w2)
 
-seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
-print seq
-# w_1 = flip_edge(w, 'p_1')
-# w_2 = flip_edge(w_1, 'p_5')
-# print have_same_face_types(w, w_2)
+# seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
+# print seq
+
+# w.print_face_info()
+
+# w_1 = flip_edge(w, 'p_2')
+# w_2 = flip_edge(w_1, 'p_1')
+# w_3 = cootie_face(w_2, 'f_1')
+# w_4 = flip_edge(w_3, 'p_4')
+# w_5 = flip_edge(w_4, 'p_2')
+# print have_same_face_types(w, w_5)
+# print are_equivalent(w, w_5)
+
+w_1 = flip_edge(w, 'p_1')
+w_2 = flip_edge(w_1, 'p_5')
+
+print have_same_face_types(w, w_2)
 # print are_equivalent(w, w_2)
+# w_2.print_face_info()
+
+# now reshuffle the streets of the network
+
+
+
+graph_1 = w
+graph_2 = w_2
+
+s_1 = graph_1.streets.keys()
+bp_1 = {
+    b.label : [s.label for s in b.streets] 
+    for b in graph_1.branch_points.values()
+}
+j_1 = {
+    j.label : [get_label(s) for s in j.streets] 
+    for j in graph_1.joints.values()
+}
+
+s_2 = graph_2.streets.keys()
+bp_2 = {
+    b.label : [s.label for s in b.streets] 
+    for b in graph_2.branch_points.values()
+}
+j_2 = {
+    j.label : [get_label(s) for s in j.streets] 
+    for j in graph_2.joints.values()
+}
+
+old_vars = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+new_vars = ['p_1', 'p_4', 'p_2', 'p_6', 'p_5', 'p_3']
+print 'old vars = {}'.format(old_vars)
+print 'new vars = {}'.format(new_vars)
+new_bp = replace(old_vars, new_vars, bp_1)
+
+print new_bp
+print bp_2
+print equivalent_as_dictionaries(new_bp, bp_2)
+
+
+# print 'the two graphs have same faces: {}'.format(have_same_face_types(w, w1))
+# print 'the two graphs are equivalent: {}'.format(are_equivalent(w, w1))
+
 
 
 # print '\n\n-------------------------------------------------------'
