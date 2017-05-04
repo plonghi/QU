@@ -747,28 +747,60 @@ def find_invariant_sequences(
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# --------------- [2,1]-punctured torus -----------------
+# # --------------- [2,1]-punctured torus -----------------
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_1', 'p_4', 'p_8'],
+#   'b_3': ['p_2', 'p_5', 'p_9'],
+#   'b_4': ['p_3', 'p_6', 'p_7'],}
+
+# joints = {
+#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
+#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
+# }
+
+
+# --------------- [3,1]-punctured torus -----------------
+
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
 
 branch_points = {
-  'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_1', 'p_4', 'p_8'],
-  'b_3': ['p_2', 'p_5', 'p_9'],
-  'b_4': ['p_3', 'p_6', 'p_7'],}
+  'b_1': ['p_1', 'p_4', 'p_15'],
+  'b_2': ['p_4', 'p_11', 'p_5'],
+  'b_3': ['p_8', 'p_9', 'p_10'],
+  'b_4': ['p_8', 'p_7', 'p_3'],
+  'b_5': ['p_13', 'p_6', 'p_14'],
+  'b_6': ['p_13', 'p_12', 'p_2'],}
 
 joints = {
-    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
+    'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
+    'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
+    'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
+    'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
 }
 
 homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3'],
-  'gamma_4' : ['p_4', 'p_5', 'p_6'],
-  'gamma_5' : ['p_7', 'p_8', 'p_9'],
+  'gamma_1' : ['p_1', 'p_2', 'p_3'],
+  'gamma_2' : ['p_4'],
+  'gamma_3' : ['p_9', 'p_14', 'p_15'],
+  'gamma_4' : ['p_10', 'p_11', 'p_12'],
+  'gamma_5' : ['p_5', 'p_6', 'p_7'],
+  'gamma_6' : ['p_13'],
+  'gamma_7' : ['p_8'],
 }
+
+
 
 
 
@@ -779,51 +811,9 @@ w = BPSgraph(
     homology_classes=homology_classes
 )
 
-# # now reshuffle the streets of the network
 
-# old_vars = streets
-# perms = map(list, list(itertools.permutations(
-#         old_vars
-#     )))
-# new_vars = perms[10]
-# print 'old vars = {}'.format(old_vars)
-# print 'new vars = {}'.format(new_vars)
-# bp1 = replace(old_vars, new_vars, branch_points)
-# j1 = replace(old_vars, new_vars, joints)
-
-# w1 = BPSgraph(
-#     branch_points=bp1, 
-#     streets=streets, 
-#     joints=j1, 
-#     homology_classes=homology_classes
-# )
-
-# print 'the two graphs have same faces: {}'.format(have_same_face_types(w, w1))
-# print 'the two graphs are equivalent: {}'.format(are_equivalent(w, w1))
-
-
-# w.print_face_info()
-
-# w.print_mutable_info()
-
-# w1 = flip_edge(w, 'p_6')
-# w2 = flip_edge(w, 'p_4')
-# w3 = flip_edge(w, 'p_5')
-# print have_same_face_types(w, w3)
-
-# w2 = cootie_face(w, 'f_1')
-
-# w1.print_face_info()
-
-# print have_same_face_types(w, w)
-# print have_same_face_types(w, w1)
-# print have_same_face_types(w, w2)
-# print have_same_face_types(w1, w2)
-
-seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
+seq = find_invariant_sequences(w, 4, level=0, ref_graph=w,)
 print seq
-
-# w.print_face_info()
 
 # w_1 = flip_edge(w, 'p_2')
 # w_2 = flip_edge(w_1, 'p_1')
@@ -833,11 +823,6 @@ print seq
 # print have_same_face_types(w, w_5)
 # print are_equivalent(w, w_5)
 
-# w_1 = flip_edge(w, 'p_1')
-# w_2 = flip_edge(w_1, 'p_5')
-
-# print have_same_face_types(w, w_2)
-# print are_equivalent(w, w_2)
 # # w_2.print_face_info()
 
 # # now reshuffle the streets of the network
