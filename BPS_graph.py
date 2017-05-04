@@ -1,4 +1,4 @@
-import sys
+import sys, itertools, re
 
 from mcsn import MCSN, Street, Joint, BranchPoint
 from solitons import (
@@ -490,6 +490,84 @@ def have_same_face_types(graph_1, graph_2):
     else:
         return True
 
+def are_equivalent(graph_1, graph_2):
+    """
+    Determine whether two graphs are equivalent, in the 
+    sense that there exists a permutation of the edges
+    which makes them identical.
+    If they are inequivalent, returns None.
+    If they are equivalent, returns the permutation.
+    """
+
+    s_1 = graph_1.streets.keys()
+    bp_1 = {
+        b.label : [s.label for s in b.streets] 
+        for b in graph_1.branch_points.values()
+    }
+    j_1 = {
+        j.label : [get_label(s) for s in j.streets] 
+        for j in graph_1.joints.values()
+    }
+
+    s_2 = graph_2.streets.keys()
+    bp_2 = {
+        b.label : [s.label for s in b.streets] 
+        for b in graph_2.branch_points.values()
+    }
+    j_2 = {
+        j.label : [get_label(s) for s in j.streets] 
+        for j in graph_2.joints.values()
+    }
+
+    # Now apply a permutation to the set of streets s_1
+    # and recast branch points bp_1 and joints j_1
+    # in the new labels
+    # If they both coincide with bp_2 and j_2 respectively,
+    # the two graphs are equivalent!
+
+    # create all permutations of the list of streets
+    all_perms = map(list, list(itertools.permutations(
+        s_1
+    )))
+
+    for p in all_perms:
+        # start by checking equality of branch points
+        bp_1_perm = replace(s_1, p, bp_1)
+        # print 'comparing {} and {} gives\n{}'.format(bp_1_perm, bp_2, bp_1_perm == bp_2)
+        if bp_1_perm == bp_2:
+            # then also check equality of joints
+            j_1_perm = replace(s_1, p, j_1)
+            if j_1_perm == j_2:
+                return [s_1, p]
+
+    return None
+
+def replace(old_vars, new_vars, dic):
+    """
+    Replace the variables appearing in the values of a dictionary
+    according to a permutation.
+    """
+    if len(old_vars) != len(new_vars):
+        raise Exception('Replacement impossible')
+
+    # First, let's turn the dictionary into a string
+    dic_str = str(dic)
+
+    # then, let's perform the subs, first create a replacement dictionary
+    rep = {old_vars[i] : new_vars[i] for i in range(len(old_vars))}
+
+    # taken from 
+    # http://stackoverflow.com/questions/6116978/python-replace-multiple-strings
+    rep = dict((re.escape(k), v) for k, v in rep.iteritems())
+    pattern = re.compile("|".join(rep.keys()))
+    new_dic_str = pattern.sub(
+        lambda m: rep[re.escape(m.group(0))], dic_str
+    )
+
+    # finally, turn the string back into a dictionary
+    return eval(new_dic_str)
+
+
 def find_invariant_sequences(
     graph, depth, level=0, ref_graph=None, sequence=None,
 ):
@@ -528,8 +606,10 @@ def find_invariant_sequences(
         g_new = cootie_face(graph, f)
         new_sequence = sequence + [f]
         if have_same_face_types(ref_graph, g_new) is True:
-            print 'This is a good sequence: {}'.format(new_sequence)
-            self_similar_graphs.append(new_sequence)
+            perm = are_equivalent(ref_graph, g_new)
+            if perm is not None:
+                print 'This is a good sequence: {}'.format(new_sequence)
+                self_similar_graphs.append([new_sequence, perm])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -553,8 +633,11 @@ def find_invariant_sequences(
         g_new = flip_edge(graph, e)
         new_sequence = sequence + [e]
         if have_same_face_types(ref_graph, g_new) is True:
-            print 'This is a good sequence: {}'.format(new_sequence)
-            self_similar_graphs.append(new_sequence)
+            # print 'HAVE SAME FACES with sequence {}'.format(new_sequence)
+            perm = are_equivalent(ref_graph, g_new)
+            if perm is not None:
+                print 'This is a good sequence: {}'.format(new_sequence)
+                self_similar_graphs.append([new_sequence, perm])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -587,27 +670,25 @@ def find_invariant_sequences(
 #   'gamma_2' : ['p_5']}
 
 
-# # --------------- N-punctured sphere -- 4 punctures -----------------
+# --------------- N-punctured sphere -- 4 punctures -----------------
 
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
 
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_2', 'p_4', 'p_5'],
-#   'b_3': ['p_1', 'p_6', 'p_4'],
-#   'b_4': ['p_3', 'p_5', 'p_6'],}
+branch_points = {
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_2', 'p_4', 'p_5'],
+  'b_3': ['p_1', 'p_6', 'p_4'],
+  'b_4': ['p_3', 'p_5', 'p_6'],}
 
-# joints = {}
+joints = {}
 
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-#   'gamma_4' : ['p_4'],
-#   'gamma_5' : ['p_5'],
-#   'gamma_6' : ['p_6'],}
-
-
+homology_classes = {
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+  'gamma_4' : ['p_4'],
+  'gamma_5' : ['p_5'],
+  'gamma_6' : ['p_6'],}
 
 
 # # --------------- T3 -----------------
@@ -641,28 +722,28 @@ def find_invariant_sequences(
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# --------------- [2,1]-punctured torus -----------------
+# # --------------- [2,1]-punctured torus -----------------
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
 
-branch_points = {
-  'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_1', 'p_4', 'p_8'],
-  'b_3': ['p_2', 'p_5', 'p_9'],
-  'b_4': ['p_3', 'p_6', 'p_7'],}
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_1', 'p_4', 'p_8'],
+#   'b_3': ['p_2', 'p_5', 'p_9'],
+#   'b_4': ['p_3', 'p_6', 'p_7'],}
 
-joints = {
-    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
-}
+# joints = {
+#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
+# }
 
-homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3'],
-  'gamma_4' : ['p_4', 'p_5', 'p_6'],
-  'gamma_5' : ['p_7', 'p_8', 'p_9'],
-}
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
+#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
+# }
 
 
 
@@ -672,6 +753,28 @@ w = BPSgraph(
     joints=joints, 
     homology_classes=homology_classes
 )
+
+# # now reshuffle the streets of the network
+
+# old_vars = streets
+# perms = map(list, list(itertools.permutations(
+#         old_vars
+#     )))
+# new_vars = perms[10]
+# print 'old vars = {}'.format(old_vars)
+# print 'new vars = {}'.format(new_vars)
+# bp1 = replace(old_vars, new_vars, branch_points)
+# j1 = replace(old_vars, new_vars, joints)
+
+# w1 = BPSgraph(
+#     branch_points=bp1, 
+#     streets=streets, 
+#     joints=j1, 
+#     homology_classes=homology_classes
+# )
+
+# print 'the two graphs have same faces: {}'.format(have_same_face_types(w, w1))
+# print 'the two graphs are equivalent: {}'.format(are_equivalent(w, w1))
 
 
 # w.print_face_info()
@@ -694,6 +797,11 @@ w = BPSgraph(
 
 seq = find_invariant_sequences(w, 5, level=0, ref_graph=w,)
 print seq
+# w_1 = flip_edge(w, 'p_1')
+# w_2 = flip_edge(w_1, 'p_5')
+# print have_same_face_types(w, w_2)
+# print are_equivalent(w, w_2)
+
 
 # print '\n\n-------------------------------------------------------'
 # print '\nSoliton Data'
