@@ -1,4 +1,5 @@
-import sys, itertools, re
+import sys, itertools, re, numpy
+import matplotlib.pyplot as plt
 
 from mcsn import MCSN, Street, Joint, BranchPoint
 # from solitons import (
@@ -31,7 +32,9 @@ class BPSgraph(MCSN):
         branch_points={}, 
         streets=[], 
         joints={}, 
-        homology_classes={}
+        homology_classes={},
+        bp_coordinates={},
+        j_coordinates={},
     ):
         MCSN.__init__(
             self,
@@ -42,6 +45,8 @@ class BPSgraph(MCSN):
             homology_classes,
             quiet=True
         )
+        self.bp_coordinates=bp_coordinates
+        self.j_coordinates=j_coordinates
         self.faces = {}
         self.mutable_faces = []
         self.mutable_edges = []
@@ -270,11 +275,24 @@ def flip_edge(graph, edge):
     new_branch_points[b_0] = [p.label, s11, s00]
     new_branch_points[b_1] = [p.label, s01, s10]
 
+    # now update the positions of branch points
+    old_xy_0 = graph.bp_coordinates[b_0]
+    old_xy_1 = graph.bp_coordinates[b_1]
+    center = (numpy.array(old_xy_0) + numpy.array(old_xy_1)) / 2
+    sep = numpy.array(old_xy_0) - numpy.array(old_xy_1) 
+    rot = numpy.array([[0, 1], [-1, 0]])
+    new_xy_0 = list(center + rot.dot(sep))
+    new_xy_1 = list(center - rot.dot(sep))
+    graph.bp_coordinates[b_0] = new_xy_0
+    graph.bp_coordinates[b_1] = new_xy_1
+
     return BPSgraph(
         branch_points=new_branch_points, 
         streets=new_streets, 
         joints=new_joints, 
-        homology_classes=new_homology_classes
+        homology_classes=new_homology_classes,
+        bp_coordinates=graph.bp_coordinates,
+        j_coordinates=graph.j_coordinates,
     )
 
 
@@ -361,6 +379,17 @@ def cootie_face(graph, face):
         streets_b_0[0], None, streets_b_0[1], None, streets_b_0[2], None
     ]
 
+    # update coordinates of branch points and joints
+    old_xy_b_0 = graph.bp_coordinates[b_0]
+    old_xy_b_1 = graph.bp_coordinates[b_1]
+    old_xy_j_0 = graph.j_coordinates[j_0]
+    old_xy_j_1 = graph.j_coordinates[j_1]
+
+    graph.bp_coordinates[b_0] = old_xy_j_0
+    graph.bp_coordinates[b_1] = old_xy_j_1
+    graph.j_coordinates[j_0] = old_xy_b_1
+    graph.j_coordinates[j_1] = old_xy_b_0
+
     print (
         '\nWARNING: '
         'Homology classes not handled correctly in cootie.\n'
@@ -370,7 +399,9 @@ def cootie_face(graph, face):
         branch_points=new_branch_points, 
         streets=new_streets, 
         joints=new_joints, 
-        homology_classes=new_homology_classes
+        homology_classes=new_homology_classes,
+        bp_coordinates=graph.bp_coordinates,
+        j_coordinates=graph.j_coordinates,
     )
 
 
@@ -1465,6 +1496,77 @@ def have_compatible_endpoints(street_1, street_2):
     else:
         return False
 
+def plot_BPS_graph(graph):
+    """
+    """
+    shifts = [[x, y] for x in [-1, 0, 1] for y in [-1, 0, 1]]
+
+    # plot the branch points
+    bp_x_s = [v[0] for v in graph.bp_coordinates.values()]
+    bp_y_s = [v[1] for v in graph.bp_coordinates.values()]
+    for s in shifts:
+        plt.plot(
+            [v + s[0] for v in bp_x_s],
+            [v + s[1] for v in bp_y_s],
+            'r*'
+        )
+
+    # plot the joints
+    j_x_s = [v[0] for v in graph.j_coordinates.values()]
+    j_y_s = [v[1] for v in graph.j_coordinates.values()]
+    for s in shifts:
+        plt.plot(
+            [v + s[0] for v in j_x_s],
+            [v + s[1] for v in j_y_s],
+            'bo'
+        )
+
+    # plot edges
+    for s in graph.streets.values():
+        [ep_0, ep_1] = s.endpoints
+        if ep_0.end_point.__class__.__name__ == 'BranchPoint':
+            [x_0, y_0] = graph.bp_coordinates[ep_0.end_point.label]
+        elif ep_0.end_point.__class__.__name__ == 'Joint':
+            [x_0, y_0] = graph.j_coordinates[ep_0.end_point.label]
+        if ep_1.end_point.__class__.__name__ == 'BranchPoint':
+            [x_1, y_1] = graph.bp_coordinates[ep_1.end_point.label]
+        elif ep_1.end_point.__class__.__name__ == 'Joint':
+            [x_1, y_1] = graph.j_coordinates[ep_1.end_point.label]
+
+        [x_1, y_1] = closest_on_covering_space([x_0, y_0], [x_1, y_1])
+        
+        for s in shifts:
+            plt.plot(
+                [x_0 + s[0], x_1 + s[0]],
+                [y_0 + s[1], y_1 + s[1]],
+                'b-'
+            )
+
+    plt.axis([-0.1,1.1,-0.1,1.1])
+    plt.show()
+
+
+def closest_on_covering_space(xy_0, xy_1):
+    """
+    """
+    [x_0, y_0] = xy_0
+    [x_1, y_1] = xy_1
+
+    d_x = abs(x_1 - x_0)
+    s_x = 0
+    for shift in [-1, 0, 1]:
+        if abs(x_1 + shift - x_0) <= d_x:
+            s_x = shift
+            d_x = abs(x_1 + shift - x_0)
+
+    d_y = abs(y_1 - y_0)
+    s_y = 0
+    for shift in [-1, 0, 1]:
+        if abs(y_1 + shift - y_0) <= d_y:
+            s_y = shift
+            d_y = abs(y_1 + shift - y_0)
+
+    return [x_1 + s_x, y_1 + s_y]
 
 
 # # --------- torus graph with two joints and two branch points ----------
@@ -1590,6 +1692,21 @@ homology_classes = {
   'gamma_7' : ['p_8'],
 }
 
+bp_coordinates = {
+  'b_1': [0.25, 0.25],
+  'b_2': [0.5, 0.49],
+  'b_3': [0.5, 0.0],
+  'b_4': [0.75, 0.0],
+  'b_5': [0.0, 0.5],
+  'b_6': [0.0, 0.75],
+}
+
+j_coordinates = {
+    'j_1': [0.0, 0.0],
+    'j_2': [0.25, 0.0],
+    'j_3': [0.0, 0.25],
+    'j_4': [0.75, 0.75],
+}
 
 
 
@@ -1598,16 +1715,31 @@ w = BPSgraph(
     branch_points=branch_points, 
     streets=streets, 
     joints=joints, 
-    homology_classes=homology_classes
+    homology_classes=homology_classes,
+    bp_coordinates=bp_coordinates,
+    j_coordinates=j_coordinates,
 )
 
 
 
-seq = find_invariant_sequences(
-    w, 6, level=0, ref_graph=w, 
-    edge_cycle_min_length=4, 
-)
-print len(seq)
+# seq = find_invariant_sequences(
+#     w, 8, level=0, ref_graph=w, 
+#     edge_cycle_min_length=4, 
+# )
+# print seq
+# print len(seq)
+
+plot_BPS_graph(w)
+
+w_1 = apply_sequence(w, ['p_4'])
+
+plot_BPS_graph(w_1)
+
+w_2 = apply_sequence(w_1, ['f_2'])
+
+plot_BPS_graph(w_2)
+
+
 
 # # a couple of test BPS graphs, related to the SU2 Nf=4 theory
 # w_1 = apply_sequence(w, ['p_1'])
