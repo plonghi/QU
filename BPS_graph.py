@@ -1,17 +1,17 @@
 import sys, itertools, re
 
 from mcsn import MCSN, Street, Joint, BranchPoint
-from solitons import (
-    copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
-    growing_pairs_from_dashes, growing_clusters
-)
-from growth_rules import (
-    # bp_type_1_growth, j_type_3_growth, 
-    grow_soliton_once, grow_soliton,
-)
-from soliton_data import SolitonData, NetworkSolitonContent
+# from solitons import (
+#     copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
+#     growing_pairs_from_dashes, growing_clusters
+# )
+# from growth_rules import (
+#     # bp_type_1_growth, j_type_3_growth, 
+#     grow_soliton_once, grow_soliton,
+# )
+# from soliton_data import SolitonData, NetworkSolitonContent
 
-from intersections import get_dash_nodes, compute_self_intersections
+# from intersections import get_dash_nodes, compute_self_intersections
 
 from config import MCSNConfig
 
@@ -362,8 +362,8 @@ def cootie_face(graph, face):
     ]
 
     print (
-        '\n\t **** WARNING **** \n'
-        'Homology classes not handled correctly in cootie for the moment.\n'
+        '\nWARNING: '
+        'Homology classes not handled correctly in cootie.\n'
     )
 
     return BPSgraph(
@@ -502,15 +502,13 @@ def have_same_face_types(graph_1, graph_2):
     else:
         return True
 
-def are_equivalent_by_edge_perm(graph_1, graph_2):
-    """
-    Determine whether two graphs are equivalent, in the 
-    sense that there exists a permutation of the edges
-    which makes them identical.
-    If they are inequivalent, returns None.
-    If they are equivalent, returns the permutation.
-    """
 
+def validate_edge_perm(graph_1, graph_2, edge_perm_dic):
+    """
+    check if the permutation of edges encoded by a dictionary 
+    of the form {...,  edge_of_g1 : corresp_edge_of_g2, ...}
+    is valid, based on joint and branch point structure
+    """
     s_1 = graph_1.streets.keys()
     bp_1 = {
         b.label : [s.label for s in b.streets] 
@@ -531,28 +529,60 @@ def are_equivalent_by_edge_perm(graph_1, graph_2):
         for j in graph_2.joints.values()
     }
 
-    # Now apply a permutation to the set of streets s_1
+    # Now apply the permutation to the set of streets s_1
     # and recast branch points bp_1 and joints j_1
     # in the new labels
     # If they both coincide with bp_2 and j_2 respectively,
     # the two graphs are equivalent!
+
+    # list of permuted edges, in the order corresponding to s_1:
+    p = [edge_perm_dic[s] for s in s_1]
+
+    # start by checking equality of branch points
+    bp_1_perm = replace(s_1, p, bp_1)
+    if equivalent_as_dictionaries(bp_1_perm, bp_2) is True:
+        # then also check equality of joints
+        j_1_perm = replace(s_1, p, j_1)
+        if equivalent_as_dictionaries(j_1_perm, j_2) is True:
+            return p
+        else:
+            return None
+    else:
+        return None
+
+
+
+def are_equivalent_by_edge_perm(graph_1, graph_2):
+    """
+    Determine whether two graphs are equivalent, in the 
+    sense that there exists a permutation of the edges
+    which makes them identical.
+    If they are inequivalent, returns None.
+    If they are equivalent, returns all the permutations of edges
+    which make those graphs equivalent.
+    """
+
+    s_1 = graph_1.streets.keys()
 
     # create all permutations of the list of streets
     all_perms = map(list, list(itertools.permutations(
         s_1
     )))
 
+    ok_perms = []
+
     for p in all_perms:
-        # start by checking equality of branch points
-        bp_1_perm = replace(s_1, p, bp_1)
-        if equivalent_as_dictionaries(bp_1_perm, bp_2) is True:
-            # then also check equality of joints
-            j_1_perm = replace(s_1, p, j_1)
-            if equivalent_as_dictionaries(j_1_perm, j_2) is True:
-                return [s_1, p]
+        # construct the permutation dictionary
+        edge_perm_dic = {s_1[i] : p[i] for i in range(len(s_1))}
+        # check if the permutation is valid
+        check = validate_edge_perm(graph_1, graph_2, edge_perm_dic)
+        if check is not None:
+            ok_perms.append([s_1, p])
 
-    return None
-
+    if len(ok_perms) > 0:
+        return ok_perms
+    else:
+        return None
 
 
 def equivalent_as_dictionaries(dic_1, dic_2):
@@ -607,22 +637,175 @@ def replace(old_vars, new_vars, dic):
     return eval(new_dic_str)
 
 
+### OLD -- was finding sequences using both face permutations and
+### using edge permutations
+###
+# def find_invariant_sequences(
+#     graph, depth, level=None, ref_graph=None, sequence=None,
+#     face_cycle_min_length=None, edge_cycle_min_length=None,
+# ):
+#     """
+#     Find all sequences of flips or cootie moves, up to length 
+#     'depth' which take a BPS graph back to itself, up to an automorphism.
+#     The criterion for the automorphism is that the two graphs must 
+#     coincide up to a permutation of the streets.
+#     Since the permutation of streets can take much time, 
+#     to speed up the comparison we first make weaker checks.
+#     For instance we check that two graphs have the same types of faces.
+#     Only retain 
+#     """
+#     if face_cycle_min_length is None:
+#         face_cycle_min_length = 0
+#     if edge_cycle_min_length is None:
+#         edge_cycle_min_length = 0
+
+#     if level is None:
+#         level = 0
+
+#     if level == depth:
+#         # print 'max depth reached'
+#         return []
+
+#     if sequence is None:
+#         sequence = []
+
+#     # print '\nStudying sequence {}'.format(sequence)
+    
+#     if ref_graph is None:
+#         ref_graph = graph
+
+#     self_similar_graphs = []
+
+#     for f in graph.mutable_faces:
+#         # avoid repeating the last move in the sequence
+#         # that would be a trivial result (it's involutive)
+#         if len(sequence) > 0:
+#             if f == sequence[-1]:
+#                 # print 'cootie on {} is the same as last move'.format(f)
+#                 continue
+
+#         g_new = cootie_face(graph, f)
+#         new_sequence = sequence + [f]
+#         if have_same_face_types(ref_graph, g_new) is True:
+#             perms = are_equivalent(ref_graph, g_new, faces=True, edges=False)
+#             if perms is not None:
+#                 # FIXME: this only works if 'perms' is a honest list of 
+#                 # permutations
+#                 # it won't be true if both edge-permtuations and 
+#                 # face-permutations are turned on.
+                
+#                 # Now among all the permutations which would 
+#                 # make two graphs coincide, we take the minimal one
+#                 # only. Because we want to discard two graphs which 
+#                 # can be related to each other by 'small permutations'
+#                 min_perm = []
+#                 n_faces = len(graph.faces.keys())
+#                 min_l = n_faces
+#                 # find the minimal length of all the maximal 
+#                 # cycles within each permutation
+#                 for p in perms:
+#                     cycles = determine_perm_cycles(p[0], p[1])
+#                     if max(cycles) < min_l:
+#                         min_l = max(cycles)
+#                         min_perm = p
+#                 # now let's see if there is a permutation with 
+#                 # all cycles below the threshold cycle_min_length
+#                 # in that case, we don't keep this graph.
+#                 if min_l < face_cycle_min_length:
+#                         continue
+#                 else:
+#                     print (
+#                         'This is a good sequence: {}'.format(new_sequence)
+#                     )
+#                     self_similar_graphs.append([new_sequence, p])
+#         else:
+#             # print 'Will try going deeper with: {}'.format(new_sequence)
+#             deeper_sequences = find_invariant_sequences(
+#                 g_new,
+#                 depth,
+#                 level=level+1,
+#                 ref_graph=ref_graph,
+#                 sequence=new_sequence,
+#                 face_cycle_min_length=face_cycle_min_length,
+#                 edge_cycle_min_length=edge_cycle_min_length,
+#             )
+#             self_similar_graphs += deeper_sequences
+
+#     for e in graph.mutable_edges:
+#         # avoid repeating the last move in the sequence
+#         # that would be a trivial result (it's involutive)
+#         # print 'studying mutation on {}'.format(e)
+#         if len(sequence) > 0:
+#             if e == sequence[-1]:
+#                 # print 'flipping {} is the same as last move'.format(e)
+#                 continue
+
+#         g_new = flip_edge(graph, e)
+#         new_sequence = sequence + [e]
+#         if have_same_face_types(ref_graph, g_new) is True:
+#             perms = are_equivalent(ref_graph, g_new, faces=True, edges=False)
+#             if perms is not None:
+#                 # FIXME: this only works if 'perms' is a honest list of 
+#                 # permutations
+#                 # it won't be true if both edge-permtuations and 
+#                 # face-permutations are turned on.
+                
+#                 # Now among all the permutations which would 
+#                 # make two graphs coincide, we take the minimal one
+#                 # only. Because we want to discard two graphs which 
+#                 # can be related to each other by 'small permutations'
+#                 min_perm = []
+#                 n_faces = len(graph.faces.keys())
+#                 min_l = n_faces
+#                 # find the minimal length of all the maximal 
+#                 # cycles within each permutation
+#                 for p in perms:
+#                     cycles = determine_perm_cycles(p[0], p[1])
+#                     if max(cycles) < min_l:
+#                         min_l = max(cycles)
+#                         min_perm = p
+#                 # now let's see if there is a permutation with 
+#                 # all cycles below the threshold cycle_min_length
+#                 # in that case, we don't keep this graph.
+#                 if min_l < face_cycle_min_length:
+#                         continue
+#                 else:
+#                     print (
+#                         'This is a good sequence: {}'.format(new_sequence)
+#                     )
+#                     self_similar_graphs.append([new_sequence, p])
+                    
+#         else:
+#             # print 'Will try going deeper with: {}'.format(new_sequence)
+#             deeper_sequences = find_invariant_sequences(
+#                 g_new,
+#                 depth,
+#                 level=level+1,
+#                 ref_graph=ref_graph,
+#                 sequence=new_sequence,
+#                 face_cycle_min_length=face_cycle_min_length,
+#                 edge_cycle_min_length=edge_cycle_min_length,
+#             )
+#             self_similar_graphs += deeper_sequences
+
+#     return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
+
+
 def find_invariant_sequences(
     graph, depth, level=None, ref_graph=None, sequence=None,
-    cycle_min_length=None,
+    edge_cycle_min_length=None,
 ):
     """
     Find all sequences of flips or cootie moves, up to length 
     'depth' which take a BPS graph back to itself, up to an automorphism.
     The criterion for the automorphism is that the two graphs must 
     coincide up to a permutation of the streets.
-    Since the permutation of streets can take much time, 
-    to speed up the comparison we first make weaker checks.
-    For instance we check that two graphs have the same types of faces.
-    Only retain 
+    We try to match streets on both graphs by following the node structure.
+    Only retain sequences in which streets are permuted with cycles 
+    of a given minimal length.
     """
-    if cycle_min_length is None:
-        cycle_min_length = 0
+    if edge_cycle_min_length is None:
+        edge_cycle_min_length = 0
 
     if level is None:
         level = 0
@@ -652,15 +835,37 @@ def find_invariant_sequences(
         g_new = cootie_face(graph, f)
         new_sequence = sequence + [f]
         if have_same_face_types(ref_graph, g_new) is True:
-            perm = are_equivalent(ref_graph, g_new, faces=True, edges=False)
-            if perm is not None:
-                # FIXME: this only works if 'perm' is a honest permutation
-                # it won't be true if both edge-permtuations and 
-                # face-permutations are turned on.
-                cycles = determine_perm_cycles(perm[0], perm[1])
-                if max(cycles) >= cycle_min_length:
-                    print 'This is a good sequence: {}'.format(new_sequence)
-                    self_similar_graphs.append([new_sequence, perm])
+            perms = are_equivalent_as_graphs(ref_graph, g_new)
+            if perms is not None:
+                # get ALL valid permutation dictionaries of edges
+                
+                # Now among all the permutations which would 
+                # make two graphs coincide, we take the minimal one
+                # only. Because we want to discard two graphs which 
+                # can be related to each other by 'small permutations'
+                min_perm = []
+                n_edges = len(graph.streets.keys())
+                min_l = n_edges
+                # find the minimal length of all the maximal 
+                # cycles within each permutation
+                for p in perms:
+                    # recall each permutation is a dictionary
+                    p_k = p.keys()
+                    p_v = [p[key] for key in p_k]
+                    cycles = determine_perm_cycles(p_k, p_v)
+                    if max(cycles) < min_l:
+                        min_l = max(cycles)
+                        min_perm = p
+                # now let's see if there is a permutation with 
+                # all cycles below the threshold cycle_min_length
+                # in that case, we don't keep this graph.
+                if min_l < edge_cycle_min_length:
+                        continue
+                else:
+                    print (
+                        'This is a good sequence: {}'.format(new_sequence)
+                    )
+                    self_similar_graphs.append([new_sequence, p])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -669,7 +874,7 @@ def find_invariant_sequences(
                 level=level+1,
                 ref_graph=ref_graph,
                 sequence=new_sequence,
-                cycle_min_length=cycle_min_length,
+                edge_cycle_min_length=edge_cycle_min_length,
             )
             self_similar_graphs += deeper_sequences
 
@@ -685,15 +890,37 @@ def find_invariant_sequences(
         g_new = flip_edge(graph, e)
         new_sequence = sequence + [e]
         if have_same_face_types(ref_graph, g_new) is True:
-            perm = are_equivalent(ref_graph, g_new, faces=True, edges=False)
-            if perm is not None:
-                # FIXME: this only works if 'perm' is a honest permutation
-                # it won't be true if both edge-permtuations and 
-                # face-permutations are turned on.
-                cycles = determine_perm_cycles(perm[0], perm[1])
-                if max(cycles) >= cycle_min_length:
-                    print 'This is a good sequence: {}'.format(new_sequence)
-                    self_similar_graphs.append([new_sequence, perm])
+            perms = are_equivalent_as_graphs(ref_graph, g_new)
+            if perms is not None:
+                # get ALL valid permutation dictionaries of edges
+                
+                # Now among all the permutations which would 
+                # make two graphs coincide, we take the minimal one
+                # only. Because we want to discard two graphs which 
+                # can be related to each other by 'small permutations'
+                min_perm = []
+                n_edges = len(graph.streets.keys())
+                min_l = n_edges
+                # find the minimal length of all the maximal 
+                # cycles within each permutation
+                for p in perms:
+                    # recall each permutation is a dictionary
+                    p_k = p.keys()
+                    p_v = [p[key] for key in p_k]
+                    cycles = determine_perm_cycles(p_k, p_v)
+                    if max(cycles) < min_l:
+                        min_l = max(cycles)
+                        min_perm = p
+                # now let's see if there is a permutation with 
+                # all cycles below the threshold cycle_min_length
+                # in that case, we don't keep this graph.
+                if min_l < edge_cycle_min_length:
+                        continue
+                else:
+                    print (
+                        'This is a good sequence: {}'.format(new_sequence)
+                    )
+                    self_similar_graphs.append([new_sequence, p])
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -702,12 +929,11 @@ def find_invariant_sequences(
                 level=level+1,
                 ref_graph=ref_graph,
                 sequence=new_sequence,
-                cycle_min_length=cycle_min_length,
+                edge_cycle_min_length=edge_cycle_min_length,
             )
             self_similar_graphs += deeper_sequences
 
     return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
-
 
 def apply_sequence(graph, seq):
     """
@@ -797,7 +1023,8 @@ def are_equivalent_by_face_perm(graph_1, graph_2):
     sense that there exists a permutation of the faces
     which makes them identical.
     If they are inequivalent, returns None.
-    If they are equivalent, returns the permutation of faces.
+    If they are equivalent, returns all the permutations of faces
+    which make those graphs equivalent.
     """
     f_1 = graph_1.faces.keys()
     t_1 = graph_1.tessellation_data
@@ -815,21 +1042,343 @@ def are_equivalent_by_face_perm(graph_1, graph_2):
         f_1
     )))
 
+    ok_perms = []
+
     for p in all_perms:
         t_1_perm = replace(f_1, p, t_1)
         if equivalent_as_dictionaries(t_1_perm, t_2) is True:
-            return [f_1, p]
+            ok_perms.append([f_1, p])
 
-    return None
+    if len(ok_perms) > 0:
+        return ok_perms
+    else:
+        return None
+
+def grow_dict(
+    edge_dic, next_node_1, next_node_2
+):
+    """
+    takes a dictionary of edges between two graphs g1, g2
+    and keeps growing it from a specified pair of end_points
+    on each graph.
+        *** IMPORTANT: ASSUMING TRI-VALENT BP AND JOINTS ***
+    """
+    new_dic = edge_dic.copy()
+
+    # distinguish between branch points and joints
+    if next_node_1.end_point.__class__.__name__ == 'BranchPoint':
+        q_1 = 1
+    elif next_node_1.end_point.__class__.__name__ == 'Joint':
+        q_1 = 2
+    if next_node_2.end_point.__class__.__name__ == 'BranchPoint':
+        q_2 = 1
+    elif next_node_2.end_point.__class__.__name__ == 'Joint':
+        q_2 = 2
+
+    if q_1 != q_2:
+        # interrupt this cycle because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        # print 'incompatibility 1'
+        return None
+
+    # now that we identified the corresponding endpoints on each
+    # graph, let's use this data to identify the new edges
+    slot_1 = next_node_1.slot
+    next_edge_1_R = next_node_1.end_point.streets[
+        (slot_1 + q_1) % (3 * q_1)
+    ]
+    next_edge_1_L = next_node_1.end_point.streets[
+        (slot_1 + 2 * q_1) % (3 * q_1)
+    ]
+    slot_2 = next_node_2.slot
+    next_edge_2_R = next_node_2.end_point.streets[
+        (slot_2 + q_2) % (3 * q_2)
+    ]
+    next_edge_2_L = next_node_2.end_point.streets[
+        (slot_2 + 2 * q_2) % (3 * q_2)
+    ]
+    # add new entries to the dictionary
+    if have_compatible_endpoints(
+        next_edge_1_L, next_edge_2_L
+    ):
+        if (
+            (next_edge_1_L.label not in new_dic.keys()) and
+            (next_edge_2_L.label not in new_dic.values())
+        ): 
+            # the pair is not yet in the dictionary, add it
+            new_dic[next_edge_1_L.label] = next_edge_2_L.label
+        elif (
+            (next_edge_1_L.label in new_dic.keys()) and
+            (next_edge_2_L.label in new_dic.values())
+        ): 
+            # the pair is already in the dictionary
+            if new_dic[next_edge_1_L.label] == next_edge_2_L.label:
+                pass
+            else:
+                # pair is already there but there is a mismatch
+                # print 'incompatibility 2'
+                return None
+        else:
+            # only part of the pair is there, so there is an incompatibility
+            # print 'incompatibility 3'
+            return None
+    else:
+        # interrupt this cycle because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        # print 'incompatibility 4'
+        return None
+
+    if have_compatible_endpoints(
+        next_edge_1_R, next_edge_2_R
+    ):       
+        if (
+            (next_edge_1_R.label not in new_dic.keys()) and
+            (next_edge_2_R.label not in new_dic.values())
+        ): 
+            # the pair is not yet in the dictionary, add it
+            new_dic[next_edge_1_R.label] = next_edge_2_R.label
+        elif (
+            (next_edge_1_R.label in new_dic.keys()) and
+            (next_edge_2_R.label in new_dic.values())
+        ): 
+            # the pair is already in the dictionary
+            if new_dic[next_edge_1_R.label] == next_edge_2_R.label:
+                pass
+            else:
+                # pair is already there but there is a mismatch
+                # print 'incompatibility 5'
+                return None
+        else:
+            # only part of the pair is there, so there is an incompatibility
+            # print 'incompatibility 6'
+            return None
+    else:
+        # interrupt this cycle because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        # print 'incompatibility 7'
+        return None
+
+    # move on to the next step, next generation that is.
+    # But only if we changed the dictionary at this step, 
+    # otherwise we are done.
+    if new_dic == edge_dic:
+        return new_dic
+    else:
+        pass
+
+    next_end_point_1_L = other_node(next_edge_1_L, next_node_1.end_point)
+    next_end_point_2_L = other_node(next_edge_2_L, next_node_2.end_point)
+
+    next_end_point_1_R = other_node(next_edge_1_R, next_node_1.end_point)
+    next_end_point_2_R = other_node(next_edge_2_R, next_node_2.end_point)
+    
+    new_entries_L = grow_dict(
+        new_dic, next_end_point_1_L, next_end_point_2_L
+    )
+    if new_entries_L == None:
+        # there is an incompatibility, stop here
+        # print 'incompatibility 8'
+        return None
+    else:
+        # merge with previous dictionary
+        updated_new_dic = dict(new_entries_L.items() + new_dic.items())
+        new_dic = updated_new_dic.copy()
+
+    new_entries_R = grow_dict(
+        new_dic, next_end_point_1_R, next_end_point_2_R
+    )
+    if new_entries_R == None:
+        # there is an incompatibility, stop here
+        # print 'incompatibility 9'
+        return None
+    else:
+        # merge with previous dictionary
+        updated_new_dic = dict(new_entries_R.items() + new_dic.items())
+        new_dic = updated_new_dic
+
+    return new_dic
+
+
+def other_node(street, node):
+    """
+    give an actual branch point or joint, returns the opposite StreetEndPoint
+    """
+    pts = street.endpoints
+    if node == pts[0].end_point:
+        return pts[1]
+    elif node == pts[1].end_point:
+        return pts[0]
+    else:
+        raise Exception()
+
+
+def match_graphs_from_starting_point(
+    g1, g2, start_2, orientation_2
+):
+    """
+    Try to match graphs g1, g2 by taking the first edge of graph g1 
+    with canonical orientation, and match it with street 'start_2' of graph 
+    g2, with orientation specified by 'orientation_2'. 
+    Then follow through all the nodes of the graph and see if it works out.
+    """
+    edges_1 = g1.streets.keys()
+    edges_2 = g2.streets.keys()
+
+    # fix the initial edge
+    if have_compatible_endpoints(
+        g1.streets[edges_1[0]], g2.streets[start_2]
+    ):
+        edge_dic = {edges_1[0] : start_2}
+    else:
+        # interrupt this because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        return None
+
+    # then use the orientation to move forward along the graph
+    if orientation_2 == +1:
+        next_node_1 = g1.streets[edges_1[0]].initial_point()
+    elif orientation_2 == -1:
+        next_node_1 = g1.streets[edges_1[0]].final_point()
+    next_node_2 = g2.streets[start_2].final_point()
+    
+    # distinguish between branch points and joints
+    if next_node_1.end_point.__class__.__name__ == 'BranchPoint':
+        q_1 = 1
+    elif next_node_1.end_point.__class__.__name__ == 'Joint':
+        q_1 = 2
+    if next_node_2.end_point.__class__.__name__ == 'BranchPoint':
+        q_2 = 1
+    elif next_node_2.end_point.__class__.__name__ == 'Joint':
+        q_2 = 2
+
+    if q_1 != q_2:
+        # interrupt this because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        return None
+
+    # now that we identified the corresponding endpoints on each
+    # graph, let's use this data to identify the new edges
+    slot_1 = next_node_1.slot
+    next_edge_1_R = next_node_1.end_point.streets[
+        (slot_1 + q_1) % (3 * q_1)
+    ]
+    next_edge_1_L = next_node_1.end_point.streets[
+        (slot_1 + 2 * q_1) % (3 * q_1)
+    ]
+    slot_2 = next_node_2.slot
+    next_edge_2_R = next_node_2.end_point.streets[
+        (slot_2 + q_2) % (3 * q_2)
+    ]
+    next_edge_2_L = next_node_2.end_point.streets[
+        (slot_2 + 2 * q_2) % (3 * q_2)
+    ]
+    # add new entries to the dictionary
+    if have_compatible_endpoints(
+        next_edge_1_L, next_edge_2_L
+    ):
+        edge_dic[next_edge_1_L.label] = next_edge_2_L.label
+    else:
+        # interrupt this because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        return None
+
+    if have_compatible_endpoints(
+        next_edge_1_R, next_edge_2_R
+    ):
+        edge_dic[next_edge_1_R.label] = next_edge_2_R.label
+    else:
+        # interrupt this because the two streets cannot be 
+        # compatible with each other if their endpoints are different
+        return None
+
+    # move on to the next step, next generation that is.
+    next_end_point_1_L = other_node(next_edge_1_L, next_node_1.end_point)
+    next_end_point_2_L = other_node(next_edge_2_L, next_node_2.end_point)
+
+    next_end_point_1_R = other_node(next_edge_1_R, next_node_1.end_point)
+    next_end_point_2_R = other_node(next_edge_2_R, next_node_2.end_point)
+
+    # print '1 the dictionary is : {}'.format(edge_dic)
+
+    new_entries_L = grow_dict(
+        edge_dic, next_end_point_1_L, next_end_point_2_L
+    )
+    if new_entries_L == None:
+        # there is an incompatibility, stop here
+        return None
+    else:
+        # merge with previous dictionary
+        new_dic = dict(new_entries_L.items() + edge_dic.items())
+        edge_dic = new_dic
+        # print '2 the dictionary is : {}'.format(edge_dic)
+
+    new_entries_R = grow_dict(
+        edge_dic, next_end_point_1_R, next_end_point_2_R
+    )
+    if new_entries_R == None:
+        # there is an incompatibility, stop here
+        return None
+    else:
+        # merge with previous dictionary
+        new_dic = dict(new_entries_R.items() + edge_dic.items())
+        edge_dic = new_dic
+        # print '3 the dictionary is : {}'.format(edge_dic)
+
+    return edge_dic
+
+def match_graphs_by_edges(g1, g2, all_perms=False):
+    """
+    Does what the name says.
+    Try to match graph g1 to g2 by taking the first edge of g1 
+    with fixed orientation and trying to match onto every edge of g2 
+    with both orientations, then follow through nodes of each 
+    graph in parallel, stopping if a contradiction is found.
+
+    An option to return ALL permutations whch work is available.
+    """
+    if all_perms is True:
+        ok_perms = []
+
+    for start_2 in g2.streets.keys():
+        for orientation_2 in [+1, -1]:
+            edge_dic = match_graphs_from_starting_point(
+                g1, g2, start_2, orientation_2
+            )
+            if edge_dic is not None:
+                if all_perms is False:
+                    return edge_dic
+                elif all_perms is True:
+                    ok_perms.append(edge_dic)
+
+    return ok_perms
+
 
 def are_equivalent(graph_1, graph_2, faces=False, edges=False):
     """
     Determine if two graphs are equivalent by checking permutations 
     of edges and/or faces.
-    The former is usually much slower, should avoid using it.
+    The former can be done in two ways:
+    a- trying all edge permutations (usually much slower, should avoid)
+    b- trying to match streets according to the graph structure (following
+        nodes of the graph)
+    method 'a' is now deprecated, but still available. 
+    method 'b' is always checked.
     """
     f_check = True
     e_check = True
+
+    edge_dictionary = match_graphs_by_edges(graph_1, graph_2)
+    if edge_dictionary is not None:
+        # (double) check if the dictionary of edges provides the correct
+        # branhc point and joint structure
+        check = validate_edge_perm(graph_1, graph_2, edge_dictionary)
+        if check is not None:
+            print '\nOK found a dictionary for edges'
+            pass
+        else:
+            return None
+    else:
+        return None
 
     if faces is False and edges is False:
         raise Exception('No checks made.')
@@ -848,7 +1397,36 @@ def are_equivalent(graph_1, graph_2, faces=False, edges=False):
         if f_check is None or e_check is None:
             return None
         else:
-            return [f_check, e_check]
+            return f_check + e_check
+
+
+def are_equivalent_as_graphs(graph_1, graph_2):
+    """
+    Determine if two graphs are equivalent by matches edges of one 
+    onto the other, following the graph structure on each side, node-by-node.
+    Returns all permutations which make two graphs identical.
+    """
+    edge_dictionary = match_graphs_by_edges(graph_1, graph_2, all_perms=True)
+    if edge_dictionary is not None:
+        ok_perms = []
+        # (double) check if the dictionary of edges provides the correct
+        # branch point and joint structure.
+        # Select the valid ones
+        for perm in edge_dictionary:
+            check = validate_edge_perm(graph_1, graph_2, perm)
+            if check is not None:
+                print 'OK found a dictionary for edges'
+                ok_perms.append(perm)
+                pass
+            else:
+                print 'Discard permutation.'
+                pass
+        if len(ok_perms) > 0:
+            return ok_perms
+        else:
+            return None
+    else:
+        return None
 
 def determine_perm_cycles(before, after):
     """
@@ -873,6 +1451,20 @@ def determine_perm_cycles(before, after):
                 break
 
     return cycles
+
+def have_compatible_endpoints(street_1, street_2):
+    """
+    Check what the name says.
+    """
+    ends_1 = [pt.end_point.__class__.__name__ for pt in street_1.endpoints]
+    ends_2 = [pt.end_point.__class__.__name__ for pt in street_2.endpoints]
+
+    if ends_1 == ends_2 or ends_1[::-1] == ends_2:
+        return True
+    else:
+        return False
+
+
 
 # # --------- torus graph with two joints and two branch points ----------
 
@@ -1009,11 +1601,40 @@ w = BPSgraph(
 )
 
 
-seq = find_invariant_sequences(w, 8, level=0, ref_graph=w, cycle_min_length=4)
-print seq
+
+seq = find_invariant_sequences(
+    w, 8, level=0, ref_graph=w, 
+    edge_cycle_min_length=4, 
+)
+print len(seq)
+
+# # a couple of test BPS graphs, related to the SU2 Nf=4 theory
+# w_1 = apply_sequence(w, ['p_1'])
+# w_2 = apply_sequence(w, ['p_1', 'p_5'])
+
+# # a couple of test BPS graphs, related to the [2,1] torus theory
+# w_1 = apply_sequence(w, ['p_1'])
+# # the following is the S^-1 move
+# w_2 = apply_sequence(w, ['p_2', 'p_1', 'f_1', 'p_9', 'p_2'])
+
+# edge_dic = match_graphs_by_edges(w, w_2)
+# print '\n4 the dictionary is : {}'.format(edge_dic)    
 
 
 
+ 
+# w_1 = apply_sequence(w, ['p_4', 'f_2', 'p_10', 'p_8', 'p_10', 'p_8', 'f_2', 'p_10', 'p_4'])
+# w_1.print_face_info()
+# perm = are_equivalent_by_face_perm(w, w_1)
+
+# print perm
+
+# print {j.label : [get_label(s) for s in j.streets] for j in w_1.joints.values()}
+# print {b.label : [get_label(s) for s in b.streets] for b in w_1.branch_points.values()}
+
+
+
+######
 
 # w_1 = apply_sequence(w, ['p_13', 'f_4', 'p_4', 'f_4', 'p_8'])        
 
