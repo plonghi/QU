@@ -1355,6 +1355,7 @@ def match_graphs_by_edges(g1, g2, all_perms=False):
 
 def are_equivalent(graph_1, graph_2, faces=False, edges=False):
     """
+    *** DEPRECATED ***
     Determine if two graphs are equivalent by checking permutations 
     of edges and/or faces.
     The former can be done in two ways:
@@ -1603,7 +1604,7 @@ w = BPSgraph(
 
 
 seq = find_invariant_sequences(
-    w, 8, level=0, ref_graph=w, 
+    w, 6, level=0, ref_graph=w, 
     edge_cycle_min_length=4, 
 )
 print len(seq)
