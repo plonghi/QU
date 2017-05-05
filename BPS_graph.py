@@ -1,4 +1,4 @@
-import sys, itertools, re, numpy
+import sys, itertools, re, numpy, os, datetime
 import matplotlib.pyplot as plt
 
 from mcsn import MCSN, Street, Joint, BranchPoint
@@ -35,6 +35,7 @@ class BPSgraph(MCSN):
         homology_classes={},
         bp_coordinates={},
         j_coordinates={},
+        edges_out={},
     ):
         MCSN.__init__(
             self,
@@ -45,8 +46,9 @@ class BPSgraph(MCSN):
             homology_classes,
             quiet=True
         )
-        self.bp_coordinates=bp_coordinates
-        self.j_coordinates=j_coordinates
+        self.bp_coordinates = bp_coordinates
+        self.j_coordinates = j_coordinates
+        self.edges_out = edges_out
         self.faces = {}
         self.mutable_faces = []
         self.mutable_edges = []
@@ -281,17 +283,19 @@ def flip_edge(graph, edge):
     center = (numpy.array(old_xy_0) + numpy.array(old_xy_1)) / 2
     sep = numpy.array(old_xy_0) - numpy.array(old_xy_1) 
     rot = numpy.array([[0, 1], [-1, 0]])
-    new_xy_0 = list(center + rot.dot(sep))
-    new_xy_1 = list(center - rot.dot(sep))
-    graph.bp_coordinates[b_0] = new_xy_0
-    graph.bp_coordinates[b_1] = new_xy_1
+    new_xy_0 = list(center + rot.dot(sep) / 3)
+    new_xy_1 = list(center - rot.dot(sep) / 3)
+
+    new_bp_coordinates = graph.bp_coordinates.copy()
+    new_bp_coordinates[b_0] = new_xy_0
+    new_bp_coordinates[b_1] = new_xy_1
 
     return BPSgraph(
         branch_points=new_branch_points, 
         streets=new_streets, 
         joints=new_joints, 
         homology_classes=new_homology_classes,
-        bp_coordinates=graph.bp_coordinates,
+        bp_coordinates=new_bp_coordinates,
         j_coordinates=graph.j_coordinates,
     )
 
@@ -385,10 +389,13 @@ def cootie_face(graph, face):
     old_xy_j_0 = graph.j_coordinates[j_0]
     old_xy_j_1 = graph.j_coordinates[j_1]
 
-    graph.bp_coordinates[b_0] = old_xy_j_0
-    graph.bp_coordinates[b_1] = old_xy_j_1
-    graph.j_coordinates[j_0] = old_xy_b_1
-    graph.j_coordinates[j_1] = old_xy_b_0
+    new_bp_coordinates = graph.bp_coordinates.copy()
+    new_j_coordinates = graph.j_coordinates.copy()
+
+    new_bp_coordinates[b_0] = old_xy_j_0
+    new_bp_coordinates[b_1] = old_xy_j_1
+    new_j_coordinates[j_0] = old_xy_b_1
+    new_j_coordinates[j_1] = old_xy_b_0
 
     print (
         '\nWARNING: '
@@ -400,8 +407,8 @@ def cootie_face(graph, face):
         streets=new_streets, 
         joints=new_joints, 
         homology_classes=new_homology_classes,
-        bp_coordinates=graph.bp_coordinates,
-        j_coordinates=graph.j_coordinates,
+        bp_coordinates=new_bp_coordinates,
+        j_coordinates=new_j_coordinates,
     )
 
 
@@ -966,21 +973,34 @@ def find_invariant_sequences(
 
     return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
 
-def apply_sequence(graph, seq):
+def apply_sequence(graph, seq, save_plot=None):
     """
     Perform a sequence of moves.
+    Gives an option to save the plots of all steps, 
+    takes the directory path as argument for this.
     """
+    if save_plot is not None:
+        plot = plot_BPS_graph(graph)
+        plt.savefig(os.path.join(save_plot, '0.png'))
+        plt.clf()  # Clear the figure for the next loop
+
     faces = graph.faces.keys()
     edges = graph.streets.keys()
 
     new_graph = graph
-    for el in seq:
+    print 'apply this sequence: {}'.format(seq)
+    for i, el in enumerate(seq):
         if el in faces:
             new_graph = cootie_face(new_graph, el)
         elif el in edges:
             new_graph = flip_edge(new_graph, el)
         else:
+            print 'got this command: {}'.format(el)
             raise Exception('Unknown step.')
+        if save_plot is not None:
+            plot = plot_BPS_graph(new_graph)
+            plt.savefig(os.path.join(save_plot, str(i + 1)+'.png'))
+            plt.clf()  # Clear the figure for the next loop
 
     return new_graph
 
@@ -1508,7 +1528,7 @@ def plot_BPS_graph(graph):
         plt.plot(
             [v + s[0] for v in bp_x_s],
             [v + s[1] for v in bp_y_s],
-            'r*'
+            'rx', mew=3, ms=5,
         )
 
     # plot the joints
@@ -1533,35 +1553,54 @@ def plot_BPS_graph(graph):
         elif ep_1.end_point.__class__.__name__ == 'Joint':
             [x_1, y_1] = graph.j_coordinates[ep_1.end_point.label]
 
-        [x_1, y_1] = closest_on_covering_space([x_0, y_0], [x_1, y_1])
+        # Determine whether to force an edge to 
+        # end out of the fundamental region, based on input data
+        # contained in graph.edges_out
+        if s.label in edges_out.keys():
+            in_out = edges_out[s.label]
+        else:
+            in_out = None
         
-        for s in shifts:
+        [x_1, y_1] = closest_on_covering_space(
+            [x_0, y_0], [x_1, y_1], in_out=in_out
+        )
+
+        for d in shifts:
             plt.plot(
-                [x_0 + s[0], x_1 + s[0]],
-                [y_0 + s[1], y_1 + s[1]],
+                [x_0 + d[0], x_1 + d[0]],
+                [y_0 + d[1], y_1 + d[1]],
                 'b-'
             )
+            plt.text((x_0 + x_1) /2 + d[0], (y_0 + y_1) / 2 + d[1], s.label)
 
     plt.axis([-0.1,1.1,-0.1,1.1])
-    plt.show()
 
 
-def closest_on_covering_space(xy_0, xy_1):
+def closest_on_covering_space(xy_0, xy_1, in_out=None):
     """
+    the option 'out' forces the closest match 
+    to be chosen outside the fundamental region
     """
     [x_0, y_0] = xy_0
     [x_1, y_1] = xy_1
 
+    if in_out is 'out':
+        deltas = [-1, 1]
+    elif in_out is 'in':
+        deltas = [0]
+    elif in_out is None:
+        deltas = [-1, 0, 1]
+
     d_x = abs(x_1 - x_0)
     s_x = 0
-    for shift in [-1, 0, 1]:
+    for shift in deltas:
         if abs(x_1 + shift - x_0) <= d_x:
             s_x = shift
             d_x = abs(x_1 + shift - x_0)
 
     d_y = abs(y_1 - y_0)
     s_y = 0
-    for shift in [-1, 0, 1]:
+    for shift in deltas:
         if abs(y_1 + shift - y_0) <= d_y:
             s_y = shift
             d_y = abs(y_1 + shift - y_0)
@@ -1694,7 +1733,7 @@ homology_classes = {
 
 bp_coordinates = {
   'b_1': [0.25, 0.25],
-  'b_2': [0.5, 0.49],
+  'b_2': [0.5, 0.50],
   'b_3': [0.5, 0.0],
   'b_4': [0.75, 0.0],
   'b_5': [0.0, 0.5],
@@ -1708,7 +1747,7 @@ j_coordinates = {
     'j_4': [0.75, 0.75],
 }
 
-
+edges_out = {'p_11': 'in', 'p_1': 'in'} 
 
 
 w = BPSgraph(
@@ -1718,26 +1757,49 @@ w = BPSgraph(
     homology_classes=homology_classes,
     bp_coordinates=bp_coordinates,
     j_coordinates=j_coordinates,
+    edges_out=edges_out,
 )
 
+# analyze all sequences which give back the BPS graph
+max_n_moves = 4
+seq = find_invariant_sequences(
+    w, max_n_moves, level=0, ref_graph=w, 
+    edge_cycle_min_length=0, 
+)
+# print [s[0] for s in seq]
+print 'Found {} sequences.'.format(len(seq))
+
+# prepare a directory
+mydir = os.path.join(
+    os.getcwd(), 'mcg_moves', 
+    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
+)
+os.makedirs(mydir)
+
+# save info about sequences
+text_file = open(mydir + '/sequence_data.txt', 'w')
+text_file.write('\t\tSequence data\n\n')
+for s in seq:
+    text_file.write('\n{}'.format(s[0]))
+
+# save plots of sequences
+for i, s in enumerate(seq):
+    sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+    os.makedirs(sub_dir)
+    apply_sequence(w, s[0], save_plot=sub_dir)
 
 
-# seq = find_invariant_sequences(
-#     w, 8, level=0, ref_graph=w, 
-#     edge_cycle_min_length=4, 
-# )
-# print seq
-# print len(seq)
+# plot = plot_BPS_graph(w)
+# plt.savefig(os.path.join(mydir, '0.png'))
+# plt.show()
+# w_1 = apply_sequence(w, ['p_4', 'f_2'], save_plot=mydir)
 
-plot_BPS_graph(w)
+# plot_BPS_graph(w_1)
 
-w_1 = apply_sequence(w, ['p_4'])
+# w_2 = apply_sequence(w_1, ['f_2'])
 
-plot_BPS_graph(w_1)
+# plot_BPS_graph(w_2)
 
-w_2 = apply_sequence(w_1, ['f_2'])
-
-plot_BPS_graph(w_2)
 
 
 
