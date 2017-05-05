@@ -1,7 +1,9 @@
-import sys, itertools, re, numpy, os, datetime
+import sys, itertools, re, numpy, os, datetime, matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 from mcsn import MCSN, Street, Joint, BranchPoint
+
 # from solitons import (
 #     copy_of_soliton, join_dashes_at_branch_point, SolitonPath, Dash, 
 #     growing_pairs_from_dashes, growing_clusters
@@ -988,7 +990,6 @@ def apply_sequence(graph, seq, save_plot=None):
     edges = graph.streets.keys()
 
     new_graph = graph
-    print 'apply this sequence: {}'.format(seq)
     for i, el in enumerate(seq):
         if el in faces:
             new_graph = cootie_face(new_graph, el)
@@ -1779,137 +1780,12 @@ os.makedirs(mydir)
 # save info about sequences
 text_file = open(mydir + '/sequence_data.txt', 'w')
 text_file.write('\t\tSequence data\n\n')
-for s in seq:
-    text_file.write('\n{}'.format(s[0]))
+for i, s in enumerate(seq):
+    text_file.write('\nsequence {} : {}'.format(i, s[0]))
 
 # save plots of sequences
 for i, s in enumerate(seq):
     sub_dir = os.path.join(mydir, 'sequence_'+str(i))
     os.makedirs(sub_dir)
     apply_sequence(w, s[0], save_plot=sub_dir)
-
-
-# plot = plot_BPS_graph(w)
-# plt.savefig(os.path.join(mydir, '0.png'))
-# plt.show()
-# w_1 = apply_sequence(w, ['p_4', 'f_2'], save_plot=mydir)
-
-# plot_BPS_graph(w_1)
-
-# w_2 = apply_sequence(w_1, ['f_2'])
-
-# plot_BPS_graph(w_2)
-
-
-
-
-# # a couple of test BPS graphs, related to the SU2 Nf=4 theory
-# w_1 = apply_sequence(w, ['p_1'])
-# w_2 = apply_sequence(w, ['p_1', 'p_5'])
-
-# # a couple of test BPS graphs, related to the [2,1] torus theory
-# w_1 = apply_sequence(w, ['p_1'])
-# # the following is the S^-1 move
-# w_2 = apply_sequence(w, ['p_2', 'p_1', 'f_1', 'p_9', 'p_2'])
-
-# edge_dic = match_graphs_by_edges(w, w_2)
-# print '\n4 the dictionary is : {}'.format(edge_dic)    
-
-
-
- 
-# w_1 = apply_sequence(w, ['p_4', 'f_2', 'p_10', 'p_8', 'p_10', 'p_8', 'f_2', 'p_10', 'p_4'])
-# w_1.print_face_info()
-# perm = are_equivalent_by_face_perm(w, w_1)
-
-# print perm
-
-# print {j.label : [get_label(s) for s in j.streets] for j in w_1.joints.values()}
-# print {b.label : [get_label(s) for s in b.streets] for b in w_1.branch_points.values()}
-
-
-
-######
-
-# w_1 = apply_sequence(w, ['p_13', 'f_4', 'p_4', 'f_4', 'p_8'])        
-
-# perm = are_equivalent_by_face_perm(w, w_1)
-
-# print perm
-
-# cycles = determine_perm_cycles(perm[0], perm[1])
-# print cycles
-
-
-# check_sequence(w, ['p_13'])
-
-
-
-
-
-# print have_same_face_types(w, w_1)
-# print are_equivalent(w, w_1, faces=True)
-
-
-# w_1 = flip_edge(w, 'p_2')
-# w_2 = flip_edge(w_1, 'p_1')
-# w_3 = cootie_face(w_2, 'f_1')
-# w_4 = flip_edge(w_3, 'p_4')
-# w_5 = flip_edge(w_4, 'p_2')
-# print have_same_face_types(w, w_5)
-# print are_equivalent(w, w_5)
-
-# # w_2.print_face_info()
-
-# # now reshuffle the streets of the network
-
-
-
-# graph_1 = w
-# graph_2 = w_2
-
-# s_1 = graph_1.streets.keys()
-# bp_1 = {
-#     b.label : [s.label for s in b.streets] 
-#     for b in graph_1.branch_points.values()
-# }
-# j_1 = {
-#     j.label : [get_label(s) for s in j.streets] 
-#     for j in graph_1.joints.values()
-# }
-
-# s_2 = graph_2.streets.keys()
-# bp_2 = {
-#     b.label : [s.label for s in b.streets] 
-#     for b in graph_2.branch_points.values()
-# }
-# j_2 = {
-#     j.label : [get_label(s) for s in j.streets] 
-#     for j in graph_2.joints.values()
-# }
-
-# old_vars = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
-# new_vars = ['p_1', 'p_4', 'p_2', 'p_6', 'p_5', 'p_3']
-# print 'old vars = {}'.format(old_vars)
-# print 'new vars = {}'.format(new_vars)
-# new_bp = replace(old_vars, new_vars, bp_1)
-
-# print new_bp
-# print bp_2
-# print equivalent_as_dictionaries(new_bp, bp_2)
-
-
-# print 'the two graphs have same faces: {}'.format(have_same_face_types(w, w1))
-# print 'the two graphs are equivalent: {}'.format(are_equivalent(w, w1))
-
-
-
-# print '\n\n-------------------------------------------------------'
-# print '\nSoliton Data'
-# Q1 = SolitonData(label='Q_1', network=w , street=s3, resolution='british')
-# Q1.initialize()
-# # # Q1.print_info(full_path=True)
-# Q1.grow(n_steps=4)
-# Q1.print_info(full_path=True, soliton_paths=True)
-
 
