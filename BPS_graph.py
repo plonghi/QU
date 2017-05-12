@@ -22,8 +22,6 @@ class BPSgraph(MCSN):
     'e_coordinates' is a dictionary related to edges; 
     it contains coordinates of edges
 
-    TODO: check that their coordinates coincide with those of 
-    branch points or joints!!!
     In fact, remove altogether the info about positions of BP and JOINTS
     just retain info about edges, and extract from it the infor about 
     BP and Joints. Need to make checks of compatibility, 
@@ -55,6 +53,7 @@ class BPSgraph(MCSN):
         self.faces = {}
         self.mutable_faces = []
         self.mutable_edges = []
+        self.check_edge_node_coordinates()
         self.determine_faces()
         for f in self.faces.values():
             f.determine_neighbors(self)
@@ -115,6 +114,26 @@ class BPSgraph(MCSN):
 
         self.mutable_edges = mutable_edges
         self.mutable_faces = mutable_faces
+
+    def check_edge_node_coordinates(self):
+        for e_k, e_v in self.streets.iteritems():
+            xy_0 = node_coordinates(e_v.endpoints[0].end_point.label, self)
+            xy_1 = node_coordinates(e_v.endpoints[1].end_point.label, self)
+            edge_xy_0 = self.e_coordinates[e_k][0]
+            edge_xy_1 = self.e_coordinates[e_k][1]
+            if (
+                are_within_range(xy_0, edge_xy_0, EPSILON) is True and
+                are_within_range(xy_1, edge_xy_1, EPSILON) is True
+                ) or (
+                are_within_range(xy_0, edge_xy_1, EPSILON) is True and
+                are_within_range(xy_1, edge_xy_0, EPSILON) is True
+            ):
+                pass
+            else:
+                raise Exception(
+                    'Coordinates of {} seems not to match ' 
+                    'those of its endpoints'.format(e_k)
+                )
 
 
 class Face():
@@ -1024,7 +1043,8 @@ def find_invariant_sequences(
     'sequence' is also an auxiliary variable, it keeps track of how many moves
     have been done, in fact level=len(sequence)
     'edge_cycle_min_length' determines whether to retain a valid sequence, 
-    based on its length
+    based on how the edges of the graph are permuted: if it's a cyclic 
+    permutation of length greater than a certain minimal value
     'min_n_cooties' determines whether to retain a valid sequence based on the
     number of cootie moves it contains
 
@@ -1891,102 +1911,119 @@ def closest_on_covering_space(xy_0, xy_1, in_out=None):
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# --------------- [2,1]-punctured torus -----------------
+# # --------------- [2,1]-punctured torus -----------------
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
-
-branch_points = {
-  'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_1', 'p_4', 'p_8'],
-  'b_3': ['p_2', 'p_5', 'p_9'],
-  'b_4': ['p_3', 'p_6', 'p_7'],}
-
-joints = {
-    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
-}
-
-homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3'],
-  'gamma_4' : ['p_4', 'p_5', 'p_6'],
-  'gamma_5' : ['p_7', 'p_8', 'p_9'],
-}
-
-bp_coordinates = {
-  'b_1': [0.0, 0.0],
-  'b_2': [0.3, 0.0],
-  'b_3': [0.0, 0.3],
-  'b_4': [0.6, 0.6],
-}
-
-j_coordinates = {
-    'j_1': [0.3, 0.6],
-    'j_2': [0.6, 0.3],
-}
-
-e_coordinates = {
-    'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
-    'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
-    'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][0] + 1]], 
-    'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
-    'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
-    'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
-    'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
-    'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
-    'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
-}
-
-edges_out = {} 
-
-
-# # --------------- [3,1]-punctured torus -----------------
-
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
 
 # branch_points = {
-#   'b_1': ['p_1', 'p_4', 'p_15'],
-#   'b_2': ['p_4', 'p_11', 'p_5'],
-#   'b_3': ['p_8', 'p_9', 'p_10'],
-#   'b_4': ['p_8', 'p_7', 'p_3'],
-#   'b_5': ['p_13', 'p_6', 'p_14'],
-#   'b_6': ['p_13', 'p_12', 'p_2'],}
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_1', 'p_4', 'p_8'],
+#   'b_3': ['p_2', 'p_5', 'p_9'],
+#   'b_4': ['p_3', 'p_6', 'p_7'],}
 
 # joints = {
-#     'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
-#     'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
-#     'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
-#     'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
 # }
 
 # homology_classes = {
-#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
-#   'gamma_2' : ['p_4'],
-#   'gamma_3' : ['p_9', 'p_14', 'p_15'],
-#   'gamma_4' : ['p_10', 'p_11', 'p_12'],
-#   'gamma_5' : ['p_5', 'p_6', 'p_7'],
-#   'gamma_6' : ['p_13'],
-#   'gamma_7' : ['p_8'],
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
+#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
 # }
 
 # bp_coordinates = {
-#   'b_1': [0.25, 0.25],
-#   'b_2': [0.5, 0.50],
-#   'b_3': [0.5, 0.0],
-#   'b_4': [0.75, 0.0],
-#   'b_5': [0.0, 0.5],
-#   'b_6': [0.0, 0.75],
+#   'b_1': [0.0, 0.0],
+#   'b_2': [0.3, 0.0],
+#   'b_3': [0.0, 0.3],
+#   'b_4': [0.6, 0.6],
 # }
 
 # j_coordinates = {
-#     'j_1': [0.0, 0.0],
-#     'j_2': [0.25, 0.0],
-#     'j_3': [0.0, 0.25],
-#     'j_4': [0.75, 0.75],
+#     'j_1': [0.3, 0.6],
+#     'j_2': [0.6, 0.3],
 # }
 
-# edges_out = {'p_11': 'in', 'p_1': 'in'} 
+# e_coordinates = {
+#     'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
+#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
+#     'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][1] + 1]], 
+#     'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
+#     'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
+#     'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
+#     'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
+#     'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
+#     'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
+# }
+
+
+
+
+# --------------- [3,1]-punctured torus -----------------
+
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+
+branch_points = {
+  'b_1': ['p_1', 'p_4', 'p_15'],
+  'b_2': ['p_4', 'p_11', 'p_5'],
+  'b_3': ['p_8', 'p_9', 'p_10'],
+  'b_4': ['p_8', 'p_7', 'p_3'],
+  'b_5': ['p_13', 'p_6', 'p_14'],
+  'b_6': ['p_13', 'p_12', 'p_2'],}
+
+joints = {
+    'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
+    'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
+    'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
+    'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+}
+
+homology_classes = {
+  'gamma_1' : ['p_1', 'p_2', 'p_3'],
+  'gamma_2' : ['p_4'],
+  'gamma_3' : ['p_9', 'p_14', 'p_15'],
+  'gamma_4' : ['p_10', 'p_11', 'p_12'],
+  'gamma_5' : ['p_5', 'p_6', 'p_7'],
+  'gamma_6' : ['p_13'],
+  'gamma_7' : ['p_8'],
+}
+
+bp_coordinates = {
+  'b_1': [0.25, 0.25],
+  'b_2': [0.5, 0.50],
+  'b_3': [0.5, 0.0],
+  'b_4': [0.75, 0.0],
+  'b_5': [0.0, 0.5],
+  'b_6': [0.0, 0.75],
+}
+
+j_coordinates = {
+    'j_1': [0.0, 0.0],
+    'j_2': [0.25, 0.0],
+    'j_3': [0.0, 0.25],
+    'j_4': [0.75, 0.75],
+}
+
+e_coordinates = {
+    'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
+    'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
+    'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
+    'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
+    'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
+    'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
+    'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
+    'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
+    'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
+    'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
+    'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
+    'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
+    'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
+    'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
+    'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+}
+
 
 
 w = BPSgraph(
@@ -2003,7 +2040,7 @@ w = BPSgraph(
 max_n_moves = 5
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=4, 
+    edge_cycle_min_length=0, 
     min_n_cooties=1,
 )
 # print [s[0] for s in seq]
