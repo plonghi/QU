@@ -3,12 +3,13 @@ import sys, itertools, re, numpy, os, datetime, matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mcsn import MCSN, Street, Joint, BranchPoint
+from decimal import Decimal
 
 from config import MCSNConfig
 
 # an auxiliary parameter for checking whether, modulo [1, 1]
 # two vectors in the plane are the same
-EPSILON = 0.01
+EPSILON = 0.0001
 
 
 class BPSgraph(MCSN):
@@ -132,8 +133,37 @@ class BPSgraph(MCSN):
             else:
                 raise Exception(
                     'Coordinates of {} seems not to match ' 
-                    'those of its endpoints'.format(e_k)
+                    'those of its endpoints. The edge has {}'
+                    'while the endpoints are {}'.format(
+                        e_k, [edge_xy_0, edge_xy_1], [xy_0, xy_1])
                 )
+
+    def copy(self):
+        new_streets = [k for k in self.streets.keys()]
+        new_branch_points = {
+            b.label : [s.label for s in b.streets] 
+            for b in self.branch_points.values()
+        }
+        new_joints = {
+            j.label : [get_label(s) for s in j.streets] 
+            for j in self.joints.values()
+        }
+        new_homology_classes = {
+            h.label : [s.label for s in h.streets] 
+            for h in self.basis_homology_classes.values()
+        }
+        new_bp_coordinates = self.bp_coordinates.copy()
+        new_j_coordinates = self.j_coordinates.copy()
+        new_e_coordinates = self.e_coordinates.copy()
+        return BPSgraph(
+            branch_points=new_branch_points, 
+            streets=new_streets, 
+            joints=new_joints, 
+            homology_classes=new_homology_classes,
+            bp_coordinates=new_bp_coordinates,
+            j_coordinates=new_j_coordinates,
+            e_coordinates=new_e_coordinates,
+        )
 
 
 class Face():
@@ -245,6 +275,17 @@ def build_face(end_pt):
     return [face_seq, face_seq_nodes, face_seq_streets]
  
 
+def shift_number_into_interval_01(x):
+    # NOTE: crucial to use numpy.fmod, because of issues described e.g. here
+    # http://stackoverflow.com/questions/14763722/python-modulo-on-floats
+
+    # this returns a number between -1.0 and +1.0
+    ans = numpy.fmod(x, 1.0)
+    # Then, we shift it between 0.0 and 1.0, if necessary
+    if ans < 0.0:
+        ans = ans + 1.0
+    return ans
+
 def are_within_range(xy_A, xy_B, eps):
     """
     Given xy_A = [x_0, y_0] and similarly xy_B,
@@ -252,10 +293,24 @@ def are_within_range(xy_A, xy_B, eps):
     For example, if xy_A = [0,0] and xy_B = [1,1] then they are 
     effectively coincident. (The torus is square with side 1).
     """
-    xy_A_mod = [z % 1 for z in xy_A]
-    xy_B_mod = [z % 1 for z in xy_B]
+    xy_A_mod = [shift_number_into_interval_01(z) for z in xy_A]
+    xy_B_mod = [shift_number_into_interval_01(z) for z in xy_B]
+
+    # now all the numbers are shifted between [0.0 , 1.0]
+    # however there is still one problem: the above shift would take
+    # -0.00001 --> 0.999999
+    # but also 
+    # 1.0 --> 0.0
+    # so the two would look far away.
+    # So we compute the distance and we take it modulo 1 and finally 
+    # take its absolute value. If this is small enough, 
+    # the two points are close.
     d = numpy.linalg.norm(numpy.array(xy_A_mod) - numpy.array(xy_B_mod))
-    if d < eps:
+    d_mod_1 = min(
+        [abs(shift_number_into_interval_01(d)), 
+        abs(shift_number_into_interval_01(-d))]
+    )
+    if d_mod_1 < eps:
         return True
     else:
         return False
@@ -309,7 +364,10 @@ def determine_edge_shift(edge_coordinates, xy):
         are_within_range(xy, edge_coordinates[0], EPSILON) is True and 
         are_within_range(xy, edge_coordinates[1], EPSILON) is True
     ):
-        raise Exception()
+        raise Exception(
+            'The endpoints of some edges appear to coincide. '
+            'Try changing the initial positions of edges by a bit.'
+        )
     else:
         print 'xy = {}'.format(xy)
         print 'edge_coordinates = {}'.format(edge_coordinates)
@@ -333,7 +391,7 @@ def flip_edge(graph, edge):
     if can_be_flipped(p) is False:
         raise Exception('Cannot flip on edge {}.'.format(edge))
 
-    new_streets = graph.streets.keys()
+    new_streets = [k for k in graph.streets.keys()]
     new_branch_points = {
         b.label : [s.label for s in b.streets] 
         for b in graph.branch_points.values()
@@ -378,16 +436,24 @@ def flip_edge(graph, edge):
     # the ambiguity by integer shifts around cycles of the torus.
     # Therefore they must be computed differently, using directy the 
     # information stored about the edges.
-    # First of all, note that we don't know if the endpoints of the edge
-    # we're flipping match with those of its coordinate data, 
+    # First of all, note that we don't know if the endpoints (nodes) 
+    # of the edge that we're flipping match with those of its coordinate data, 
     # so we first match them.
-    if are_within_range(
-        old_node_xy_0, graph.e_coordinates[edge][0], EPSILON
+    if (
+        are_within_range(
+            old_node_xy_0, graph.e_coordinates[edge][0], EPSILON
+        ) and are_within_range(
+            old_node_xy_1, graph.e_coordinates[edge][1], EPSILON
+        )
     ):
         old_edge_xy_0 = graph.e_coordinates[edge][0]
         old_edge_xy_1 = graph.e_coordinates[edge][1]
-    elif are_within_range(
-        old_node_xy_0, graph.e_coordinates[edge][1], EPSILON
+    elif (
+        are_within_range(
+            old_node_xy_0, graph.e_coordinates[edge][1], EPSILON
+        ) and are_within_range(
+            old_node_xy_1, graph.e_coordinates[edge][0], EPSILON
+        )
     ):
         old_edge_xy_0 = graph.e_coordinates[edge][1]
         old_edge_xy_1 = graph.e_coordinates[edge][0]
@@ -400,8 +466,8 @@ def flip_edge(graph, edge):
     edge_center = (numpy.array(old_edge_xy_0) + numpy.array(old_edge_xy_1)) / 2
     edge_sep = numpy.array(old_edge_xy_0) - numpy.array(old_edge_xy_1) 
     rot = numpy.array([[0, 1], [-1, 0]])
-    new_edge_xy_0 = list(edge_center + rot.dot(edge_sep) / 3)
-    new_edge_xy_1 = list(edge_center - rot.dot(edge_sep) / 3)
+    new_edge_xy_0 = list(edge_center + (rot.dot(edge_sep) / 2))
+    new_edge_xy_1 = list(edge_center - (rot.dot(edge_sep) / 2))
     new_e_coordinates = graph.e_coordinates.copy()
     new_e_coordinates[edge] = [new_edge_xy_0, new_edge_xy_1]
     # Then we update the cooridnates of those four edges that ended on the 
@@ -467,6 +533,8 @@ def flip_edge(graph, edge):
     new_bp_coordinates[b_0] = new_node_xy_0
     new_bp_coordinates[b_1] = new_node_xy_1
 
+    new_j_coordinates = graph.j_coordinates.copy()
+
     # finally return the new BPS graph
     return BPSgraph(
         branch_points=new_branch_points, 
@@ -474,7 +542,7 @@ def flip_edge(graph, edge):
         joints=new_joints, 
         homology_classes=new_homology_classes,
         bp_coordinates=new_bp_coordinates,
-        j_coordinates=graph.j_coordinates,
+        j_coordinates=new_j_coordinates,
         e_coordinates=new_e_coordinates,
     )
 
@@ -497,7 +565,7 @@ def cootie_face(graph, face):
     nodes = f.node_sequence
     streets = f.street_sequence
 
-    new_streets = graph.streets.keys()
+    new_streets = [k for k in graph.streets.keys()]
     new_branch_points = {
         b.label : [s.label for s in b.streets] 
         for b in graph.branch_points.values()
@@ -1010,7 +1078,7 @@ def replace(old_vars, new_vars, dic):
 #     return [ssg for ssg in self_similar_graphs if len(ssg) > 0]
 
 
-def move_count(sequence, labels_list):
+def move_count(sequence, labels_list, diff=None):
     """
     Given a sequence, like 
     ['p_8', 'p_4', 'f_2', 'p_8', 'f_2', 'p_4']
@@ -1018,11 +1086,42 @@ def move_count(sequence, labels_list):
     For example if labels_list is a list of labels of faces, then it counts 
     the number of cootie moves in the sequence.
     Likewise, supplying the list of edges will count flips.
+
+    If diff is True, then only count each occurrence of an edge/face once.
     """
+    if diff is None:
+        diff=False
+
     tot = 0
-    for f in labels_list:
-        tot += sequence.count(f)
+    if diff is False:
+        for f in labels_list:
+            tot += sequence.count(f)
+    elif diff is True:
+        for f in labels_list:
+            if f in sequence:
+                tot += 1
+    
     return tot
+
+
+# def overall_graph_displacement(graph_1, graph_2):
+#     """
+#     Computes the center of mass of all edges for each graph,
+#     returns the modulus of the difference of those vectors.
+#     """
+#     n_edges = float(len(graph_1.e_coordinates.keys()))
+#     # recall that graph.e_coordinates is a dictionary like
+#     # {..., p_i : [[x_0, y_0] , [x_1, y_1]], ...}
+#     center_1 = sum(
+#         [(numpy.array(v_0) + numpy.array(v_1))/ 2 
+#         for [v_0 , v_1] in graph_1.e_coordinates.values()]
+#     ) / n_edges
+#     center_2 = sum(
+#         [(numpy.array(v_0) + numpy.array(v_1))/ 2 
+#         for [v_0 , v_1] in graph_2.e_coordinates.values()]
+#     ) / n_edges
+
+#     return numpy.linalg.norm(center_2 - center_1)
 
 
 def find_invariant_sequences(
@@ -1109,6 +1208,7 @@ def find_invariant_sequences(
                 # in that case, we don't keep this graph.
                 if min_l < edge_cycle_min_length:
                         continue
+
                 else:
                     print (
                         'This is a good sequence: {}'.format(new_sequence)
@@ -1138,6 +1238,7 @@ def find_invariant_sequences(
 
         g_new = flip_edge(graph, e)
         new_sequence = sequence + [e]
+        
         if have_same_face_types(ref_graph, g_new) is True:
             perms = are_equivalent_as_graphs(ref_graph, g_new)
             if perms is not None:
@@ -1165,7 +1266,9 @@ def find_invariant_sequences(
                 # in that case, we don't keep this graph.
                 if min_l < edge_cycle_min_length:
                         continue
+
                 else:
+                    
                     print (
                         'This is a good sequence: {}'.format(new_sequence)
                     )
@@ -1192,7 +1295,9 @@ def find_invariant_sequences(
     # require a certain number of cootie moves
     selected_ssg = [
         ssg for ssg in selected_ssg if 
-        move_count(ssg[0], faces) >= min_n_cooties
+        (   
+            move_count(ssg[0], faces) >= min_n_cooties
+        )
     ]
 
     return selected_ssg
@@ -1208,10 +1313,12 @@ def apply_sequence(graph, seq, save_plot=None):
         plt.savefig(os.path.join(save_plot, '0.png'))
         plt.clf()  # Clear the figure for the next loop
 
-    faces = graph.faces.keys()
-    edges = graph.streets.keys()
+    faces = [k for k in graph.faces.keys()]
+    edges = [k for k in graph.streets.keys()]
 
-    new_graph = graph
+    # Note: this takes precisely the old graph, it doesn't create a new one
+    # for now. This is OK. New graphs will be created at each flip and cootie.
+    new_graph = graph 
     for i, el in enumerate(seq):
         if el in faces:
             new_graph = cootie_face(new_graph, el)
@@ -1799,10 +1906,14 @@ def plot_BPS_graph(graph):
         [[x_0, y_0], [x_1, y_1]] = graph.e_coordinates[s.label]
 
         for d in shifts:
+            if d == [0, 0]:
+                marker = 'r-'
+            else:
+                marker = 'b-'
             plt.plot(
                 [x_0 + d[0], x_1 + d[0]],
                 [y_0 + d[1], y_1 + d[1]],
-                'b-'
+                marker
             )
             plt.text((x_0 + x_1) /2 + d[0], (y_0 + y_1) / 2 + d[1], s.label)
 
@@ -1911,118 +2022,118 @@ def closest_on_covering_space(xy_0, xy_1, in_out=None):
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# # --------------- [2,1]-punctured torus -----------------
+# --------------- [2,1]-punctured torus -----------------
 
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
-
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_1', 'p_4', 'p_8'],
-#   'b_3': ['p_2', 'p_5', 'p_9'],
-#   'b_4': ['p_3', 'p_6', 'p_7'],}
-
-# joints = {
-#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
-# }
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
-#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
-# }
-
-# bp_coordinates = {
-#   'b_1': [0.0, 0.0],
-#   'b_2': [0.3, 0.0],
-#   'b_3': [0.0, 0.3],
-#   'b_4': [0.6, 0.6],
-# }
-
-# j_coordinates = {
-#     'j_1': [0.3, 0.6],
-#     'j_2': [0.6, 0.3],
-# }
-
-# e_coordinates = {
-#     'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
-#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
-#     'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][1] + 1]], 
-#     'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
-#     'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
-#     'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
-#     'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
-#     'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
-#     'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
-# }
-
-
-
-
-# --------------- [3,1]-punctured torus -----------------
-
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
 
 branch_points = {
-  'b_1': ['p_1', 'p_4', 'p_15'],
-  'b_2': ['p_4', 'p_11', 'p_5'],
-  'b_3': ['p_8', 'p_9', 'p_10'],
-  'b_4': ['p_8', 'p_7', 'p_3'],
-  'b_5': ['p_13', 'p_6', 'p_14'],
-  'b_6': ['p_13', 'p_12', 'p_2'],}
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_1', 'p_4', 'p_8'],
+  'b_3': ['p_2', 'p_5', 'p_9'],
+  'b_4': ['p_3', 'p_6', 'p_7'],}
 
 joints = {
-    'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
-    'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
-    'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
-    'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
 }
 
 homology_classes = {
-  'gamma_1' : ['p_1', 'p_2', 'p_3'],
-  'gamma_2' : ['p_4'],
-  'gamma_3' : ['p_9', 'p_14', 'p_15'],
-  'gamma_4' : ['p_10', 'p_11', 'p_12'],
-  'gamma_5' : ['p_5', 'p_6', 'p_7'],
-  'gamma_6' : ['p_13'],
-  'gamma_7' : ['p_8'],
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+  'gamma_4' : ['p_4', 'p_5', 'p_6'],
+  'gamma_5' : ['p_7', 'p_8', 'p_9'],
 }
 
 bp_coordinates = {
-  'b_1': [0.25, 0.25],
-  'b_2': [0.5, 0.50],
-  'b_3': [0.5, 0.0],
-  'b_4': [0.75, 0.0],
-  'b_5': [0.0, 0.5],
-  'b_6': [0.0, 0.75],
+  'b_1': [0.0, 0.0],
+  'b_2': [0.28, 0.0],
+  'b_3': [0.0, 0.31],
+  'b_4': [0.62, 0.57],
 }
 
 j_coordinates = {
-    'j_1': [0.0, 0.0],
-    'j_2': [0.25, 0.0],
-    'j_3': [0.0, 0.25],
-    'j_4': [0.75, 0.75],
+    'j_1': [0.32, 0.63],
+    'j_2': [0.62, 0.28],
 }
 
 e_coordinates = {
-    'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
-    'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
-    'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
-    'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
-    'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
-    'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
-    'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
-    'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
-    'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
-    'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
-    'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
-    'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
-    'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
-    'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
-    'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+    'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
+    'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
+    'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][1] + 1]], 
+    'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
+    'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
+    'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
+    'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
+    'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
+    'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
 }
+
+
+
+
+# # --------------- [3,1]-punctured torus -----------------
+
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_4', 'p_15'],
+#   'b_2': ['p_4', 'p_11', 'p_5'],
+#   'b_3': ['p_8', 'p_9', 'p_10'],
+#   'b_4': ['p_8', 'p_7', 'p_3'],
+#   'b_5': ['p_13', 'p_6', 'p_14'],
+#   'b_6': ['p_13', 'p_12', 'p_2'],}
+
+# joints = {
+#     'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
+#     'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
+#     'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
+#     'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['p_4'],
+#   'gamma_3' : ['p_9', 'p_14', 'p_15'],
+#   'gamma_4' : ['p_10', 'p_11', 'p_12'],
+#   'gamma_5' : ['p_5', 'p_6', 'p_7'],
+#   'gamma_6' : ['p_13'],
+#   'gamma_7' : ['p_8'],
+# }
+
+# bp_coordinates = {
+#   'b_1': [0.27, 0.23],
+#   'b_2': [0.51, 0.45],
+#   'b_3': [0.49, 0.0],
+#   'b_4': [0.78, 0.0],
+#   'b_5': [0.0, 0.61],
+#   'b_6': [0.0, 0.7],
+# }
+
+# j_coordinates = {
+#     'j_1': [0.0, 0.0],
+#     'j_2': [0.24, 0.0],
+#     'j_3': [0.0, 0.26],
+#     'j_4': [0.73, 0.76],
+# }
+
+# e_coordinates = {
+#     'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
+#     'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
+#     'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
+#     'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
+#     'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
+#     'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
+#     'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
+#     'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
+#     'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
+#     'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
+#     'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
+#     'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
+#     'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
+#     'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
+#     'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+# }
 
 
 
@@ -2040,7 +2151,7 @@ w = BPSgraph(
 max_n_moves = 5
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=0, 
+    edge_cycle_min_length=2, 
     min_n_cooties=1,
 )
 # print [s[0] for s in seq]
