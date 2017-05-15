@@ -55,6 +55,10 @@ class BPSgraph(MCSN):
         self.mutable_faces = []
         self.mutable_edges = []
         self.check_edge_node_coordinates()
+        # keep a check on whether all coordinates are transformed OK after 
+        # a flip, for nodes and edges together.
+        self.wrong_coordinates = False
+        self.check_edge_node_coordinates()
         self.determine_faces()
         for f in self.faces.values():
             f.determine_neighbors(self)
@@ -131,6 +135,13 @@ class BPSgraph(MCSN):
             ):
                 pass
             else:
+                ### USEFUL for DEBUGGING: just comment out the exception
+                self.wrong_coordinates = True
+                print [xy_0, xy_1]
+                print [edge_xy_0, edge_xy_1]
+                print are_within_range(xy_0, edge_xy_0, EPSILON)
+                print are_within_range(xy_1, edge_xy_1, EPSILON) 
+                
                 raise Exception(
                     'Coordinates of {} seems not to match ' 
                     'those of its endpoints. The edge has {}'
@@ -305,12 +316,14 @@ def are_within_range(xy_A, xy_B, eps):
     # So we compute the distance and we take it modulo 1 and finally 
     # take its absolute value. If this is small enough, 
     # the two points are close.
-    d = numpy.linalg.norm(numpy.array(xy_A_mod) - numpy.array(xy_B_mod))
-    d_mod_1 = min(
-        [abs(shift_number_into_interval_01(d)), 
-        abs(shift_number_into_interval_01(-d))]
-    )
-    if d_mod_1 < eps:
+    # MORE PRECISELY, we must take the difference of x-coordinates mod 1
+    # and the difference of y-coordinates mod 1, SEPARATELY!
+    # Then we build a 'modded' distance vector with those remainders,
+    # and check if its norm is smaller than epsilon.
+    delta_x = shift_number_into_interval_01(abs(xy_A_mod[0] - xy_B_mod[0]))
+    delta_y = shift_number_into_interval_01(abs(xy_A_mod[1] - xy_B_mod[1]))
+    d = numpy.linalg.norm(numpy.array([delta_x, delta_y]))
+    if d < eps:
         return True
     else:
         return False
@@ -534,6 +547,20 @@ def flip_edge(graph, edge):
     new_bp_coordinates[b_1] = new_node_xy_1
 
     new_j_coordinates = graph.j_coordinates.copy()
+
+    # #### DEBUGGING BEGINS ####   
+    # print '\n\nflipped edge: {}'.format(edge)
+    # print 'old edge coordinates = \n{}\n{}'.format(old_edge_xy_0, old_edge_xy_1)
+    # print 'new edge coordinates = \n{}\n{}'.format(new_edge_xy_0, new_edge_xy_1)
+    # print 'new b_0: {}= {} at {}'.format(b_0, new_branch_points[b_0], new_bp_coordinates[b_0])
+    # print 'new b_1: {}= {} at {}'.format(b_1, new_branch_points[b_1], new_bp_coordinates[b_1])
+    # print 'other edges involved: {}'.format([s00, s01, s10, s11])
+    # print 'these are the shifts: {}'.format([s00_shift, s01_shift, s10_shift, s11_shift])
+    # for s_i in [s00, s01, s10, s11]:
+    #     print '{} goes from \n{}\nto\n{} '.format(
+    #         s_i, graph.e_coordinates[s_i], new_e_coordinates[s_i]
+    #     )
+    # #### DEBUGGING ENDS ####
 
     # finally return the new BPS graph
     return BPSgraph(
@@ -1387,9 +1414,23 @@ def find_invariant_sequences(
 
         g_new = flip_edge(graph, e)
         new_sequence = sequence + [e]
+
+        # ### DEBUGGING BEGINS
+        # # print out the problematic sequence and save the graphs in plots
+        # if g_new.wrong_coordinates is True:
+        #     print '\n\n\nPROBLEM with sequence {}'.format(new_sequence)
+        #     mydir = os.path.join(
+        #         os.getcwd(), 'mcg_moves', 
+        #         (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+        #     )
+        #     os.makedirs(mydir)
+        #     print 'will save plots for debug, in folder {}'.format(mydir)
+        #     new_graph = apply_sequence(ref_graph, new_sequence, save_plot=mydir)
+        # ### DEBUGGING ENDS
         
         if have_same_face_types(ref_graph, g_new) is True:
             perms = are_equivalent_as_graphs(ref_graph, g_new)
+            selected_perms = []
             if perms is not None:
                 # get ALL valid permutation dictionaries of edges
                 
@@ -1405,7 +1446,7 @@ def find_invariant_sequences(
                 # two graphs.
                 # Among them, we keep only those whose cycles 
                 # contain at least one of length 'edge_cycle_min_length'
-                selected_perms = []
+                
                 for p in perms:
                     # find the minimal length of all the maximal 
                     # cycles within each permutation.
@@ -2336,7 +2377,6 @@ tau = ['p_1', 'p_15', 'p_14', 'p_13', 'p_2']
 
 
 
-
 w = BPSgraph(
     branch_points=branch_points, 
     streets=streets, 
@@ -2347,12 +2387,13 @@ w = BPSgraph(
     e_coordinates=e_coordinates,
 )
 
+
 # analyze all sequences which give back the BPS graph
-max_n_moves = 5
+max_n_moves = 12
 SAVE_PLOTS = True
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=4,
+    edge_cycle_min_length=2,
     min_n_cooties=1,
     fundamental_region=[one, tau]
 )
@@ -2460,3 +2501,12 @@ for [i, j] in R_move_candidates:
 
 
 
+# ### DEBUG A PARTICULAR SEQUENCE
+# seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+# )
+# os.makedirs(mydir)
+# w1 = apply_sequence(w, seq_0, save_plot=mydir)
+# ### DEBUG END
