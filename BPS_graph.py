@@ -2331,8 +2331,8 @@ e_coordinates = {
     'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
 }
 
-one = ['p_1', 'p_8', 'p_9', 'p_2']
-tau = ['p_2', 'p_5', 'p_4', 'p_1']
+one = ['p_1', 'p_4', 'p_11', 'p_10', 'p_8', 'p_3']
+tau = ['p_1', 'p_15', 'p_14', 'p_13', 'p_2']
 
 
 
