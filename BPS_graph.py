@@ -466,8 +466,8 @@ def flip_edge(graph, edge):
     edge_center = (numpy.array(old_edge_xy_0) + numpy.array(old_edge_xy_1)) / 2
     edge_sep = numpy.array(old_edge_xy_0) - numpy.array(old_edge_xy_1) 
     rot = numpy.array([[0, 1], [-1, 0]])
-    new_edge_xy_0 = list(edge_center + (rot.dot(edge_sep) / 2))
-    new_edge_xy_1 = list(edge_center - (rot.dot(edge_sep) / 2))
+    new_edge_xy_0 = list(edge_center + (rot.dot(edge_sep) / 3))
+    new_edge_xy_1 = list(edge_center - (rot.dot(edge_sep) / 3))
     new_e_coordinates = graph.e_coordinates.copy()
     new_e_coordinates[edge] = [new_edge_xy_0, new_edge_xy_1]
     # Then we update the cooridnates of those four edges that ended on the 
@@ -1853,7 +1853,7 @@ def determine_perm_cycles(before, after):
 
     cycles = []
     for e in before:
-        counter = 0
+        counter = 1
         x = e
         for i in range(l_max):
             x = rep[x]
@@ -2151,28 +2151,31 @@ w = BPSgraph(
 max_n_moves = 5
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=2, 
+    edge_cycle_min_length=4,
     min_n_cooties=1,
 )
 # print [s[0] for s in seq]
 print 'Found {} sequences.'.format(len(seq))
+print 'sequence 2'
+print seq[2][0]
+print seq[2][1]
 
-# prepare a directory
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
-)
-os.makedirs(mydir)
+# # prepare a directory
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
+# )
+# os.makedirs(mydir)
 
-# save info about sequences
-text_file = open(mydir + '/sequence_data.txt', 'w')
-text_file.write('\t\tSequence data\n\n')
-for i, s in enumerate(seq):
-    text_file.write('\nsequence {} : {}'.format(i, s[0]))
+# # save info about sequences
+# text_file = open(mydir + '/sequence_data.txt', 'w')
+# text_file.write('\t\tSequence data\n\n')
+# for i, s in enumerate(seq):
+#     text_file.write('\nsequence {} : {}'.format(i, s[0]))
 
-# save plots of sequences
-for i, s in enumerate(seq):
-    sub_dir = os.path.join(mydir, 'sequence_'+str(i))
-    os.makedirs(sub_dir)
-    apply_sequence(w, s[0], save_plot=sub_dir)
+# # save plots of sequences
+# for i, s in enumerate(seq):
+#     sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+#     os.makedirs(sub_dir)
+#     apply_sequence(w, s[0], save_plot=sub_dir)
 
