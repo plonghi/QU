@@ -2497,11 +2497,11 @@ w = BPSgraph(
 
 
 # analyze all sequences which give back the BPS graph
-max_n_moves = 9
+max_n_moves = 7
 SAVE_PLOTS = True
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=2,
+    edge_cycle_min_length=0,
     min_n_cooties=1,
     fundamental_region=[one, tau]
 )
