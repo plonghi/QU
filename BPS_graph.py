@@ -23,6 +23,9 @@ class BPSgraph(MCSN):
     'e_coordinates' is a dictionary related to edges; 
     it contains coordinates of edges
 
+    'mutable_edges' contains both the I-webs that can be flipped, 
+    and the middle-edges of H-webs, which can be 'H-flipped'.
+
     In fact, remove altogether the info about positions of BP and JOINTS
     just retain info about edges, and extract from it the infor about 
     BP and Joints. Need to make checks of compatibility, 
@@ -109,7 +112,10 @@ class BPSgraph(MCSN):
     def determine_mutable_elements(self):
         mutable_edges = []
         for s_k, s_v in self.streets.iteritems():
-            if can_be_flipped(s_v) is True:
+            if (
+                can_be_flipped(s_v) is True or
+                can_be_H_flipped(s_v) is True
+            ):
                 mutable_edges.append(s_k)
 
         mutable_faces = []
@@ -390,7 +396,10 @@ def determine_edge_shift(edge_coordinates, xy):
 def flip_edge(graph, edge):
     """
     Perform a flip move on a BPS graph, 
-    at the edge whose label is given as an argument
+    at the edge whose label is given as an argument.
+    NOTE: this function can also be used for an H-flip,
+    that is, it can be used to flip and edge within an H-web,
+    which ends on joints at both endpoints.
     """
     if edge not in graph.streets.keys():
         raise Exception('This edge is not part of the graph.')
@@ -401,8 +410,33 @@ def flip_edge(graph, edge):
     ep0, ep1 = p.endpoints
 
     # check that we can perform a flip on this edge: must be an I-web
-    if can_be_flipped(p) is False:
-        raise Exception('Cannot flip on edge {}.'.format(edge))
+    if can_be_flipped(p) is False and can_be_H_flipped(p) is False:
+        raise Exception('Cannot flip / H-flip on edge {}.'.format(edge))
+
+    # check whether it's an I-web or an H-web
+    if (
+        ep0.end_point.__class__.__name__ == 'BranchPoint' and 
+        ep1.end_point.__class__.__name__ == 'BranchPoint'
+    ):
+        edge_type = 'I'
+        slot_shift = 1
+    elif (
+        ep0.end_point.__class__.__name__ == 'Joint' and 
+        ep1.end_point.__class__.__name__ == 'Joint'
+    ):
+        edge_type = 'H'
+        slot_shift = 2
+        ### DEBUG BEGINS
+        print '\n\n*** H-flipping an edge***\n\n'
+        ### DEBUG ENDS
+    else:
+        raise Exception('Cannot flip this edge: its ends are {}'.format(
+            [
+                ep0.end_point.__class__.__name__, 
+                ep1.end_point.__class__.__name__
+            ]
+        ))
+
 
     new_streets = [k for k in graph.streets.keys()]
     new_branch_points = {
@@ -418,30 +452,50 @@ def flip_edge(graph, edge):
         for h in graph.basis_homology_classes.values()
     }
 
-    b_0 = ep0.end_point.label
+    l_0 = ep0.end_point.label
     slot_0 = ep0.slot
-    old_node_xy_0 = graph.bp_coordinates[b_0]
-    b_1 = ep1.end_point.label
+    
+    l_1 = ep1.end_point.label
     slot_1 = ep1.slot
-    old_node_xy_1 = graph.bp_coordinates[b_1]
 
-    del new_branch_points[b_0]
-    del new_branch_points[b_1]
+    if edge_type == 'I':
+        old_node_xy_0 = graph.bp_coordinates[l_0]
+        old_node_xy_1 = graph.bp_coordinates[l_1]
+        del new_branch_points[l_0]
+        del new_branch_points[l_1]
+    elif edge_type == 'H':
+        old_node_xy_0 = graph.j_coordinates[l_0]
+        old_node_xy_1 = graph.j_coordinates[l_1]
+        del new_joints[l_0]
+        del new_joints[l_1]
 
     # now I label the streets meeting at the two endpoints as follows:
     # at endpoint ep0 I have in ccw order: {p, s00, s01}
     # at endpoint ep1 I have in ccw order: {p, s10, s11}
-    # then I must make new branch points where I have, in ccw order
-    # {p, s11, s00} at b_0 and {p, s01, s10} at b_1
+    # then I must make new end points (branch points for I-web, or 
+    # joints for an H-web) where I have, in ccw order
+    # {p, s11, s00} at l_0 and {p, s01, s10} at l_1
     # let's get the labels fo these streets then:
-    s00 = ep0.end_point.streets[(slot_0 + 1) % 3].label
-    s01 = ep0.end_point.streets[(slot_0 + 2) % 3].label
-    s10 = ep1.end_point.streets[(slot_1 + 1) % 3].label
-    s11 = ep1.end_point.streets[(slot_1 + 2) % 3].label
+    s00 = ep0.end_point.streets[
+        (slot_0 + 1 * slot_shift) % (3 * slot_shift)
+    ].label
+    s01 = ep0.end_point.streets[
+        (slot_0 + 2 * slot_shift) % (3 * slot_shift)
+    ].label
+    s10 = ep1.end_point.streets[
+        (slot_1 + 1 * slot_shift) % (3 * slot_shift)
+    ].label
+    s11 = ep1.end_point.streets[
+        (slot_1 + 2 * slot_shift) % (3 * slot_shift)
+    ].label
 
-    # now add the new keys to the dictionary of branch points 
-    new_branch_points[b_0] = [p.label, s11, s00]
-    new_branch_points[b_1] = [p.label, s01, s10]
+    # now add the new keys to the dictionary of branch points / joints
+    if edge_type == 'I':
+        new_branch_points[l_0] = [p.label, s11, s00]
+        new_branch_points[l_1] = [p.label, s01, s10]
+    elif edge_type == 'H':
+        new_joints[l_0] = [p.label, None, s11, None, s00, None]
+        new_joints[l_1] = [p.label, None, s01, None, s10, None]
 
     # Now update the coordinates for endpoints of edges of the graph.
     # Recall that these are the same as the coordinates of the endpoints,
@@ -475,7 +529,7 @@ def flip_edge(graph, edge):
         print 'old coordinate data of edges {}'.format(graph.e_coordinates[edge])
         raise Exception()
     # now at this point we are guaranteed that old_edge_xy_0 (resp 1)
-    # correspond to the coordinate of b_0 (resp 1), before flipping.
+    # correspond to the coordinate of l_0 (resp 1), before flipping.
     edge_center = (numpy.array(old_edge_xy_0) + numpy.array(old_edge_xy_1)) / 2
     edge_sep = numpy.array(old_edge_xy_0) - numpy.array(old_edge_xy_1) 
     rot = numpy.array([[0, 1], [-1, 0]])
@@ -533,7 +587,7 @@ def flip_edge(graph, edge):
         s11_other_endpt
     ]
 
-    # Also update positions of the branch points, now using
+    # Also update positions of the branch points / joints, now using
     # the separation induced by the edge coordinates, though!
     # TODO: get rid of this step, by automatically computing positions
     # of branch points and joints from the edge coordinates.
@@ -542,18 +596,23 @@ def flip_edge(graph, edge):
     new_node_xy_0 = new_edge_xy_0
     new_node_xy_1 = new_edge_xy_1
 
-    new_bp_coordinates = graph.bp_coordinates.copy()
-    new_bp_coordinates[b_0] = new_node_xy_0
-    new_bp_coordinates[b_1] = new_node_xy_1
-
-    new_j_coordinates = graph.j_coordinates.copy()
+    if edge_type == 'I':
+        new_bp_coordinates = graph.bp_coordinates.copy()
+        new_bp_coordinates[l_0] = new_node_xy_0
+        new_bp_coordinates[l_1] = new_node_xy_1
+        new_j_coordinates = graph.j_coordinates.copy()
+    elif edge_type == 'H':
+        new_j_coordinates = graph.j_coordinates.copy()
+        new_j_coordinates[l_0] = new_node_xy_0
+        new_j_coordinates[l_1] = new_node_xy_1
+        new_bp_coordinates = graph.bp_coordinates.copy()
 
     # #### DEBUGGING BEGINS ####   
     # print '\n\nflipped edge: {}'.format(edge)
     # print 'old edge coordinates = \n{}\n{}'.format(old_edge_xy_0, old_edge_xy_1)
     # print 'new edge coordinates = \n{}\n{}'.format(new_edge_xy_0, new_edge_xy_1)
-    # print 'new b_0: {}= {} at {}'.format(b_0, new_branch_points[b_0], new_bp_coordinates[b_0])
-    # print 'new b_1: {}= {} at {}'.format(b_1, new_branch_points[b_1], new_bp_coordinates[b_1])
+    # print 'new l_0: {}= {} at {}'.format(l_0, new_branch_points[l_0], new_bp_coordinates[l_0])
+    # print 'new l_1: {}= {} at {}'.format(l_1, new_branch_points[l_1], new_bp_coordinates[l_1])
     # print 'other edges involved: {}'.format([s00, s01, s10, s11])
     # print 'these are the shifts: {}'.format([s00_shift, s01_shift, s10_shift, s11_shift])
     # for s_i in [s00, s01, s10, s11]:
@@ -771,6 +830,26 @@ def can_cootie(graph, face):
         ep0.end_point.type != 'type_3_branch_point' or
         ep1.end_point.type != 'type_3_branch_point'
     ):
+        return False
+    else:
+        return True
+
+
+def can_be_H_flipped(street):
+    """
+    Determines whether an edge can be 'H-swapped'.
+    This is the transformation s-channel --> t-channel for an edge
+    that it is bounded by two joints, each of which must be trivalent.
+    """
+    ep0, ep1 = street.endpoints
+
+    # check that both endpoints are tri-valent branch points
+    if (
+        ep0.end_point.type != 'type_3_joint' or
+        ep1.end_point.type != 'type_3_joint'
+    ):
+        return False
+    elif ep0.end_point == ep1.end_point:
         return False
     else:
         return True
@@ -1356,6 +1435,7 @@ def find_invariant_sequences(
 
         g_new = cootie_face(graph, f)
         new_sequence = sequence + [f]
+
         if have_same_face_types(ref_graph, g_new) is True:
             perms = are_equivalent_as_graphs(ref_graph, g_new)
             if perms is not None:
@@ -1404,6 +1484,9 @@ def find_invariant_sequences(
             self_similar_graphs += deeper_sequences
 
     for e in graph.mutable_edges:
+        # Note: this includes both flips on I-webs
+        # and 'H-flips' on the middle edges of H-webs.
+
         # avoid repeating the last move in the sequence
         # that would be a trivial result (it's involutive)
         # print 'studying mutation on {}'.format(e)
@@ -2389,7 +2472,7 @@ w = BPSgraph(
 
 
 # analyze all sequences which give back the BPS graph
-max_n_moves = 12
+max_n_moves = 5
 SAVE_PLOTS = True
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
@@ -2397,11 +2480,9 @@ seq = find_invariant_sequences(
     min_n_cooties=1,
     fundamental_region=[one, tau]
 )
-# print [s[0] for s in seq]
+
 print 'Found {} sequences.'.format(len(seq))
-# print 'sequence 2'
-# print seq[2][0]
-# print seq[2][1]
+
 
 old_modular_parameter = compute_modular_parameter(one, tau, w)
 S_old_modular_parameter = -1 / old_modular_parameter
@@ -2501,12 +2582,15 @@ for [i, j] in R_move_candidates:
 
 
 
+
+# ####################################################
 # ### DEBUG A PARTICULAR SEQUENCE
 # seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
+# seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
 # mydir = os.path.join(
 #     os.getcwd(), 'mcg_moves', 
 #     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
 # )
 # os.makedirs(mydir)
-# w1 = apply_sequence(w, seq_0, save_plot=mydir)
+# w1 = apply_sequence(w, seq_1, save_plot=mydir)
 # ### DEBUG END
