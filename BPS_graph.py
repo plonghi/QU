@@ -57,7 +57,6 @@ class BPSgraph(MCSN):
         self.faces = {}
         self.mutable_faces = []
         self.mutable_edges = []
-        self.check_edge_node_coordinates()
         # keep a check on whether all coordinates are transformed OK after 
         # a flip, for nodes and edges together.
         self.wrong_coordinates = False
@@ -326,8 +325,14 @@ def are_within_range(xy_A, xy_B, eps):
     # and the difference of y-coordinates mod 1, SEPARATELY!
     # Then we build a 'modded' distance vector with those remainders,
     # and check if its norm is smaller than epsilon.
-    delta_x = shift_number_into_interval_01(abs(xy_A_mod[0] - xy_B_mod[0]))
-    delta_y = shift_number_into_interval_01(abs(xy_A_mod[1] - xy_B_mod[1]))
+    delta_x = min(
+        abs(shift_number_into_interval_01(xy_A_mod[0] - xy_B_mod[0])),
+        abs(shift_number_into_interval_01(xy_B_mod[0] - xy_A_mod[0]))
+    )
+    delta_y = min(
+        abs(shift_number_into_interval_01(xy_A_mod[1] - xy_B_mod[1])),
+        abs(shift_number_into_interval_01(xy_B_mod[1] - xy_A_mod[1]))
+    )
     d = numpy.linalg.norm(numpy.array([delta_x, delta_y]))
     if d < eps:
         return True
@@ -427,7 +432,7 @@ def flip_edge(graph, edge):
         edge_type = 'H'
         slot_shift = 2
         ### DEBUG BEGINS
-        print '\n\n*** H-flipping an edge***\n\n'
+        # print '\n\n*** H-flipping an edge***\n\n'
         ### DEBUG ENDS
     else:
         raise Exception('Cannot flip this edge: its ends are {}'.format(
@@ -533,8 +538,8 @@ def flip_edge(graph, edge):
     edge_center = (numpy.array(old_edge_xy_0) + numpy.array(old_edge_xy_1)) / 2
     edge_sep = numpy.array(old_edge_xy_0) - numpy.array(old_edge_xy_1) 
     rot = numpy.array([[0, 1], [-1, 0]])
-    new_edge_xy_0 = list(edge_center + (rot.dot(edge_sep) / 3))
-    new_edge_xy_1 = list(edge_center - (rot.dot(edge_sep) / 3))
+    new_edge_xy_0 = list(edge_center + (rot.dot(edge_sep) / 2))
+    new_edge_xy_1 = list(edge_center - (rot.dot(edge_sep) / 2))
     new_e_coordinates = graph.e_coordinates.copy()
     new_e_coordinates[edge] = [new_edge_xy_0, new_edge_xy_1]
     # Then we update the cooridnates of those four edges that ended on the 
@@ -931,11 +936,21 @@ def validate_edge_perm(graph_1, graph_2, edge_perm_dic):
     # list of permuted edges, in the order corresponding to s_1:
     p = [edge_perm_dic[s] for s in s_1]
 
+    # ### DEBUG
+    # print '\n\npermuting edges \n{}\ninto\n{}\n'.format(s_1, p)
+    # ###
+
     # start by checking equality of branch points
     bp_1_perm = replace(s_1, p, bp_1)
+    # ### DEBUG
+    # print 'permuting BP \n{}\ninto\n{}\ncompare\n{}'.format(bp_1, bp_1_perm, bp_2)
+    # ###
     if equivalent_as_dictionaries(bp_1_perm, bp_2) is True:
         # then also check equality of joints
         j_1_perm = replace(s_1, p, j_1)
+        # ### DEBUG
+        # print 'permuting J \n{}\ninto\n{}\ncompare\n{}'.format(j_1, j_1_perm, j_2)
+        # ###
         if equivalent_as_dictionaries(j_1_perm, j_2) is True:
             return p
         else:
@@ -1008,26 +1023,33 @@ def replace(old_vars, new_vars, dic):
     """
     Replace the variables appearing in the values of a dictionary
     according to a permutation.
+    IMPORTANT: this is a specialized functoin, the dictionary is
+    assumed to be structured like this:
+    {..., key : [entry1, entry2, ..., entryk], ...}
+    that is, the values of the dictionary are lists of entries
     """
     if len(old_vars) != len(new_vars):
         raise Exception('Replacement impossible')
 
-    # First, let's turn the dictionary into a string
-    dic_str = str(dic)
-
     # then, let's perform the subs, first create a replacement dictionary
     rep = {old_vars[i] : new_vars[i] for i in range(len(old_vars))}
+    
+    new_dic_str = {}
+    for key, val in dic.iteritems():
+        # build the new value obtained after substitution
+        # for each key of the dictionary
+        new_val = []
+        for entry in val:
+            # in Joints, the entries of val = [entry1, entry2,...]
+            # may happen to be 'None', so be careful to handle 
+            # this separately
+            if entry is not None:
+                new_val.append(rep[entry])
+            else:
+                new_val.append(None)
+        new_dic_str[key] = new_val
 
-    # taken from 
-    # http://stackoverflow.com/questions/6116978/python-replace-multiple-strings
-    rep = dict((re.escape(k), v) for k, v in rep.iteritems())
-    pattern = re.compile("|".join(rep.keys()))
-    new_dic_str = pattern.sub(
-        lambda m: rep[re.escape(m.group(0))], dic_str
-    )
-
-    # finally, turn the string back into a dictionary
-    return eval(new_dic_str)
+    return new_dic_str
 
 
 ### OLD -- was finding sequences using both face permutations and
@@ -1752,7 +1774,8 @@ def grow_dict(
     """
     takes a dictionary of edges between two graphs g1, g2
     and keeps growing it from a specified pair of end_points
-    on each graph.
+    on each graph. (IMPORTANT: these are objects of the type
+    StreetEndPoint)
         *** IMPORTANT: ASSUMING TRI-VALENT BP AND JOINTS ***
     """
     new_dic = edge_dic.copy()
@@ -1994,19 +2017,12 @@ def match_graphs_from_starting_point(
     next_edge_2_L = next_node_2.end_point.streets[
         (slot_2 + 2 * q_2) % (3 * q_2)
     ]
-    # add new entries to the dictionary
-    if have_compatible_endpoints(
-        next_edge_1_L, next_edge_2_L
+    # add both new entries to the dictionary
+    if (
+        have_compatible_endpoints(next_edge_1_L, next_edge_2_L) and
+        have_compatible_endpoints(next_edge_1_R, next_edge_2_R)        
     ):
         edge_dic[next_edge_1_L.label] = next_edge_2_L.label
-    else:
-        # interrupt this because the two streets cannot be 
-        # compatible with each other if their endpoints are different
-        return None
-
-    if have_compatible_endpoints(
-        next_edge_1_R, next_edge_2_R
-    ):
         edge_dic[next_edge_1_R.label] = next_edge_2_R.label
     else:
         # interrupt this because the two streets cannot be 
@@ -2065,10 +2081,17 @@ def match_graphs_by_edges(g1, g2, all_perms=None):
 
     for start_2 in g2.streets.keys():
         for orientation_2 in [+1, -1]:
+            # ### DEBUG BEGIN
+            # print 'trying {} with orientation {}'.format(start_2, orientation_2)
+            # ### DEBUG END
             edge_dic = match_graphs_from_starting_point(
                 g1, g2, start_2, orientation_2
             )
             if edge_dic is not None:
+                # ### DEBUG
+                # print 'found permutations!'
+                # print edge_dic
+                # ###
                 if all_perms is False:
                     return edge_dic
                 elif all_perms is True:
@@ -2148,7 +2171,7 @@ def are_equivalent_as_graphs(graph_1, graph_2):
                 pass
         if len(ok_perms) > 0:
             print (
-                'found {} inequivalent permutations, presumably the graph'
+                'found {} inequivalent permutations, presumably the graph '
                 'has an underlying Z_{} symmetry'.format(
                     len(ok_perms), len(ok_perms)
                 )
@@ -2471,8 +2494,10 @@ w = BPSgraph(
 )
 
 
+
+
 # analyze all sequences which give back the BPS graph
-max_n_moves = 5
+max_n_moves = 9
 SAVE_PLOTS = True
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
@@ -2594,3 +2619,27 @@ for [i, j] in R_move_candidates:
 # os.makedirs(mydir)
 # w1 = apply_sequence(w, seq_1, save_plot=mydir)
 # ### DEBUG END
+
+
+# ####################################################
+# ###     Just find permutations which leave a graph invariant 
+
+# perms = are_equivalent_as_graphs(w, w)
+# print '\nFound {} permutations'.format(len(perms))
+# for p in perms:
+#     print p
+
+# # streets = w.streets.keys()
+# # # s_0 = streets[0]
+# # s_0 = 'p_14'
+# # epts = [ep.end_point.label for ep in w.streets[s_0].endpoints]
+
+# # print 'edges of graph w'
+# # print streets
+# # print 'endpoints of {} are {}'.format(s_0, epts)
+
+# # print 
+# # perm = match_graphs_from_starting_point(
+# #     w, w, s_0, -1
+# # )
+# # print perm
