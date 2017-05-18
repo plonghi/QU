@@ -181,6 +181,16 @@ class BPSgraph(MCSN):
             e_coordinates=new_e_coordinates,
         )
 
+    def homology_dictionary(self):
+        """
+        returns the homology dictionary as was originally used to 
+        specify basis homology classes
+        """
+        return (
+            {hc_k : [s.label for s in hc_v.streets] for 
+            hc_k, hc_v in self.basis_homology_classes.iteritems()}
+        )
+
 
 class Face():
     """
@@ -685,6 +695,68 @@ def cootie_face(graph, face):
         j_0 = f.node_sequence[1]
         j_1 = f.node_sequence[3]
 
+    # Identify streets uniquely: for example the external street
+    # attached to b_0 will be s_b0, while the boundary street
+    # and running b_0 and j_1 will be s_b0_j1, and so on
+
+    b0_streets = [s.label for s in graph.branch_points[b_0].streets]
+    b1_streets = [s.label for s in graph.branch_points[b_1].streets]
+    j0_streets = [s.label for s in graph.joints[j_0].streets if s is not None]
+    j1_streets = [s.label for s in graph.joints[j_1].streets if s is not None]
+
+    # Start with the four external edges
+    for s in b0_streets:
+        if s not in f.street_sequence:
+            s_b0 = s
+            break
+    for s in b1_streets:
+        if s not in f.street_sequence:
+            s_b1 = s
+            break
+    for s in j0_streets:
+        if s not in f.street_sequence:
+            s_j0 = s
+            break
+    for s in j1_streets:
+        if s not in f.street_sequence:
+            s_j1 = s
+            break
+    
+    # Then the four boundary edges
+    for s in f.street_sequence:
+        if (
+            s in b0_streets and 
+            s in j0_streets
+        ):
+            s_b0_j0 = s
+        elif (
+            s in b0_streets and 
+            s in j1_streets
+        ):
+            s_b0_j1 = s
+        elif (
+            s in b1_streets and 
+            s in j0_streets
+        ):
+            s_b1_j0 = s
+        elif (
+            s in b1_streets and 
+            s in j1_streets
+        ):
+            s_b1_j1 = s
+        else:
+            # ### DEBUG
+            # print 'streets on the boundary: {}'.format(f.street_sequence)
+            # print 'streets of b0 {}'.format(b0_streets)
+            # print 'streets of b1 {}'.format(b1_streets)
+            # print 'streets of j0 {}'.format(j0_streets)
+            # print 'streets of j1 {}'.format(j1_streets)
+            # ### END DEBUG
+            raise Exception('{} is not a boundary edge for face {}'.format(
+                s, face)
+        )
+
+    # Delete old branch points and joints that will be replaced.
     del new_branch_points[b_0]
     del new_branch_points[b_1]
     del new_joints[j_0]
@@ -698,6 +770,8 @@ def cootie_face(graph, face):
     # to 
     # {..., b_0 : [p_1, p_4, p_5], ...}
     # {..., j_0 : [p_1, None, p_2, None, p_3, None], ...}
+    # (Alternatively, I could have used the explicit identification 
+    # of all streets obtained above.)
     streets_b_0 = [
         s.label for s in graph.branch_points[b_0].streets if s is not None
     ]
@@ -736,10 +810,38 @@ def cootie_face(graph, face):
     new_j_coordinates[j_0] = old_xy_b_1
     new_j_coordinates[j_1] = old_xy_b_0
 
-    print (
-        '\nWARNING: '
-        'Homology classes not handled correctly in cootie.\n'
-    )
+    # Update the homology classes of the BPS graph.
+    # They are denoted by gamma_b0, gamma_b1, gamma_j0, gamma_j1
+    # for example gamma_b0 should include s_b0 while 
+    # gamma_j0 should include s_j0, s_b0_j0, s_b1_j0
+    # and so on.
+    
+    for h_k, h_v in new_homology_classes.iteritems():
+        # To gamma_b0 we must add streets s_b0_j0, s_b0_j1 
+        if s_b0 in h_v:
+            gamma_b0 = h_k
+            new_streets_gamma_b0 = [s for s in h_v] + [s_b0_j0, s_b0_j1]
+        # To gamma_b1 we must add streets s_b1_j0, s_b1_j1 
+        elif s_b1 in h_v:
+            gamma_b1 = h_k
+            new_streets_gamma_b1 = [s for s in h_v] + [s_b1_j0, s_b1_j1]
+        # To gamma_j0 we must remove streets s_b0_j0, s_b1_j0
+        if s_j0 in h_v:
+            gamma_j0 = h_k
+            new_streets_gamma_j0 = [
+                s for s in h_v if (s != s_b0_j0 and s != s_b1_j0)
+            ]
+        # To gamma_j1 we must remove streets s_b0_j1, s_b1_j1
+        if s_j1 in h_v:
+            gamma_j1 = h_k
+            new_streets_gamma_j1 = [
+                s for s in h_v if (s != s_b0_j1 and s != s_b1_j1)
+            ]
+    # Now update the new homology classes:
+    new_homology_classes[gamma_b0] = new_streets_gamma_b0
+    new_homology_classes[gamma_b1] = new_streets_gamma_b1
+    new_homology_classes[gamma_j0] = new_streets_gamma_j0
+    new_homology_classes[gamma_j1] = new_streets_gamma_j1
 
     return BPSgraph(
         branch_points=new_branch_points, 
@@ -2517,9 +2619,6 @@ w = BPSgraph(
     e_coordinates=e_coordinates,
 )
 
-
-
-
 # # analyze all sequences which give back the BPS graph
 # max_n_moves = 7
 # SAVE_PLOTS = True
@@ -2633,27 +2732,29 @@ w = BPSgraph(
 
 
 
-# ####################################################
-# ### DEBUG A PARTICULAR SEQUENCE
-# seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
-# seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
-# mydir = os.path.join(
-#     os.getcwd(), 'mcg_moves', 
-#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
-# )
-# os.makedirs(mydir)
-# w1 = apply_sequence(w, seq_1, save_plot=mydir)
-# ### DEBUG END
-
-
 ####################################################
-###     Just find permutations which leave a graph invariant 
-w2 = apply_sequence(w, ['p_13', 'f_4', 'p_4', 'p_5', 'p_4', 'p_5', 'p_4', 'f_4', 'p_13'])
-perms = are_equivalent_as_graphs(w, w2)
-print '\nFound {} permutations'.format(len(perms))
-for p in perms:
-    print p
-    print determine_perm_cycles(p.keys(), p.values())
+### DEBUG A PARTICULAR SEQUENCE
+seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
+seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
+seq_2 = ['p_13', 'f_4']
+mydir = os.path.join(
+    os.getcwd(), 'mcg_moves', 
+    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+)
+os.makedirs(mydir)
+w1 = apply_sequence(w, seq_2, save_plot=mydir)
+print w1.homology_dictionary()
+### DEBUG END
+
+
+# ####################################################
+# ###     Just find permutations which leave a graph invariant 
+# w2 = apply_sequence(w, ['p_13', 'f_4', 'p_4', 'p_5', 'p_4', 'p_5', 'p_4', 'f_4', 'p_13'])
+# perms = are_equivalent_as_graphs(w, w2)
+# print '\nFound {} permutations'.format(len(perms))
+# for p in perms:
+#     print p
+#     print determine_perm_cycles(p.keys(), p.values())
 
 # # streets = w.streets.keys()
 # # # s_0 = streets[0]
