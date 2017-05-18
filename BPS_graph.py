@@ -1498,6 +1498,7 @@ def compute_modular_parameter(one, tau, graph):
 
 def find_invariant_sequences(
     graph, depth, level=None, ref_graph=None, sequence=None,
+    mutation_sequence=None,
     edge_cycle_min_length=None, min_n_cooties=None,
     fundamental_region=None, drop_if_trivial_perm=None,
 ):
@@ -1514,6 +1515,10 @@ def find_invariant_sequences(
     'ref_graph' is the original graph, a sequence must eventually reproduce it.
     'sequence' is also an auxiliary variable, it keeps track of how many moves
     have been done, in fact level=len(sequence)
+    'mutation_sequence' contains the same data as 'sequence', except that
+    it translates it into actual quiver mutations, that is: it doesn't
+    record cooties, and it translates flips on streets into mutations on 
+    quvier nodes.
     'edge_cycle_min_length' determines whether to retain a valid sequence, 
     based on how the edges of the graph are permuted: if it's a cyclic 
     permutation of length greater than a certain minimal value
@@ -1547,7 +1552,8 @@ def find_invariant_sequences(
     if sequence is None:
         sequence = []
 
-    # print '\nStudying sequence {}'.format(sequence)
+    if mutation_sequence is None:
+        mutation_sequence = []
     
     if ref_graph is None:
         ref_graph = graph
@@ -1563,7 +1569,9 @@ def find_invariant_sequences(
                 continue
 
         g_new = cootie_face(graph, f)
-        new_sequence = sequence + [f]
+        new_sequence = [m for m in sequence] + [f]
+        # Cooties are not recorded as mutations
+        new_mutation_sequence = [m for m in mutation_sequence]
 
         if have_same_face_types(ref_graph, g_new) is True:
             perms = are_equivalent_as_graphs(ref_graph, g_new)
@@ -1598,7 +1606,9 @@ def find_invariant_sequences(
                 print (
                     'This is a good sequence: {}'.format(new_sequence)
                 )
-                self_similar_graphs.append([new_sequence, selected_perms])
+                self_similar_graphs.append(
+                    [new_sequence, selected_perms, new_mutation_sequence]
+                )
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -1607,6 +1617,7 @@ def find_invariant_sequences(
                 level=level+1,
                 ref_graph=ref_graph,
                 sequence=new_sequence,
+                mutation_sequence=new_mutation_sequence,
                 edge_cycle_min_length=edge_cycle_min_length,
                 min_n_cooties=min_n_cooties,
             )
@@ -1625,7 +1636,21 @@ def find_invariant_sequences(
                 continue
 
         g_new = flip_edge(graph, e)
-        new_sequence = sequence + [e]
+        new_sequence = [m for m in sequence] + [e]
+
+        # if the edge is an I-web (as opposed to the middle of an H-web)
+        # record this into the mutation sequence as well.
+        p = graph.streets[e]
+        ep0, ep1 = p.endpoints
+        if (
+            ep0.end_point.__class__.__name__ == 'BranchPoint' and 
+            ep1.end_point.__class__.__name__ == 'BranchPoint'
+        ):
+            gamma = (
+                [key for key, value in graph.homology_dictionary().iteritems() 
+                if e in value][0]
+            )
+            new_mutation_sequence = [m for m in mutation_sequence] + [gamma]
 
         # ### DEBUGGING BEGINS
         # # print out the problematic sequence and save the graphs in plots
@@ -1674,7 +1699,9 @@ def find_invariant_sequences(
                 print (
                     'This is a candidate sequence: {}'.format(new_sequence)
                 )
-                self_similar_graphs.append([new_sequence, selected_perms])
+                self_similar_graphs.append(
+                    [new_sequence, selected_perms, new_mutation_sequence]
+                )
         else:
             # print 'Will try going deeper with: {}'.format(new_sequence)
             deeper_sequences = find_invariant_sequences(
@@ -1683,6 +1710,7 @@ def find_invariant_sequences(
                 level=level+1,
                 ref_graph=ref_graph,
                 sequence=new_sequence,
+                mutation_sequence=new_mutation_sequence,
                 edge_cycle_min_length=edge_cycle_min_length,
                 min_n_cooties=min_n_cooties,
             )
@@ -2490,123 +2518,122 @@ def closest_on_covering_space(xy_0, xy_1, in_out=None):
 #   'gamma_11' : ['p_1', 'p_4', 'p_13'],}
 
 
-# # --------------- [2,1]-punctured torus -----------------
+# --------------- [2,1]-punctured torus -----------------
 
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
-
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_1', 'p_4', 'p_8'],
-#   'b_3': ['p_2', 'p_5', 'p_9'],
-#   'b_4': ['p_3', 'p_6', 'p_7'],}
-
-# joints = {
-#     'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
-#     'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
-# }
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-#   'gamma_4' : ['p_4', 'p_5', 'p_6'],
-#   'gamma_5' : ['p_7', 'p_8', 'p_9'],
-# }
-
-# bp_coordinates = {
-#   'b_1': [0.0, 0.0],
-#   'b_2': [0.28, 0.0],
-#   'b_3': [0.0, 0.31],
-#   'b_4': [0.62, 0.57],
-# }
-
-# j_coordinates = {
-#     'j_1': [0.32, 0.63],
-#     'j_2': [0.62, 0.28],
-# }
-
-# e_coordinates = {
-#     'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
-#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
-#     'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][1] + 1]], 
-#     'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
-#     'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
-#     'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
-#     'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
-#     'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
-#     'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
-# }
-
-# one = ['p_1', 'p_8', 'p_9', 'p_2']
-# tau = ['p_2', 'p_5', 'p_4', 'p_1']
-
-
-# --------------- [3,1]-punctured torus -----------------
-
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9']
 
 branch_points = {
-  'b_1': ['p_1', 'p_4', 'p_15'],
-  'b_2': ['p_4', 'p_11', 'p_5'],
-  'b_3': ['p_8', 'p_9', 'p_10'],
-  'b_4': ['p_8', 'p_7', 'p_3'],
-  'b_5': ['p_13', 'p_6', 'p_14'],
-  'b_6': ['p_13', 'p_12', 'p_2'],}
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_1', 'p_4', 'p_8'],
+  'b_3': ['p_2', 'p_5', 'p_9'],
+  'b_4': ['p_3', 'p_6', 'p_7'],}
 
 joints = {
-    'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
-    'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
-    'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
-    'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+    'j_1': ['p_4', None, 'p_5', None, 'p_6', None],
+    'j_2': ['p_7', None, 'p_8', None, 'p_9', None],
 }
 
 homology_classes = {
-  'gamma_1' : ['p_1', 'p_2', 'p_3'],
-  'gamma_2' : ['p_4'],
-  'gamma_3' : ['p_9', 'p_14', 'p_15'],
-  'gamma_4' : ['p_10', 'p_11', 'p_12'],
-  'gamma_5' : ['p_5', 'p_6', 'p_7'],
-  'gamma_6' : ['p_13'],
-  'gamma_7' : ['p_8'],
+  'gamma_1' : ['p_2'],
+  'gamma_2' : ['p_4', 'p_5', 'p_6'],
+  'gamma_3' : ['p_1'],
+  'gamma_4' : ['p_7', 'p_8', 'p_9'],
+  'gamma_5' : ['p_3'],
 }
 
 bp_coordinates = {
-  'b_1': [0.27, 0.23],
-  'b_2': [0.51, 0.45],
-  'b_3': [0.49, 0.0],
-  'b_4': [0.78, 0.0],
-  'b_5': [0.0, 0.61],
-  'b_6': [0.0, 0.7],
+  'b_1': [0.0, 0.0],
+  'b_2': [0.28, 0.0],
+  'b_3': [0.0, 0.31],
+  'b_4': [0.62, 0.57],
 }
 
 j_coordinates = {
-    'j_1': [0.0, 0.0],
-    'j_2': [0.24, 0.0],
-    'j_3': [0.0, 0.26],
-    'j_4': [0.73, 0.76],
+    'j_1': [0.32, 0.63],
+    'j_2': [0.62, 0.28],
 }
 
 e_coordinates = {
-    'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
-    'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
-    'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
-    'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
-    'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
-    'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
-    'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
-    'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
-    'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
-    'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
-    'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
-    'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
-    'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
-    'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
-    'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+    'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
+    'p_2': [bp_coordinates['b_1'], bp_coordinates['b_3']], 
+    'p_3': [bp_coordinates['b_4'], [bp_coordinates['b_1'][0] + 1, bp_coordinates['b_1'][1] + 1]], 
+    'p_4': [j_coordinates['j_1'], [bp_coordinates['b_2'][0], bp_coordinates['b_2'][1] + 1] ], 
+    'p_5': [j_coordinates['j_1'], bp_coordinates['b_3']],
+    'p_6': [j_coordinates['j_1'], bp_coordinates['b_4']],
+    'p_7': [j_coordinates['j_2'], bp_coordinates['b_4']],
+    'p_8': [j_coordinates['j_2'], bp_coordinates['b_2']],
+    'p_9': [j_coordinates['j_2'], [bp_coordinates['b_3'][0] + 1, bp_coordinates['b_3'][1]]],
 }
 
-one = ['p_1', 'p_4', 'p_11', 'p_10', 'p_8', 'p_3']
-tau = ['p_1', 'p_15', 'p_14', 'p_13', 'p_2']
+one = ['p_1', 'p_8', 'p_9', 'p_2']
+tau = ['p_2', 'p_5', 'p_4', 'p_1']
 
+
+# # --------------- [3,1]-punctured torus -----------------
+
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_4', 'p_15'],
+#   'b_2': ['p_4', 'p_11', 'p_5'],
+#   'b_3': ['p_8', 'p_9', 'p_10'],
+#   'b_4': ['p_8', 'p_7', 'p_3'],
+#   'b_5': ['p_13', 'p_6', 'p_14'],
+#   'b_6': ['p_13', 'p_12', 'p_2'],}
+
+# joints = {
+#     'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
+#     'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
+#     'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
+#     'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['p_4'],
+#   'gamma_3' : ['p_9', 'p_14', 'p_15'],
+#   'gamma_4' : ['p_10', 'p_11', 'p_12'],
+#   'gamma_5' : ['p_5', 'p_6', 'p_7'],
+#   'gamma_6' : ['p_13'],
+#   'gamma_7' : ['p_8'],
+# }
+
+# bp_coordinates = {
+#   'b_1': [0.27, 0.23],
+#   'b_2': [0.51, 0.45],
+#   'b_3': [0.49, 0.0],
+#   'b_4': [0.78, 0.0],
+#   'b_5': [0.0, 0.61],
+#   'b_6': [0.0, 0.7],
+# }
+
+# j_coordinates = {
+#     'j_1': [0.0, 0.0],
+#     'j_2': [0.24, 0.0],
+#     'j_3': [0.0, 0.26],
+#     'j_4': [0.73, 0.76],
+# }
+
+# e_coordinates = {
+#     'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
+#     'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
+#     'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
+#     'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
+#     'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
+#     'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
+#     'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
+#     'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
+#     'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
+#     'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
+#     'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
+#     'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
+#     'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
+#     'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
+#     'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+# }
+
+# one = ['p_1', 'p_4', 'p_11', 'p_10', 'p_8', 'p_3']
+# tau = ['p_1', 'p_15', 'p_14', 'p_13', 'p_2']
 
 
 w = BPSgraph(
@@ -2619,132 +2646,131 @@ w = BPSgraph(
     e_coordinates=e_coordinates,
 )
 
-# # analyze all sequences which give back the BPS graph
-# max_n_moves = 7
-# SAVE_PLOTS = True
-# seq = find_invariant_sequences(
-#     w, max_n_moves, level=0, ref_graph=w, 
-#     edge_cycle_min_length=2,
-#     min_n_cooties=0,
-#     fundamental_region=[one, tau],
-#     drop_if_trivial_perm=True,
-# )
+# analyze all sequences which give back the BPS graph
+max_n_moves = 5
+SAVE_PLOTS = True
+seq = find_invariant_sequences(
+    w, max_n_moves, level=0, ref_graph=w, 
+    edge_cycle_min_length=4,
+    min_n_cooties=1,
+    fundamental_region=[one, tau],
+    drop_if_trivial_perm=True,
+)
 
-# print 'Found {} sequences.'.format(len(seq))
+print 'Found {} sequences.'.format(len(seq))
 
+old_modular_parameter = compute_modular_parameter(one, tau, w)
+S_old_modular_parameter = -1 / old_modular_parameter
+L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
+R_old_modular_parameter = 1 + old_modular_parameter
 
-# old_modular_parameter = compute_modular_parameter(one, tau, w)
-# S_old_modular_parameter = -1 / old_modular_parameter
-# L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
-# R_old_modular_parameter = 1 + old_modular_parameter
-
-# # prepare a directory
-# mydir = os.path.join(
-#     os.getcwd(), 'mcg_moves', 
-#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
-# )
-# os.makedirs(mydir)
-
-# # save info about sequences of moves in a text file
-# text_file = open(mydir + '/sequence_data.txt', 'w')
-# text_file.write('\t\tSequence data\n\n')
-# text_file.write(
-#     'Modular parameter of the original torus: {}'
-#     '\none : {} = {}\ntau : {} = {}\n\n'.format(
-#         old_modular_parameter, 
-#         one, sum_up_edges(one, w), 
-#         tau, sum_up_edges(tau, w)
-#     )
-# )
-
-# S_move_candidates = []
-# L_move_candidates = []
-# R_move_candidates = []
-
-# for i, s in enumerate(seq):
-#     text_file.write(
-#         '\n\n-------------------------'
-#         '\nSequence #{} : {}'.format(i, s[0])
-#     )
-#     text_file.write(
-#         '\n\t\tPermutation data\n(Note: this is in the form '
-#             '(.., old_edge : new_edge, ..)'
-#             '\nAll permutations are included\n'
-#     )
-#     if SAVE_PLOTS is True:
-#         sub_dir = os.path.join(mydir, 'sequence_'+str(i))
-#         os.makedirs(sub_dir)
-#         new_graph = apply_sequence(w, s[0], save_plot=sub_dir)
-#     else:
-#         new_graph = apply_sequence(w, s[0])
-#     # Each sequence of moves comes with a set of permutations
-#     # that relate the final graph to the original one.
-#     # Must consider each of them
-#     for j, p in enumerate(s[1]):
-#         # use the infor about the funadmental region to compute the 
-#         # new modular parameter, by tracking where the edges 
-#         # ended up.
-#         # Before the moves, the two parameteters [1, \tau] were 
-#         # specified by a sequence of edges each.
-#         # Now tracking where those edges ended up we are
-#         # able to compute the new [1', \tau'].
-#         # First of all, we translate the old sequence of edges
-#         # into the new sequence, by applying the permutation 
-#         # dictionary
-#         new_one = [p[edge] for edge in one]
-#         new_tau = [p[edge] for edge in tau]
-#         new_modular_parameter = compute_modular_parameter(
-#             new_one, new_tau, new_graph
-#         )
-#         # check if this is a candidate for n S, L or R move:
-#         if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
-#             S_move_candidates.append([i, j])
-#         if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
-#             L_move_candidates.append([i, j])
-#         if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
-#             R_move_candidates.append([i, j])
-
-#         text_file.write(
-#             '\n\tpermutation #{} : {}\n\tmodular parameter : {}'.format(
-#                 j, p, new_modular_parameter
-#             )
-#         )
-#         text_file.write(
-#             '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
-#                 new_one, sum_up_edges(new_one, new_graph), 
-#                 new_tau, sum_up_edges(new_tau, new_graph)
-#             )
-#         )
-
-# # write int the text file the candidates for S, L, R transformations
-# text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
-# for [i, j] in S_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
-# for [i, j] in L_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
-# for [i, j] in R_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-
-
-
-####################################################
-### DEBUG A PARTICULAR SEQUENCE
-seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
-seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
-seq_2 = ['p_13', 'f_4']
+# prepare a directory
 mydir = os.path.join(
     os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
 )
 os.makedirs(mydir)
-w1 = apply_sequence(w, seq_2, save_plot=mydir)
-print w1.homology_dictionary()
-### DEBUG END
+
+# save info about sequences of moves in a text file
+text_file = open(mydir + '/sequence_data.txt', 'w')
+text_file.write('\t\tSequence data\n\n')
+text_file.write(
+    'Modular parameter of the original torus: {}'
+    '\none : {} = {}\ntau : {} = {}\n\n'.format(
+        old_modular_parameter, 
+        one, sum_up_edges(one, w), 
+        tau, sum_up_edges(tau, w)
+    )
+)
+
+S_move_candidates = []
+L_move_candidates = []
+R_move_candidates = []
+
+for i, s in enumerate(seq):
+    text_file.write(
+        '\n\n-------------------------'
+        '\nSequence #{} : {}\nMutations : {}'.format(i, s[0], s[2])
+    )
+    text_file.write(
+        '\n\t\tPermutation data\n(Note: this is in the form '
+            '(.., old_edge : new_edge, ..)'
+            '\nAll permutations are included\n'
+    )
+    if SAVE_PLOTS is True:
+        sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+        os.makedirs(sub_dir)
+        new_graph = apply_sequence(w, s[0], save_plot=sub_dir)
+    else:
+        new_graph = apply_sequence(w, s[0])
+    # Each sequence of moves comes with a set of permutations
+    # that relate the final graph to the original one.
+    # Must consider each of them
+    for j, p in enumerate(s[1]):
+        # use the infor about the funadmental region to compute the 
+        # new modular parameter, by tracking where the edges 
+        # ended up.
+        # Before the moves, the two parameteters [1, \tau] were 
+        # specified by a sequence of edges each.
+        # Now tracking where those edges ended up we are
+        # able to compute the new [1', \tau'].
+        # First of all, we translate the old sequence of edges
+        # into the new sequence, by applying the permutation 
+        # dictionary
+        new_one = [p[edge] for edge in one]
+        new_tau = [p[edge] for edge in tau]
+        new_modular_parameter = compute_modular_parameter(
+            new_one, new_tau, new_graph
+        )
+        # check if this is a candidate for n S, L or R move:
+        if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
+            S_move_candidates.append([i, j])
+        if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
+            L_move_candidates.append([i, j])
+        if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
+            R_move_candidates.append([i, j])
+
+        text_file.write(
+            '\n\tpermutation #{} : {}\n\tmodular parameter : {}'.format(
+                j, p, new_modular_parameter
+            )
+        )
+        text_file.write(
+            '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
+                new_one, sum_up_edges(new_one, new_graph), 
+                new_tau, sum_up_edges(new_tau, new_graph)
+            )
+        )
+
+# write int the text file the candidates for S, L, R transformations
+text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
+for [i, j] in S_move_candidates:
+    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
+for [i, j] in L_move_candidates:
+    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
+for [i, j] in R_move_candidates:
+    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+
+
+
+# ####################################################
+# ### DEBUG A PARTICULAR SEQUENCE
+# seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
+# seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
+# seq_2 = ['p_13', 'f_4']
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+# )
+# os.makedirs(mydir)
+# w1 = apply_sequence(w, seq_2, save_plot=mydir)
+# print w1.homology_dictionary()
+# ### DEBUG END
 
 
 # ####################################################
