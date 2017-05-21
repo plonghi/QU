@@ -2584,6 +2584,30 @@ def closest_on_covering_space(xy_0, xy_1, in_out=None):
     return [x_1 + s_x, y_1 + s_y]
 
 
+def find_self_permutations(graph, fundamental_region):
+    """
+    Find nontrivial permutations that leave a graph invariant.
+    'fundamental_region' is given as a pair of lists of edges representing 
+    [one, tau]
+    """
+    one, tau = fundamental_region
+    self_perms = are_equivalent_as_graphs(graph, graph)
+    trivial_perm = {s : s for s in graph.streets.keys()}
+    nontrivial_self_perms = []
+    for p in self_perms:
+        if p == trivial_perm:
+            pass
+        else:
+            new_one = [p[edge] for edge in one]
+            new_tau = [p[edge] for edge in tau]
+            new_modular_parameter = compute_modular_parameter(
+                new_one, new_tau, graph
+            )
+            nontrivial_self_perms.append([p, new_modular_parameter])
+    
+    return nontrivial_self_perms
+
+
 # # --------- torus graph with two joints and two branch points ----------
 
 # streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
@@ -2927,6 +2951,7 @@ w = BPSgraph(
     j_coordinates=j_coordinates,
     e_coordinates=e_coordinates,
 )
+            
 
 # # prepare a directory
 # mydir = os.path.join(
@@ -2945,115 +2970,121 @@ w = BPSgraph(
 
 # SAVE_PLOTS = True
 
-# analyze all sequences which give back the BPS graph
-max_n_moves = 5
-SAVE_PLOTS = True
-seq = find_invariant_sequences(
-    w, max_n_moves, level=0, ref_graph=w, 
-    edge_cycle_min_length=0,
-    min_n_cooties=1,
-    fundamental_region=[one, tau],
-    drop_if_trivial_perm=True,
-)
+# # analyze all sequences which give back the BPS graph
+# max_n_moves = 5
+# SAVE_PLOTS = True
+# seq = find_invariant_sequences(
+#     w, max_n_moves, level=0, ref_graph=w, 
+#     edge_cycle_min_length=0,
+#     min_n_cooties=1,
+#     fundamental_region=[one, tau],
+#     drop_if_trivial_perm=True,
+# )
 
-print 'Found {} sequences.'.format(len(seq))
+# print 'Found {} sequences.'.format(len(seq))
 
-old_modular_parameter = compute_modular_parameter(one, tau, w)
-S_old_modular_parameter = -1 / old_modular_parameter
-L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
-R_old_modular_parameter = 1 + old_modular_parameter
+# old_modular_parameter = compute_modular_parameter(one, tau, w)
+# S_old_modular_parameter = -1 / old_modular_parameter
+# L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
+# R_old_modular_parameter = 1 + old_modular_parameter
 
-# prepare a directory
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
-)
-os.makedirs(mydir)
+# # prepare a directory
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
+# )
+# os.makedirs(mydir)
 
-# save info about sequences of moves in a text file
-text_file = open(mydir + '/sequence_data.txt', 'w')
-text_file.write('\t\tSequence data\n\n')
-text_file.write(
-    'Modular parameter of the original torus: {}'
-    '\none : {} = {}\ntau : {} = {}\n\n'.format(
-        old_modular_parameter, 
-        one, sum_up_edges(one, w), 
-        tau, sum_up_edges(tau, w)
-    )
-)
-text_file.write('Quiver:\n{}\n\n'.format(w.seed.quiver))
+# # save info about sequences of moves in a text file
+# text_file = open(mydir + '/sequence_data.txt', 'w')
+# text_file.write('\t\tSequence data\n\n')
+# text_file.write(
+#     'Modular parameter of the original torus: {}'
+#     '\none : {} = {}\ntau : {} = {}\n\n'.format(
+#         old_modular_parameter, 
+#         one, sum_up_edges(one, w), 
+#         tau, sum_up_edges(tau, w)
+#     )
+# )
+# text_file.write('Quiver:\n{}\n\n'.format(w.seed.quiver))
 
-S_move_candidates = []
-L_move_candidates = []
-R_move_candidates = []
+# self_permutations = find_self_permutations(w, [one, tau])
+# text_file.write('\nNontrivial permutations giving isomorphic graphs\n')
+# for p in self_permutations:
+#     text_file.write('\t{}\n'.format(p[0]))
+#     text_file.write('\tmodular parameter : {}\n'.format(p[1]))
 
-for i, s in enumerate(seq):
-    text_file.write(
-        '\n\n-------------------------'
-        '\nSequence #{} : {}\nMutations : {}'.format(i, s[0], s[2])
-    )
-    text_file.write(
-        '\n\t\tPermutation data\n(Note: this is in the form '
-            '(.., old_edge : new_edge, ..)'
-            '\nAll permutations are included\n'
-    )
-    if SAVE_PLOTS is True:
-        sub_dir = os.path.join(mydir, 'sequence_'+str(i))
-        os.makedirs(sub_dir)
-        new_graph = apply_sequence(w, s[0], save_plot=sub_dir)
-    else:
-        new_graph = apply_sequence(w, s[0])
-    # Each sequence of moves comes with a set of permutations
-    # that relate the final graph to the original one.
-    # Must consider each of them
-    for j, p in enumerate(s[1]):
-        # use the infor about the funadmental region to compute the 
-        # new modular parameter, by tracking where the edges 
-        # ended up.
-        # Before the moves, the two parameteters [1, \tau] were 
-        # specified by a sequence of edges each.
-        # Now tracking where those edges ended up we are
-        # able to compute the new [1', \tau'].
-        # First of all, we translate the old sequence of edges
-        # into the new sequence, by applying the permutation 
-        # dictionary
-        new_one = [p[edge] for edge in one]
-        new_tau = [p[edge] for edge in tau]
-        new_modular_parameter = compute_modular_parameter(
-            new_one, new_tau, new_graph
-        )
-        # check if this is a candidate for n S, L or R move:
-        if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
-            S_move_candidates.append([i, j])
-        if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
-            L_move_candidates.append([i, j])
-        if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
-            R_move_candidates.append([i, j])
+# S_move_candidates = []
+# L_move_candidates = []
+# R_move_candidates = []
 
-        text_file.write(
-            '\n\tpermutation #{} : {}\n\tmodular parameter : {}'.format(
-                j, p, new_modular_parameter
-            )
-        )
-        text_file.write(
-            '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
-                new_one, sum_up_edges(new_one, new_graph), 
-                new_tau, sum_up_edges(new_tau, new_graph)
-            )
-        )
+# for i, s in enumerate(seq):
+#     text_file.write(
+#         '\n\n-------------------------'
+#         '\nSequence #{} : {}\nMutations : {}'.format(i, s[0], s[2])
+#     )
+#     text_file.write(
+#         '\n\t\tPermutation data\n(Note: this is in the form '
+#             '(.., old_edge : new_edge, ..)'
+#             '\nAll permutations are included\n'
+#     )
+#     if SAVE_PLOTS is True:
+#         sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+#         os.makedirs(sub_dir)
+#         new_graph = apply_sequence(w, s[0], save_plot=sub_dir)
+#     else:
+#         new_graph = apply_sequence(w, s[0])
+#     # Each sequence of moves comes with a set of permutations
+#     # that relate the final graph to the original one.
+#     # Must consider each of them
+#     for j, p in enumerate(s[1]):
+#         # use the infor about the funadmental region to compute the 
+#         # new modular parameter, by tracking where the edges 
+#         # ended up.
+#         # Before the moves, the two parameteters [1, \tau] were 
+#         # specified by a sequence of edges each.
+#         # Now tracking where those edges ended up we are
+#         # able to compute the new [1', \tau'].
+#         # First of all, we translate the old sequence of edges
+#         # into the new sequence, by applying the permutation 
+#         # dictionary
+#         new_one = [p[edge] for edge in one]
+#         new_tau = [p[edge] for edge in tau]
+#         new_modular_parameter = compute_modular_parameter(
+#             new_one, new_tau, new_graph
+#         )
+#         # check if this is a candidate for n S, L or R move:
+#         if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
+#             S_move_candidates.append([i, j])
+#         if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
+#             L_move_candidates.append([i, j])
+#         if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
+#             R_move_candidates.append([i, j])
 
-# write in the text file the candidates for S, L, R transformations
-text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
-for [i, j] in S_move_candidates:
-    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+#         text_file.write(
+#             '\n\tpermutation #{} : {}\n\tmodular parameter : {}'.format(
+#                 j, p, new_modular_parameter
+#             )
+#         )
+#         text_file.write(
+#             '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
+#                 new_one, sum_up_edges(new_one, new_graph), 
+#                 new_tau, sum_up_edges(new_tau, new_graph)
+#             )
+#         )
 
-text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
-for [i, j] in L_move_candidates:
-    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+# # write in the text file the candidates for S, L, R transformations
+# text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
+# for [i, j] in S_move_candidates:
+#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
 
-text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
-for [i, j] in R_move_candidates:
-    text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+# text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
+# for [i, j] in L_move_candidates:
+#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
+# for [i, j] in R_move_candidates:
+#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
 
 
 
