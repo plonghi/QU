@@ -3049,12 +3049,6 @@ w = BPSgraph(
 )
             
 
-# prepare a directory
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves_DEBUG')
-)
-os.makedirs(mydir)
 
 SAVE_PLOTS = True
 
@@ -3106,70 +3100,147 @@ S_move_candidates = []
 L_move_candidates = []
 R_move_candidates = []
 
+# Keep track of how many sequences give the same quiver mutation sequence
+# only give one sequence of moves that corresponds to a given mutation
+# sequence.
+seen_by_mutations = {}
+# keep track of all possible modular parameters associated to a sequence 
+# of mutations
+mutation_seq_modular_parameters = {}
+
 for i, s in enumerate(seq):
-    text_file.write(
-        '\n\n-------------------------'
-        '\nSequence #{} : {}\nMutations : {}'.format(
-            i, s.moves_sequence, s.quiver_mutations
+    if str(s.quiver_mutations) not in seen_by_mutations.keys():
+        # initiate the count for graph moves corresponding to 
+        # this mutation sequence.
+        # use a list of mutation turned into a string for dictionary keys...
+        seen_by_mutations[str(s.quiver_mutations)] = [i]
+
+        text_file.write(
+            '\n\n-------------------------'
+            '\nSequence #{} : {}\nMutations : {}'.format(
+                i, s.moves_sequence, s.quiver_mutations
+            )
         )
-    )
-    text_file.write(
-        '\n\t\tPermutation data\n(Note: this is in the form '
-            '(.., old_edge : new_edge, ..)'
-            '\nAll permutations are included\n'
-    )
-    if SAVE_PLOTS is True:
-        sub_dir = os.path.join(mydir, 'sequence_'+str(i))
-        os.makedirs(sub_dir)
-        new_graph = apply_sequence(w, s.moves_sequence, save_plot=sub_dir)
+        text_file.write(
+            '\n\t\tPermutation data\n(Note: this is in the form '
+                '(.., old_edge : new_edge, ..)'
+                '\nAll permutations are included\n'
+        )
+        if SAVE_PLOTS is True:
+            sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+            os.makedirs(sub_dir)
+            new_graph = apply_sequence(w, s.moves_sequence, save_plot=sub_dir)
+        else:
+            new_graph = apply_sequence(w, s.moves_sequence)
+        # Each sequence of moves comes with a set of permutations
+        # that relate the final graph to the original one.
+        # Must consider each of them
+        for j in range(len(s.edge_permutations)):
+            # the edge permutation
+            p = s.edge_permutations[j] 
+            ### DEBUG: disabling this for now
+            # # the homology class permutation
+            hc_p = 'homology permutation not implemented'
+            # hc_p = s.homology_permutation[j] 
+            ### DEBUG END
+
+            # use the infor about the funadmental region to compute the 
+            # new modular parameter, by tracking where the edges 
+            # ended up.
+            # Before the moves, the two parameteters [1, \tau] were 
+            # specified by a sequence of edges each.
+            # Now tracking where those edges ended up we are
+            # able to compute the new [1', \tau'].
+            # First of all, we translate the old sequence of edges
+            # into the new sequence, by applying the permutation 
+            # dictionary
+            new_one = [p[edge] for edge in one]
+            new_tau = [p[edge] for edge in tau]
+            new_modular_parameter = compute_modular_parameter(
+                new_one, new_tau, new_graph
+            )
+            # record the new modular parameter produced by this 
+            # sequqnece of moves
+            mutation_seq_modular_parameters[str(s.quiver_mutations)] = (
+                [new_modular_parameter]
+            )
+            # check if this is a candidate for n S, L or R move:
+            if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
+                S_move_candidates.append([i, j])
+            if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
+                L_move_candidates.append([i, j])
+            if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
+                R_move_candidates.append([i, j])
+
+            text_file.write(
+                '\n\tpermutation #{} : {}\n{}\n\tmodular parameter : {}'.format(
+                    j, p, hc_p, new_modular_parameter
+                )
+            )
+            text_file.write(
+                '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
+                    new_one, sum_up_edges(new_one, new_graph), 
+                    new_tau, sum_up_edges(new_tau, new_graph)
+                )
+            )
     else:
+        # add the sequence to the list of moves sequences that give
+        # a certain mutation sequence
+        seen_by_mutations[str(s.quiver_mutations)].append(i)
+        # record which modular parameter is produced by this sequence of moves
         new_graph = apply_sequence(w, s.moves_sequence)
-    # Each sequence of moves comes with a set of permutations
-    # that relate the final graph to the original one.
-    # Must consider each of them
-    for j in range(len(s.edge_permutations)):
-        # the edge permutation
-        p = s.edge_permutations[j] 
-        ### DEBUG: disabling this for now
-        # # the homology class permutation
-        hc_p = 'homology permutation not implemented'
-        # hc_p = s.homology_permutation[j] 
-        ### DEBUG END
+        
+        for j in range(len(s.edge_permutations)):
+            # the edge permutation
+            p = s.edge_permutations[j] 
+            ### DEBUG: disabling this for now
+            # # the homology class permutation
+            hc_p = 'homology permutation not implemented'
+            # hc_p = s.homology_permutation[j] 
+            ### DEBUG END
 
-        # use the infor about the funadmental region to compute the 
-        # new modular parameter, by tracking where the edges 
-        # ended up.
-        # Before the moves, the two parameteters [1, \tau] were 
-        # specified by a sequence of edges each.
-        # Now tracking where those edges ended up we are
-        # able to compute the new [1', \tau'].
-        # First of all, we translate the old sequence of edges
-        # into the new sequence, by applying the permutation 
-        # dictionary
-        new_one = [p[edge] for edge in one]
-        new_tau = [p[edge] for edge in tau]
-        new_modular_parameter = compute_modular_parameter(
-            new_one, new_tau, new_graph
-        )
-        # check if this is a candidate for n S, L or R move:
-        if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
-            S_move_candidates.append([i, j])
-        if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
-            L_move_candidates.append([i, j])
-        if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
-            R_move_candidates.append([i, j])
+            # use the infor about the funadmental region to compute the 
+            # new modular parameter, by tracking where the edges 
+            # ended up.
+            # Before the moves, the two parameteters [1, \tau] were 
+            # specified by a sequence of edges each.
+            # Now tracking where those edges ended up we are
+            # able to compute the new [1', \tau'].
+            # First of all, we translate the old sequence of edges
+            # into the new sequence, by applying the permutation 
+            # dictionary
+            new_one = [p[edge] for edge in one]
+            new_tau = [p[edge] for edge in tau]
+            new_modular_parameter = compute_modular_parameter(
+                new_one, new_tau, new_graph
+            )
+            # record the new modular parameter produced by this 
+            # sequqnece of moves
+            if (
+                new_modular_parameter not in 
+                mutation_seq_modular_parameters[str(s.quiver_mutations)]
+            ):
+                mutation_seq_modular_parameters[str(s.quiver_mutations)].append(
+                    new_modular_parameter
+                )
 
-        text_file.write(
-            '\n\tpermutation #{} : {}\n{}\n\tmodular parameter : {}'.format(
-                j, p, hc_p, new_modular_parameter
-            )
+# Write the tally of how many moves seem to give the same sequence of 
+# mutations
+text_file.write('\n\n\tTally of mutations\n\n')
+for mut_seq in seen_by_mutations.keys():
+    text_file.write(
+        'This mutation sequence : {}\nwas seen {} times, in sequences\n{}'
+        .format(
+            mut_seq, len(seen_by_mutations[mut_seq]), 
+            seen_by_mutations[mut_seq]
         )
-        text_file.write(
-            '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}\n'.format(
-                new_one, sum_up_edges(new_one, new_graph), 
-                new_tau, sum_up_edges(new_tau, new_graph)
-            )
+    )
+    text_file.write(
+        'Associated modular parameters: {}\n\n'.format(
+            round(len(mutation_seq_modular_parameters[mut_seq]), 2)
         )
+    )
+
 
 # write in the text file the candidates for S, L, R transformations
 text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
