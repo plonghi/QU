@@ -3229,7 +3229,8 @@ for i, s in enumerate(seq):
 text_file.write('\n\n\tTally of mutations\n\n')
 for mut_seq in seen_by_mutations.keys():
     text_file.write(
-        'This mutation sequence : {}\nwas seen {} times, in sequences\n{}'
+        'This mutation sequence : {}\nwas seen {} times.'
+        'In moves sequences : {}\n'
         .format(
             mut_seq, len(seen_by_mutations[mut_seq]), 
             seen_by_mutations[mut_seq]
@@ -3237,7 +3238,8 @@ for mut_seq in seen_by_mutations.keys():
     )
     text_file.write(
         'Associated modular parameters: {}\n\n'.format(
-            round(len(mutation_seq_modular_parameters[mut_seq]), 2)
+            [round(mp.real, 2) + 1j * round(mp.imag, 2) 
+            for mp in mutation_seq_modular_parameters[mut_seq]]
         )
     )
 
