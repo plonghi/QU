@@ -1687,6 +1687,9 @@ def find_invariant_sequences(
     Only retain sequences in which streets are permuted with cycles 
     of a given minimal length.
 
+    We avoid sequences whose corresponding myations include two identical
+    consecutive elements.
+
     'level' is an auxiliary variable, it is used to keep track of recursion.
     'ref_graph' is the original graph, a sequence must eventually reproduce it.
     'sequence' is also an auxiliary variable, it keeps track of how many moves
@@ -1855,6 +1858,13 @@ def find_invariant_sequences(
                 [key for key, value in graph.homology_dictionary().iteritems() 
                 if e in value][0]
             )
+            # if gamma is the same as the last entry of the mutation sequence, 
+            # stop exploring these sequence and its descendants.
+            if len(mutation_sequence) > 0:
+                if gamma == mutation_sequence[-1]:
+                    continue
+                else:
+                    pass
             new_mutation_sequence = [m for m in mutation_sequence] + [gamma]
         # otherwise, if it's a H-web, just keep the mutation sequence as it was
         elif (
@@ -2644,6 +2654,17 @@ def plot_BPS_graph(graph):
                 marker
             )
             plt.text((x_0 + x_1) /2 + d[0], (y_0 + y_1) / 2 + d[1], s.label)
+
+    # plot face labels
+    for f_k, f_v in graph.faces.iteritems():
+        f_nodes = [node_coordinates(node, graph) for node in f_v.node_sequence]
+        x_avg = sum([x[0] for x in f_nodes]) / len(f_nodes)
+        y_avg = sum([x[1] for x in f_nodes]) / len(f_nodes)
+
+        for d in shifts:
+            plt.text(
+                x_avg + d[0], y_avg + d[1], f_k
+            )
 
     plt.axis([-0.1,1.1,-0.1,1.1])
 
