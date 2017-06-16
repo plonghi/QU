@@ -12,6 +12,8 @@ from cluster import Seed
 # two vectors in the plane are the same
 EPSILON = 0.0001
 
+SEED_WARNING_MESSAGE = False
+
 
 class BPSgraph(MCSN):
     """
@@ -176,7 +178,7 @@ class BPSgraph(MCSN):
                 
                 raise Exception(
                     'Coordinates of {} seems not to match ' 
-                    'those of its endpoints. The edge has {}'
+                    'those of its endpoints. The edge has {} '
                     'while the endpoints are {}'.format(
                         e_k, [edge_xy_0, edge_xy_1], [xy_0, xy_1])
                 )
@@ -319,6 +321,14 @@ class MoveSequence():
         self.edge_permutations = edge_permutations
         self.quiver_mutations = quiver_mutations
         self.homology_permutations = homology_permutations
+
+    def print_info(self):
+        print '\nSequence of graph moves\n{}'.format(self.moves_sequence)
+        print '\nEdge permutations\n{}'.format(self.edge_permutations)
+        print '\nQuiver node mutations\n{}'.format(self.quiver_mutations)
+        print '\nHomology class permutations\n{}\n\n'.format(
+            self.homology_permutations
+        )
 
 
 def intersection_pairing(graph, gamma_1, gamma_2):
@@ -535,6 +545,7 @@ def other_edge_coord(edge_coordinates, xy):
         are_within_range(xy, edge_coordinates[1], EPSILON) is True
     ):
         raise Exception()
+        
     else:
         print 'xy = {}'.format(xy)
         print 'edge_coordinates = {}'.format(edge_coordinates)
@@ -810,7 +821,10 @@ def flip_edge(graph, edge):
         
         new_seed = graph.seed.copy()
         # temporarily disable
-        print 'WARNING: disabled seed mutation'
+        global SEED_WARNING_MESSAGE
+        if SEED_WARNING_MESSAGE is False:
+            print 'WARNING: disabled seed mutation'
+            SEED_WARNING_MESSAGE = True
         # new_seed.mutate(gamma)
     else:
         new_seed = graph.seed.copy()
@@ -1854,7 +1868,7 @@ def find_invariant_sequences(
     Only retain sequences in which streets are permuted with cycles 
     of a given minimal length.
 
-    We avoid sequences whose corresponding myations include two identical
+    We avoid sequences whose corresponding mutations include two identical
     consecutive elements.
 
     'level' is an auxiliary variable, it is used to keep track of recursion.
@@ -2246,7 +2260,7 @@ def apply_sequence(graph, seq, save_plot=None, include_mutation_sequence=None):
                     in prev_graph.homology_dictionary().iteritems() 
                     if el in value][0]
                 )
-            hc_sequence.append(gamma)
+                hc_sequence.append(gamma)
             #
             graph_sequence.append(flip_edge(graph_sequence[-1], el))
         else:
@@ -2936,6 +2950,126 @@ def find_self_permutations(graph, fundamental_region):
     return nontrivial_self_perms
 
 
+def find_sequence_completion(
+    graph, partial_sequence, n_moves, one, tau, save_files=None,
+    ):
+    """
+    Given a BPS graph and a sequence of moves, 
+    find all possible completions which bring 
+    the BPS graph back to itself, starting from 
+    the given partial sequence.
+    """
+
+    if save_files is True:
+        mydir = os.path.join(
+            os.getcwd(), 'mcg_moves', 
+            (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_SEQ_AUTOCOMP')
+        )
+        os.makedirs(mydir)
+    else:
+        mydir=None
+
+    w_partial, mutation_seq = apply_sequence(
+        graph, partial_sequence, 
+        save_plot=None, 
+        include_mutation_sequence=True
+    )
+
+    max_n_moves = n_moves
+    seq = find_invariant_sequences(
+        w_partial, max_n_moves, level=0, ref_graph=graph, 
+        edge_cycle_min_length=0,
+        min_n_cooties=0,
+        fundamental_region=[one, tau],
+        drop_if_trivial_perm=True,
+    )
+
+    modular_parameter = compute_modular_parameter(one, tau, graph)
+    possible_modular_parameters = []
+
+    # save info about sequences of moves in a text file
+    text_file = open(mydir + '/sequence_data.txt', 'w')
+    text_file.write('\t\tSequence data\n\n')
+    text_file.write(
+        'Modular parameter of the original torus: {}'
+        '\none : {} = {}\ntau : {} = {}\n\n'.format(
+            modular_parameter, 
+            one, sum_up_edges(one, graph), 
+            tau, sum_up_edges(tau, graph)
+        )
+    )
+    text_file.write('Quiver:\n{}\n\n'.format(graph.seed.quiver))
+    
+    text_file.write('Found {} sequences which complete {}.\n\n'.format(
+        len(seq), partial_sequence
+    ))
+    text_file.write('Will now study their properties.\n\n')
+    for i_s, s in enumerate(seq):
+        if mydir is not None:
+            mydir_i = os.path.join(mydir, 'sequence_{}'.format(i_s))
+            os.makedirs(mydir_i)
+        else:
+            mydir_i = None
+
+        tot_seq = partial_sequence + s.moves_sequence
+        w_new, tot_mutation_seq = apply_sequence(
+            graph, tot_seq, 
+            save_plot=mydir_i, 
+            include_mutation_sequence=True
+        )
+        text_file.write(
+            '\n\n----------------------------------------------\n\n'
+        )
+        
+        text_file.write(
+            'Sequence # {} is:\n{}\n\nIt corresponds to the mutations\n{}\n'
+            .format(i_s, tot_seq, tot_mutation_seq)
+        )
+
+        perms = are_equivalent_as_graphs(graph, w_new)
+        if perms is not None:
+            text_file.write(
+                '\nThe original graph is matched by applying '
+                'the following permutations\n\n'
+            )
+
+            for j, p in enumerate(perms):
+                text_file.write('\nPermutation #{}:\n{}\n\n'.format(j, p))
+
+                new_one = [p[edge] for edge in one]
+                new_tau = [p[edge] for edge in tau]
+                new_modular_parameter = compute_modular_parameter(
+                    new_one, new_tau, w_new
+                )
+                if new_modular_parameter not in possible_modular_parameters:
+                    possible_modular_parameters.append(
+                        new_modular_parameter
+                    )
+                text_file.write(
+                    '\nNew modular parameter: {}\n'
+                    .format(new_modular_parameter)
+                )
+                text_file.write(
+                    'The new one : {} = {}\nThe new tau : {} = {}\n'.format(
+                        new_one, sum_up_edges(new_one, w_new), 
+                        new_tau, sum_up_edges(new_tau, w_new)
+                    )
+                )
+                text_file.write(
+                    'The permutation of homology classes \n{}\n'.format(
+                        quiver_node_permutation(graph, w_new, p) 
+                    )
+                )
+        else:
+            text_file.write('found no permutations')
+
+    text_file.write(
+        '\n\nPossible new modular parameters:\n{}'.format(
+            possible_modular_parameters
+        )
+    )
+
+
 # # --------- torus graph with two joints and two branch points ----------
 
 # streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
@@ -3112,9 +3246,79 @@ def find_self_permutations(graph, fundamental_region):
 
 
 
+# # --------------- [3,1]-punctured torus FROM GUESSED REDUCTION (WORKS) -----------------
+
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_4', 'p_15'],
+#   'b_2': ['p_4', 'p_11', 'p_5'],
+#   'b_3': ['p_8', 'p_9', 'p_10'],
+#   'b_4': ['p_8', 'p_7', 'p_3'],
+#   'b_5': ['p_13', 'p_6', 'p_14'],
+#   'b_6': ['p_13', 'p_12', 'p_2'],}
+
+# joints = {
+#     'j_1': ['p_1', None, 'p_3', None, 'p_2', None],
+#     'j_2': ['p_10', None, 'p_11', None, 'p_12', None],
+#     'j_3': ['p_9', None, 'p_15', None, 'p_14', None],
+#     'j_4': ['p_5', None, 'p_6', None, 'p_7', None],
+# }
+
+# homology_classes = {
+#   'gamma_1' : ['p_1', 'p_2', 'p_3'],
+#   'gamma_2' : ['p_4'],
+#   'gamma_3' : ['p_9', 'p_14', 'p_15'],
+#   'gamma_4' : ['p_10', 'p_11', 'p_12'],
+#   'gamma_5' : ['p_5', 'p_6', 'p_7'],
+#   'gamma_6' : ['p_13'],
+#   'gamma_7' : ['p_8'],
+# }
+
+# bp_coordinates = {
+#   'b_1': [0.27, 0.23],
+#   'b_2': [0.51, 0.45],
+#   'b_3': [0.49, 0.0],
+#   'b_4': [0.78, 0.0],
+#   'b_5': [0.0, 0.61],
+#   'b_6': [0.0, 0.7],
+# }
+
+# j_coordinates = {
+#     'j_1': [0.0, 0.0],
+#     'j_2': [0.24, 0.0],
+#     'j_3': [0.0, 0.26],
+#     'j_4': [0.73, 0.76],
+# }
+
+# e_coordinates = {
+#     'p_1': [j_coordinates['j_1'], bp_coordinates['b_1']],
+#     'p_2': [bp_coordinates['b_6'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] + 1]], 
+#     'p_3': [bp_coordinates['b_4'], [j_coordinates['j_1'][0] + 1, j_coordinates['j_1'][1]]], 
+#     'p_4': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
+#     'p_5': [j_coordinates['j_4'], bp_coordinates['b_2']],
+#     'p_6': [j_coordinates['j_4'], [bp_coordinates['b_5'][0] + 1, bp_coordinates['b_5'][1]]],
+#     'p_7': [j_coordinates['j_4'], [bp_coordinates['b_4'][0], bp_coordinates['b_4'][1] + 1]],
+#     'p_8': [bp_coordinates['b_3'], bp_coordinates['b_4']],
+#     'p_9': [bp_coordinates['b_3'], [j_coordinates['j_3'][0] + 1, j_coordinates['j_3'][1]]],
+#     'p_10': [bp_coordinates['b_3'], j_coordinates['j_2']],
+#     'p_11': [bp_coordinates['b_2'], j_coordinates['j_2']],
+#     'p_12': [bp_coordinates['b_6'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] + 1]],
+#     'p_13': [bp_coordinates['b_5'], bp_coordinates['b_6']],
+#     'p_14': [bp_coordinates['b_5'], j_coordinates['j_3']],
+#     'p_15': [bp_coordinates['b_1'], j_coordinates['j_3']],
+# }
+
+# one = ['p_1', 'p_4', 'p_11', 'p_10', 'p_8', 'p_3']
+# tau = ['p_1', 'p_15', 'p_14', 'p_13', 'p_2']
 
 
-# --------------- [3,1]-punctured torus SELF-GLUING (WORKS)-----------------
+
+
+
+
+
+# --------------- [3,1]-punctured torus SELF-GLUING -----------------
 
 streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
 
@@ -3180,6 +3384,84 @@ e_coordinates = {
 
 one = ['p_5', 'p_12', 'p_14', 'p_15', 'p_3', 'p_1']
 tau = ['p_11', 'p_14', 'p_8', 'p_9']
+
+
+
+
+
+
+# # --------------- [3,1]-punctured torus SELF-GLUING (MODIFIED)-----------------
+
+# streets2 = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+
+# branch_points2 = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_8', 'p_14', 'p_15'],
+#   'b_3': ['p_5', 'p_13', 'p_12'],
+#   'b_4': ['p_3', 'p_4', 'p_6'],
+#   'b_5': ['p_8', 'p_7', 'p_9'],
+#   'b_6': ['p_10', 'p_11', 'p_13'],}
+
+# joints2 = {
+#     'j_1': ['p_2', None, 'p_10', None, 'p_9', None],
+#     'j_2': ['p_12', None, 'p_7', None, 'p_6', None],
+#     'j_3': ['p_14', None, 'p_5', None, 'p_4', None],
+#     'j_4': ['p_15', None, 'p_11', None, 'p_1', None],
+# }
+
+# homology_classes2 = {
+#   'gamma_1' : ['p_3'],
+#   'gamma_2' : ['p_8'],
+#   'gamma_3' : ['p_13'],
+#   'gamma_4' : ['p_2', 'p_9', 'p_10'],
+#   'gamma_5' : ['p_1', 'p_15', 'p_11'],
+#   'gamma_6' : ['p_4', 'p_5', 'p_14'],
+#   'gamma_7' : ['p_6', 'p_7', 'p_12'],
+# }
+
+# bp_coordinates2 = {
+#   'b_1': [0.86, 0.66],
+#   'b_2': [0.61, 0.41],
+#   'b_3': [0.36, 0.16],
+#   'b_4': [0.66, 0.86],
+#   'b_5': [0.41, 0.61],
+#   'b_6': [0.16, 0.36],
+# }
+
+# j_coordinates2 = {
+#     'j_1': [0.5, 0.8],
+#     'j_2': [0.2, 0.5],
+#     'j_3': [0.8, 0.5],
+#     'j_4': [0.5, 0.2],
+# }
+
+
+# e_coordinates2 = None
+# # e_coordinates = {
+# #     'p_1': [bp_coordinates['b_1'], j_coordinates['j_4']],
+# #     'p_2': [bp_coordinates['b_1'], j_coordinates['j_1']],
+# #     'p_3': [bp_coordinates['b_1'], bp_coordinates['b_4']],
+# #     'p_4': [bp_coordinates['b_4'], [j_coordinates['j_3'][0], j_coordinates['j_3'][1] + 1]],
+# #     'p_5': [bp_coordinates['b_3'], j_coordinates['j_3']],
+# #     'p_6': [bp_coordinates['b_6'], j_coordinates['j_2']],
+# #     'p_7': [bp_coordinates['b_5'], j_coordinates['j_2']],
+# #     'p_8': [bp_coordinates['b_5'], bp_coordinates['b_2']],
+# #     'p_9': [bp_coordinates['b_5'], j_coordinates['j_1']],
+# #     'p_10': [bp_coordinates['b_4'], j_coordinates['j_1']],
+# #     'p_11': [j_coordinates['j_4'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] - 1]],
+# #     'p_12': [bp_coordinates['b_3'], j_coordinates['j_4']],
+# #     'p_13': [bp_coordinates['b_3'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] - 1]],
+# #     'p_14': [bp_coordinates['b_2'], j_coordinates['j_4']],
+# #     'p_15': [bp_coordinates['b_2'], j_coordinates['j_3']],
+# # }
+
+# one2 = ['p_5', 'p_12', 'p_14', 'p_15', 'p_3', 'p_1']
+# tau2 = ['p_11', 'p_14', 'p_8', 'p_9']
+
+
+
+
+
 
 
 
@@ -3270,6 +3552,72 @@ tau = ['p_11', 'p_14', 'p_8', 'p_9']
 
 
 
+
+
+# # --------------- T2 Theta-shaped -----------------
+
+# streets = ['p_1', 'p_2', 'p_3']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_1', 'p_3', 'p_2'],
+# }
+
+# joints = {}
+
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+# }
+
+# bp_coordinates = {
+#   'b_1': [0.0, 0.0],
+#   'b_2': [0.0, 1.0],
+# }
+
+# j_coordinates = {}
+
+# e_coordinates = None
+
+# one = ['p_1', 'p_2']
+# tau = ['p_1', 'p_3']
+
+
+# # --------------- T2: O-O shaped -----------------
+
+# streets2 = ['p_1', 'p_2', 'p_3']
+
+# branch_points2 = {
+#   'b_1': ['p_1', 'p_2', 'p_2'],
+#   'b_2': ['p_1', 'p_3', 'p_3'],
+# }
+
+# joints2 = {}
+
+# homology_classes2 = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+# }
+
+# bp_coordinates2 = {
+#   'b_1': [0.0, 0.0],
+#   'b_2': [0.0, 1.0],
+# }
+
+# j_coordinates2 = {}
+
+# e_coordinates2 = None
+
+# one2 = ['p_1', 'p_2']
+# tau2 = ['p_1', 'p_3']
+
+
+
+
+
+
 w = BPSgraph(
     branch_points=branch_points, 
     streets=streets, 
@@ -3280,16 +3628,16 @@ w = BPSgraph(
     j_coordinates=j_coordinates,
     e_coordinates=e_coordinates,
 )
-            
+
 
 
 # # analyze all sequences which give back the BPS graph
 # max_n_moves = 9
-# SAVE_PLOTS = True
+# SAVE_PLOTS = False
 # seq = find_invariant_sequences(
 #     w, max_n_moves, level=0, ref_graph=w, 
 #     edge_cycle_min_length=0,
-#     min_n_cooties=1,
+#     min_n_cooties=0,
 #     fundamental_region=[one, tau],
 #     drop_if_trivial_perm=True,
 # )
@@ -3321,15 +3669,29 @@ w = BPSgraph(
 # )
 # text_file.write('Quiver:\n{}\n\n'.format(w.seed.quiver))
 
-# self_permutations = find_self_permutations(w, [one, tau])
+# # find permutations which leave the graph invariant
 # text_file.write(
 #     '\n----------------------------------\n'
 #     'Nontrivial permutations giving isomorphic graphs\n'
 # )
-# for p in self_permutations:
-#     text_file.write('\t{}\n'.format(p[0]))
-#     text_file.write('\tmodular parameter : {}\n'.format(p[1]))
+# self_permutations = find_self_permutations(w, [one, tau])
+# for p, mod_param in self_permutations:
+#     hc_perm_dic = {}
+#     for p_k, p_v in p.iteritems():
+#         source = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_k in [s.label for s in h_v.streets]][0]
+#         )
+#         target = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_v in [s.label for s in h_v.streets]][0]
+#         )
+#         hc_perm_dic[source] = target
 
+#     text_file.write('\t{}\n'.format(p))
+#     text_file.write('\tmodular parameter : {}\n'.format(mod_param))
+#     text_file.write('\thomology class permutation : {}\n'.format(hc_perm_dic))
+    
 # S_move_candidates = []
 # L_move_candidates = []
 # R_move_candidates = []
@@ -3497,6 +3859,7 @@ w = BPSgraph(
 
 
 
+
 ####################################################
 ### STUDY A PARTICULAR SEQUENCE
 seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
@@ -3507,48 +3870,57 @@ seq_4 = ['p_6', 'p_2', 'f_1']
 seq_5 = ['p_2', 'p_5', 'p_8', 'f_1', 'f_3', 'p_8']
 seq_6 = seq_5 + ['p_1', 'p_4', 'p_1', 'p_4', 'p_1']
 
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
-)
-os.makedirs(mydir)
+### THIS IS A GOOD SEQUENCE for the [3,1] graph derived by reduction of the puncture (not by self-gluing)
+### it should correspond to the SL2Z element (1, 0 // -1, 1) = L^{-1}
+seq_7 = [
+'p_13', 'p_8', 'f_4', 'p_2', 'p_14', 
+'p_13', 'f_3', 'p_9', 'p_5', 'p_14', 
+'p_13', 'p_10', 'f_0',
+'p_14', 'p_3', 'f_4', 'p_4'
+]
 
-w1, mutation_seq = apply_sequence(
-    w, seq_5, save_plot=mydir, include_mutation_sequence=True
-)
+#### THIS GIVES THE S-transformation! For the [3,1] graph obtainedd by reduction
+seq_8 = ['p_4', 'f_2', 'p_10', 'p_8', 'p_3', 'p_10', 'f_4', 'p_11', 'p_5', 'p_3',
+'p_8', 'p_14', 'f_0',
+'p_1', 'f_2', 'p_13']
 
-print 'Sequence\n{}\ncorresponds to the mutations\n{}\n'.format(
-    seq_5, mutation_seq
-)
+#### This takes the [3,1] selfglued graph and transforms it into the [3,1] graph obtained by reduction of the puncture
+seq_9 = ['p_11', 'f_0', 'p_1', 'p_5', 'p_3', 'f_4', 'p_7']
 
-perms = are_equivalent_as_graphs(w, w1)
-print '\nFound the following permutations'
-for p in perms:
-    print p
+#### The L-move for the [3,1] selfglued graph
+seq_10 = ['p_11', 'f_0'] + ['f_2', 'p_11', 'p_6', 'p_3']
+
+#### The ???-move for the [3,1] selfglued graph
+# seq_11 = ['p_11', 'f_0', 'f_2', 'p_8', 'p_1'] 
+# seq_11=['p_8', 'p_5', 'f_3', 'p_2', 'f_1']
+seq_11=['p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'p_7']
 
 
-for j, p in enumerate(perms):
-    new_one = [p[edge] for edge in one]
-    new_tau = [p[edge] for edge in tau]
-    new_modular_parameter = compute_modular_parameter(
-        new_one, new_tau, w1
-    )
-    print (
-        '\nModular parameter of this sequence '
-        'with permutation #{}: {}\n'
-        .format(j, new_modular_parameter)
-    )
-    print (
-        'The new one : {} = {}\nThe new tau : {} = {}'.format(
-            new_one, sum_up_edges(new_one, w1), 
-            new_tau, sum_up_edges(new_tau, w1)
-        )
-    )
-    print (
-        'The permutation of homology classes \n{}'.format(
-            quiver_node_permutation(w, w1, p) 
-        )
-    )
+
+
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+# )
+# # os.makedirs(mydir)
+
+# w1, mutation_seq = apply_sequence(
+#     w, seq_11, 
+#     save_plot=None,#mydir, 
+#     include_mutation_sequence=True
+# )
+
+# # print w1.compute_quiver()
+
+# print w1.mutable_faces
+# print w1.mutable_edges
+
+# ###
+
+find_sequence_completion(w, seq_11, 5, one, tau, save_files=True)
+
+
+# ###### Try to find a completion of the sequence #####
 
 # max_n_moves = 5
 # seq = find_invariant_sequences(
@@ -3558,9 +3930,49 @@ for j, p in enumerate(perms):
 #     fundamental_region=[one, tau],
 #     drop_if_trivial_perm=True,
 # )
-
 # print 'Found {} sequences.'.format(len(seq))
-# print seq
+# for s in seq:
+#     s.print_info()
+
+######## Analyze the sequence: give quiver permutation and SL2Z transf.
+
+# print 'Sequence\n{}\ncorresponds to the mutations\n{}\n'.format(
+#     seq_11, mutation_seq
+# )
+
+# perms = are_equivalent_as_graphs(w, w1)
+# if perms is not None:
+#     print '\nFound the following permutations'
+
+#     for p in perms:
+#         print p
+
+#     for j, p in enumerate(perms):
+#         new_one = [p[edge] for edge in one]
+#         new_tau = [p[edge] for edge in tau]
+#         new_modular_parameter = compute_modular_parameter(
+#             new_one, new_tau, w1
+#         )
+#         print (
+#             '\nModular parameter of this sequence '
+#             'with permutation #{}: {}\n'
+#             .format(j, new_modular_parameter)
+#         )
+#         print (
+#             'The new one : {} = {}\nThe new tau : {} = {}'.format(
+#                 new_one, sum_up_edges(new_one, w1), 
+#                 new_tau, sum_up_edges(new_tau, w1)
+#             )
+#         )
+#         print (
+#             'The permutation of homology classes \n{}'.format(
+#                 quiver_node_permutation(w, w1, p) 
+#             )
+#         )
+# else:
+#     print 'found no permutations'
+
+#######
 
 
 # for p in perms:
@@ -3574,6 +3986,28 @@ for j, p in enumerate(perms):
 #     perms[1]
 #     )
 ### DEBUG END
+
+
+# self_permutations = find_self_permutations(w, [one, tau])
+# print self_permutations
+# for p, mod_param in self_permutations:
+#     print 'The permutation of homology classes for \n{}'.format(p)
+#     hc_perm_dic = {}
+#     for p_k, p_v in p.iteritems():
+#         source = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_k in [s.label for s in h_v.streets]][0]
+#         )
+#         target = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_v in [s.label for s in h_v.streets]][0]
+#         )
+#         hc_perm_dic[source] = target
+#     print hc_perm_dic
+    
+    
+
+
 
 
 # ####################################################
