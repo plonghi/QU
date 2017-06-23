@@ -3002,15 +3002,6 @@ def find_sequence_completion(
     if drop_if_trivial_perm is None:
         drop_if_trivial_perm = False
 
-    if save_files is True:
-        mydir = os.path.join(
-            os.getcwd(), 'mcg_moves', 
-            (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_SEQ_AUTOCOMP')
-        )
-        os.makedirs(mydir)
-    else:
-        mydir=None
-
     w_partial, mutation_seq = apply_sequence(
         graph, partial_sequence, 
         save_plot=None, 
@@ -3031,87 +3022,105 @@ def find_sequence_completion(
     modular_parameter = compute_modular_parameter(one, tau, graph)
     possible_modular_parameters = []
 
-    # save info about sequences of moves in a text file
-    text_file = open(mydir + '/sequence_data.txt', 'w')
-    text_file.write('\t\tSequence data\n\n')
-    text_file.write(
-        'Modular parameter of the original torus: {}'
-        '\none : {} = {}\ntau : {} = {}\n\n'.format(
-            modular_parameter, 
-            one, sum_up_edges(one, graph), 
-            tau, sum_up_edges(tau, graph)
-        )
-    )
-    text_file.write('Quiver:\n{}\n\n'.format(graph.seed.quiver))
-    
-    text_file.write('Found {} sequences which complete {}.\n\n'.format(
-        len(seq), partial_sequence
-    ))
-    text_file.write('Will now study their properties.\n\n')
-    for i_s, s in enumerate(seq):
-        if mydir is not None:
-            mydir_i = os.path.join(mydir, 'sequence_{}'.format(i_s))
-            os.makedirs(mydir_i)
-        else:
-            mydir_i = None
+    if len(seq) > 0:
+        if save_files is True:
+            mydir = os.path.join(
+                os.getcwd(), 'mcg_moves', 
+                (
+                    datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + 
+                    '_SEQ_AUTOCOMP'
+                )
+            )
+            os.makedirs(mydir)
 
-        tot_seq = partial_sequence + s.moves_sequence
-        w_new, tot_mutation_seq = apply_sequence(
-            graph, tot_seq, 
-            save_plot=mydir_i, 
-            include_mutation_sequence=True
-        )
-        text_file.write(
-            '\n\n----------------------------------------------\n\n'
-        )
-        
-        text_file.write(
-            'Sequence # {} is:\n{}\n\nIt corresponds to the mutations\n{}\n'
-            .format(i_s, tot_seq, tot_mutation_seq)
-        )
-
-        perms = are_equivalent_as_graphs(graph, w_new)
-        if perms is not None:
+            # save info about sequences of moves in a text file
+            text_file = open(mydir + '/sequence_data.txt', 'w')
+            text_file.write('\t\tSequence data\n\n')
             text_file.write(
-                '\nThe original graph is matched by applying '
-                'the following permutations\n\n'
+                'Modular parameter of the original torus: {}'
+                '\none : {} = {}\ntau : {} = {}\n\n'.format(
+                    modular_parameter, 
+                    one, sum_up_edges(one, graph), 
+                    tau, sum_up_edges(tau, graph)
+                )
+            )
+            text_file.write('Quiver:\n{}\n\n'.format(graph.seed.quiver))
+            
+            text_file.write('Found {} sequences which complete {}.\n\n'.format(
+                len(seq), partial_sequence
+            ))
+            text_file.write('Will now study their properties.\n\n')
+        
+        else:
+            mydir=None
+
+        
+        for i_s, s in enumerate(seq):
+            if mydir is not None:
+                mydir_i = os.path.join(mydir, 'sequence_{}'.format(i_s))
+                os.makedirs(mydir_i)
+            else:
+                mydir_i = None
+
+            tot_seq = partial_sequence + s.moves_sequence
+            w_new, tot_mutation_seq = apply_sequence(
+                graph, tot_seq, 
+                save_plot=mydir_i, 
+                include_mutation_sequence=True
+            )
+            text_file.write(
+                '\n\n----------------------------------------------\n\n'
+            )
+            
+            text_file.write(
+                'Sequence # {} is:\n{}\n\nIt corresponds to the mutations\n{}\n'
+                .format(i_s, tot_seq, tot_mutation_seq)
             )
 
-            for j, p in enumerate(perms):
-                text_file.write('\nPermutation #{}:\n{}\n\n'.format(j, p))
+            perms = are_equivalent_as_graphs(graph, w_new)
+            if perms is not None:
+                text_file.write(
+                    '\nThe original graph is matched by applying '
+                    'the following permutations\n\n'
+                )
 
-                new_one = [p[edge] for edge in one]
-                new_tau = [p[edge] for edge in tau]
-                new_modular_parameter = compute_modular_parameter(
-                    new_one, new_tau, w_new
-                )
-                if new_modular_parameter not in possible_modular_parameters:
-                    possible_modular_parameters.append(
-                        new_modular_parameter
-                    )
-                text_file.write(
-                    '\nNew modular parameter: {}\n'
-                    .format(new_modular_parameter)
-                )
-                text_file.write(
-                    'The new one : {} = {}\nThe new tau : {} = {}\n'.format(
-                        sum_up_edges(new_one, w_new), new_one,
-                        sum_up_edges(new_tau, w_new), new_tau
-                    )
-                )
-                text_file.write(
-                    'The permutation of homology classes \n{}\n'.format(
-                        quiver_node_permutation(graph, w_new, p) 
-                    )
-                )
-        else:
-            text_file.write('found no permutations')
+                for j, p in enumerate(perms):
+                    text_file.write('\nPermutation #{}:\n{}\n\n'.format(j, p))
 
-    text_file.write(
-        '\n\nPossible new modular parameters:\n{}'.format(
-            possible_modular_parameters
+                    new_one = [p[edge] for edge in one]
+                    new_tau = [p[edge] for edge in tau]
+                    new_modular_parameter = compute_modular_parameter(
+                        new_one, new_tau, w_new
+                    )
+                    if new_modular_parameter not in possible_modular_parameters:
+                        possible_modular_parameters.append(
+                            new_modular_parameter
+                        )
+                    text_file.write(
+                        '\nNew modular parameter: {}\n'
+                        .format(new_modular_parameter)
+                    )
+                    text_file.write(
+                        'The new one : {} = {}\nThe new tau : {} = {}\n'.format(
+                            sum_up_edges(new_one, w_new), new_one,
+                            sum_up_edges(new_tau, w_new), new_tau
+                        )
+                    )
+                    text_file.write(
+                        'The permutation of homology classes \n{}\n'.format(
+                            quiver_node_permutation(graph, w_new, p) 
+                        )
+                    )
+            else:
+                text_file.write('found no permutations')
+
+        text_file.write(
+            '\n\nPossible new modular parameters:\n{}'.format(
+                possible_modular_parameters
+            )
         )
-    )
+
+    return seq
 
 
 def c_num_is_in_list(c_num, l, eps):
@@ -4050,7 +4059,8 @@ seq_9 = ['p_11', 'f_0', 'p_1', 'p_5', 'p_3', 'f_4', 'p_7']
 seq_10 = ['p_11', 'f_0', 'f_2', 'p_11', 'p_6', 'p_3']
 
 #### The (S L^{-1}) -move for the [3,1] selfglued graph
-seq_11=['p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'p_7', 'p_11', 'f_0', 'f_2', 'p_8', 'p_1']
+###seq_11=['p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'p_7', 'p_11', 'f_0', 'f_2', 'p_8', 'p_1']
+seq_11 = ['p_11', 'p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'f_0', 'p_7', 'f_2', 'p_8', 'p_1']
 
 #### L-move sequence for [4,1] selfglued graph
 seq_12 = ['p_9', 'p_13'] + ['f_4', 'f_1', 'f_2'] + ['p_9', 'p_13'] + ['p_20', 'p_3']
@@ -4063,40 +4073,40 @@ seq_12 = ['p_9', 'p_13'] + ['f_4', 'f_1', 'f_2'] + ['p_9', 'p_13'] + ['p_20', 'p
 # )
 
 #### An absolutely crazy sequence for the [4,1] selfglued graph
-seq_13 = (
-    ['p_1', 'p_18', 'p_2', 'f_6', 'p_9', 'p_13', 'f_1', 'p_5', 'p_21'] +
-    ['f_4', 'f_2', 'f_1', 'p_6', 'p_15', 'p_1', 'p_3', 'p_20', 'f_5'] + 
-    ['f_0', 'p_14', 'p_7', 'p_8', 'p_12', 'f_3', 'p_6', 'p_15', 'p_1'] +
-    [ 'f_1', 'p_18', 'p_2', 'f_3', 'p_14', 'p_7']#, 'p_1']
-)
+# seq_13 = (
+#     ['p_1', 'p_18', 'p_2', 'f_6', 'p_9', 'p_13', 'f_1', 'p_5', 'p_21'] +
+#     ['f_4', 'f_2', 'f_1', 'p_6', 'p_15', 'p_1', 'p_3', 'p_20', 'f_5'] + 
+#     ['f_0', 'p_14', 'p_7', 'p_8', 'p_12', 'f_3', 'p_6', 'p_15', 'p_1'] +
+#     [ 'f_1', 'p_18', 'p_2', 'f_3', 'p_14', 'p_7']#, 'p_1']
+# )
 
 #### trying to find another SL(2,Z) move for the [4,1] selfglued graph
-# seq_14 = ['p_13', 'p_9', 'p_15', 'p_6', 'p_18', 'p_2', 'p_1', 'p_18', 'p_2', 'f_6']#, 'p_5', 'p_21', 'p_15', 'p_6']#, 'p_8', 'p_12']
+seq_14 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'f_2', 'p_21', 'f_4', 'p_6', 'p_15', 'p_1']
 
 
 
 
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
-)
-# os.makedirs(mydir)
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+# )
+# # os.makedirs(mydir)
 
-w1, mutation_seq = apply_sequence(
-    w, seq_13, 
-    save_plot=None,
-    # save_plot=mydir, 
-    include_mutation_sequence=True
-)
+# w1, mutation_seq = apply_sequence(
+#     w, seq_14, 
+#     save_plot=None,
+#     # save_plot=mydir, 
+#     include_mutation_sequence=True
+# )
 
-# print w1.compute_quiver()
+# # print w1.compute_quiver()
 
-print w1.mutable_faces
-print w1.mutable_edges
+# print w1.mutable_faces
+# print w1.mutable_edges
 
-# perms = are_equivalent_as_graphs(w, w1)
-# # print len(perms)
-# print perms
+# # perms = are_equivalent_as_graphs(w, w1)
+# # # print len(perms)
+# # print perms
 
 # # print '\n\n'
 # # w1.faces['f_1'].print_info()
@@ -4108,12 +4118,51 @@ print w1.mutable_edges
 
 ##
 
-find_sequence_completion(
-    w, seq_13, 1, one, tau, save_files=True, 
-    drop_if_trivial_perm=False,
-    avoid_last_n_moves=0, avoid_last_n_mutations=0,
-)
+# find_sequence_completion(
+#     w, seq_14, 5, one, tau, save_files=True, 
+#     drop_if_trivial_perm=False,
+#     avoid_last_n_moves=3, avoid_last_n_mutations=None,
+# )
 
+
+
+########### Build a partial sequence based on some criterion
+import random
+def build_partial_sequence(graph, length):
+    """
+    Building a partial sequence based on certain criteria
+    """
+    new_graph = graph
+    seq = []
+    for i in range(length):
+        forbidden_moves = seq[-4:]
+        moves = new_graph.mutable_faces + new_graph.mutable_edges
+        allowed_moves = [m for m in moves if m not in forbidden_moves]
+        new_move = random.choice(allowed_moves)
+        seq.append(new_move)
+        new_graph = apply_sequence(
+            new_graph, [new_move], 
+            save_plot=None,
+            # save_plot=mydir, 
+            include_mutation_sequence=False
+        )
+    return seq
+
+for i in range(1):
+    partial_seq = build_partial_sequence(w, 18)
+    print 'The partial sequence is: {}'.format(
+            partial_seq
+    )
+
+    partial_seq_comps = find_sequence_completion(
+        w, partial_seq, 5, one, tau, save_files=True,
+        drop_if_trivial_perm=False,
+        avoid_last_n_moves=None, avoid_last_n_mutations=None,
+    )
+
+
+
+###########
 
 # ###### OLD-DEPRECATED Try to find a completion of the sequence #####
 
