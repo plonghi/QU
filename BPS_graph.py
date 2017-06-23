@@ -2826,7 +2826,7 @@ def are_equivalent_as_graphs(graph_1, graph_2):
             else:
                 # print 'Discard permutation.'
                 pass
-        if len(ok_perms) > 2:
+        if len(ok_perms) > 0:
             print (
                 'found {} inequivalent permutations, presumably the graph '
                 'has an underlying Z_{} symmetry'.format(
@@ -4067,7 +4067,7 @@ seq_13 = (
     ['p_1', 'p_18', 'p_2', 'f_6', 'p_9', 'p_13', 'f_1', 'p_5', 'p_21'] +
     ['f_4', 'f_2', 'f_1', 'p_6', 'p_15', 'p_1', 'p_3', 'p_20', 'f_5'] + 
     ['f_0', 'p_14', 'p_7', 'p_8', 'p_12', 'f_3', 'p_6', 'p_15', 'p_1'] +
-    [ 'f_1', 'p_18', 'p_2']#, 'f_3', 'p_14', 'p_7', 'p_1']
+    [ 'f_1', 'p_18', 'p_2', 'f_3', 'p_14', 'p_7']#, 'p_1']
 )
 
 #### trying to find another SL(2,Z) move for the [4,1] selfglued graph
@@ -4109,7 +4109,7 @@ print w1.mutable_edges
 ##
 
 find_sequence_completion(
-    w, seq_13, 5, one, tau, save_files=True, 
+    w, seq_13, 1, one, tau, save_files=True, 
     drop_if_trivial_perm=False,
     avoid_last_n_moves=0, avoid_last_n_mutations=0,
 )
