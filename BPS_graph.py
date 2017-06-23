@@ -3022,15 +3022,24 @@ def find_sequence_completion(
     modular_parameter = compute_modular_parameter(one, tau, graph)
     possible_modular_parameters = []
 
+    time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     if len(seq) > 0:
-        if save_files is True:
-            mydir = os.path.join(
-                os.getcwd(), 'mcg_moves', 
-                (
-                    datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + 
-                    '_SEQ_AUTOCOMP'
+        if save_files is True or type(save_files) is str:
+            if save_files is True:
+                mydir = os.path.join(
+                    os.getcwd(), 'mcg_moves', 
+                    (
+                        time + '_SEQ_AUTOCOMP'
+                    )
                 )
-            )
+            elif type(save_files) is str:
+                mydir = os.path.join(
+                    os.getcwd(), 'mcg_moves', 
+                    (
+                        time + '_' + save_files
+                    )
+                )
+
             os.makedirs(mydir)
 
             # save info about sequences of moves in a text file
@@ -3282,15 +3291,15 @@ def c_num_is_in_list(c_num, l, eps):
 # }
 
 # bp_coordinates = {
-#   'b_1': [0.71, 0.61],
-#   'b_2': [0.51, 0.41],
-#   'b_3': [0.61, 0.71],
-#   'b_4': [0.41, 0.51],
+#   'b_1': [0.711, 0.618],
+#   'b_2': [0.512, 0.417],
+#   'b_3': [0.613, 0.716],
+#   'b_4': [0.414, 0.515],
 # }
 
 # j_coordinates = {
-#     'j_1': [0.51, 0.71],
-#     'j_2': [0.71, 0.51],
+#     'j_1': [0.512, 0.715],
+#     'j_2': [0.713, 0.514],
 # }
 
 # e_coordinates = {
@@ -4127,17 +4136,58 @@ seq_14 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'f_2', 'p_21', 'f_4
 
 
 ########### Build a partial sequence based on some criterion
+# import random
+# def build_partial_sequence(graph, length):
+#     """
+#     Building a partial sequence based on certain criteria
+#     """
+#     new_graph = graph
+#     seq = []
+#     for i in range(length):
+#         forbidden_moves = seq[-4:]
+#         moves = new_graph.mutable_faces + new_graph.mutable_edges
+#         allowed_moves = [m for m in moves if m not in forbidden_moves]
+#         new_move = random.choice(allowed_moves)
+#         seq.append(new_move)
+#         new_graph = apply_sequence(
+#             new_graph, [new_move], 
+#             save_plot=None,
+#             # save_plot=mydir, 
+#             include_mutation_sequence=False
+#         )
+#     return seq
+
+# for i in range(30):
+#     partial_seq = build_partial_sequence(w, 18)
+#     print 'The partial sequence is: {}'.format(
+#             partial_seq
+#     )
+
+#     partial_seq_comps = find_sequence_completion(
+#         w, partial_seq, 5, one, tau, save_files=True,
+#         drop_if_trivial_perm=False,
+#         avoid_last_n_moves=None, avoid_last_n_mutations=None,
+#     )
+
+########### Build a partial sequence based on some criterion,
+########### and incrementally look for completions of the sequence
 import random
-def build_partial_sequence(graph, length):
+def venture(graph, in_length, fin_length, completion_depth):
     """
-    Building a partial sequence based on certain criteria
+    Building a partial sequence based on certain criteria 
+    and checking at each step (between in_length, fin_length)
+    whether there is a completion (with up to 'completion_depth'
+    number of moves).
     """
     new_graph = graph
     seq = []
-    for i in range(length):
+    for i in range(fin_length):
         forbidden_moves = seq[-4:]
         moves = new_graph.mutable_faces + new_graph.mutable_edges
         allowed_moves = [m for m in moves if m not in forbidden_moves]
+        if len(allowed_moves) == 0:
+            allowed_moves = moves
+
         new_move = random.choice(allowed_moves)
         seq.append(new_move)
         new_graph = apply_sequence(
@@ -4146,19 +4196,23 @@ def build_partial_sequence(graph, length):
             # save_plot=mydir, 
             include_mutation_sequence=False
         )
-    return seq
 
-for i in range(1):
-    partial_seq = build_partial_sequence(w, 18)
-    print 'The partial sequence is: {}'.format(
-            partial_seq
-    )
+        if i >= in_length:
+            partial_seq_comps = find_sequence_completion(
+                w, seq, completion_depth, one, tau, 
+                save_files='venture_length_{}'.format(i),
+                drop_if_trivial_perm=True,
+                avoid_last_n_moves=None, avoid_last_n_mutations=None,
+            )
 
-    partial_seq_comps = find_sequence_completion(
-        w, partial_seq, 5, one, tau, save_files=True,
-        drop_if_trivial_perm=False,
-        avoid_last_n_moves=None, avoid_last_n_mutations=None,
-    )
+
+min_seq_length = 15
+max_seq_length = 25
+completion_depth = 5
+
+n_tries = 30
+for i in range(n_tries):
+    venture(w, min_seq_length, max_seq_length, completion_depth)
 
 
 
