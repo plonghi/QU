@@ -147,3 +147,4 @@ class MCSNConfig:
         with open(file_path, 'w') as fp:
             self.parser.write(fp)
         logger.info('Finished saving configuration to {}.'.format(file_path))
+
