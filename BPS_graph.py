@@ -3724,7 +3724,7 @@ w = BPSgraph(
 
 
 # analyze all sequences which give back the BPS graph
-max_n_moves = 9
+max_n_moves = 5
 last_moves_to_avoid = None
 last_mutations_to_avoid = None
 SAVE_PLOTS = False
@@ -4043,15 +4043,22 @@ for mut_seq in seen_by_mutations.keys():
 
 
 # Write the tally of which mutations seem to give the same modular transformation
-text_file.write('\n\n\tTally of modular transformations')
+# avoiding the identity transformation
+text_file.write(
+    '\n\n\tTally of modular transformations (skipping the identity)'
+)
 for mod_transf in modular_transf_mutations.keys():
-    text_file.write(
-        '\n\nThis modular transformation : \n{}\n'
-        'Corresponds to the following mutations\n'
-        .format(numpy.array(eval(mod_transf)))
-    )
-    for mut in modular_transf_mutations[mod_transf]:
-        text_file.write('{}\n'.format(mut))
+    if (
+        (eval(mod_transf) != [[1, 0], [0, 1]]) and 
+        (eval(mod_transf) != [[-1, 0], [0, -1]])
+    ):
+        text_file.write(
+            '\n\nThis modular transformation : \n{}\n'
+            'Corresponds to the following mutations\n'
+            .format(numpy.array(eval(mod_transf)))
+        )
+        for mut in modular_transf_mutations[mod_transf]:
+            text_file.write('{}\n'.format(mut))
 
 
 # # write in the text file the candidates for S, L, R transformations,
