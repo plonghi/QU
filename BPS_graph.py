@@ -1,3 +1,5 @@
+### This module handles operations with the mapping class group on BPS graphs
+
 import sys, itertools, re, numpy, os, datetime, matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
@@ -1664,7 +1666,7 @@ def move_count(sequence, labels_list, diff=None):
 
 def find_graph_corner(graph, direction=None):
     """
-    Find the corner of a given BPS graph, in the directio specified by 
+    Find the corner of a given BPS graph, in the direction specified by 
     'direction' which can be: NW, NE, SE, SW.
     Considers only the edges in the fundamental region, 
     as defined by those whose coordinates are given explicitly 
@@ -3820,238 +3822,91 @@ def find_graphs_with_symmetry(
 
 
 
-# # --------------- [4,1]-punctured torus SELF-GLUING -----------------
+# --------------- [4,1]-punctured torus SELF-GLUING -----------------
 
-# streets = ['p_' + str(i + 1) for i in range(21)]
-
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_5', 'p_6', 'p_7'],
-#   'b_3': ['p_8', 'p_15', 'p_16'],
-#   'b_4': ['p_17', 'p_18', 'p_19'],
-#   'b_5': ['p_2', 'p_4', 'p_11'],
-#   'b_6': ['p_6', 'p_10', 'p_12'],
-#   'b_7': ['p_15', 'p_14', 'p_21'],
-#   'b_8': ['p_18', 'p_20', 'p_1'],}
-
-# joints = {
-#     'j_1': ['p_9', None, 'p_10', None, 'p_11', None],
-#     'j_2': ['p_13', None, 'p_14', None, 'p_12', None],
-#     'j_3': ['p_19', None, 'p_20', None, 'p_21', None],
-#     'j_4': ['p_3', None, 'p_5', None, 'p_4', None],
-#     'j_5': ['p_7', None, 'p_8', None, 'p_9', None],
-#     'j_6': ['p_13', None, 'p_16', None, 'p_17', None],
-# }
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3', 'p_4', 'p_5'],
-#   'gamma_4' : ['p_6'],
-#   'gamma_5' : ['p_7', 'p_8', 'p_9', 'p_10', 'p_11'],
-#   'gamma_6' : ['p_12', 'p_13', 'p_14', 'p_16', 'p_17'],
-#   'gamma_7' : ['p_15'],
-#   'gamma_8' : ['p_19', 'p_20', 'p_21'],
-#   'gamma_9' : ['p_18'],
-# }
-
-# bp_coordinates = {
-#   'b_1': [0.81, 0.61],
-#   'b_2': [0.71, 0.51],
-#   'b_3': [0.61, 0.41],
-#   'b_4': [0.51, 0.31],
-#   'b_5': [0.61, 0.81],
-#   'b_6': [0.51, 0.71],
-#   'b_7': [0.41, 0.61],
-#   'b_8': [0.31, 0.51],
-# }
-
-# j_coordinates = {
-#     'j_1': [0.5, 0.8],
-#     'j_2': [0.4, 0.7],
-#     'j_3': [0.3, 0.6],
-#     'j_4': [0.8, 0.5],
-#     'j_5': [0.7, 0.4],
-#     'j_6': [0.6, 0.3],
-# }
-
-
-# e_coordinates = {
-#     'p_1': [bp_coordinates['b_1'], [bp_coordinates['b_8'][0] + 1, bp_coordinates['b_8'][1]]],
-#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_5']],
-#     'p_3': [bp_coordinates['b_1'], j_coordinates['j_4']],
-#     'p_4': [bp_coordinates['b_5'], [j_coordinates['j_4'][0], j_coordinates['j_4'][1] + 1]],
-#     'p_5': [bp_coordinates['b_2'], j_coordinates['j_4']],
-#     'p_6': [bp_coordinates['b_6'], bp_coordinates['b_2']],
-#     'p_7': [bp_coordinates['b_2'], j_coordinates['j_5']],
-#     'p_8': [bp_coordinates['b_3'], j_coordinates['j_5']],
-#     'p_9': [j_coordinates['j_5'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] - 1]],
-#     'p_10': [bp_coordinates['b_6'], j_coordinates['j_1']],
-#     'p_11': [j_coordinates['j_1'], bp_coordinates['b_5']],
-#     'p_12': [bp_coordinates['b_6'], j_coordinates['j_2']],
-#     'p_13': [j_coordinates['j_2'], [j_coordinates['j_6'][0], j_coordinates['j_6'][1] + 1]],
-#     'p_14': [bp_coordinates['b_7'], j_coordinates['j_2']],
-#     'p_15': [bp_coordinates['b_3'], bp_coordinates['b_7']],
-#     'p_16': [bp_coordinates['b_3'], j_coordinates['j_6']],
-#     'p_17': [bp_coordinates['b_4'], j_coordinates['j_6']],
-#     'p_18': [bp_coordinates['b_4'], bp_coordinates['b_8']],
-#     'p_19': [bp_coordinates['b_4'], [j_coordinates['j_3'][0], j_coordinates['j_3'][1] - 1]],
-#     'p_20': [bp_coordinates['b_8'], j_coordinates['j_3']],
-#     'p_21': [bp_coordinates['b_7'], j_coordinates['j_3']],
-# }
-
-# one = ['p_1', 'p_20', 'p_21', 'p_14', 'p_12', 'p_10', 'p_11', 'p_2']
-# tau = ['p_19', 'p_18', 'p_20']
-
-
-
-
-
-
-# # --------------- T2 Theta-shaped -----------------
-
-# streets = ['p_1', 'p_2', 'p_3']
-
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_1', 'p_3', 'p_2'],
-# }
-
-# joints = {}
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-# }
-
-# bp_coordinates = {
-#   'b_1': [0.0, 0.0],
-#   'b_2': [0.0, 1.0],
-# }
-
-# j_coordinates = {}
-
-# e_coordinates = None
-
-# one = ['p_1', 'p_2']
-# tau = ['p_1', 'p_3']
-
-
-# # --------------- T2: O-O shaped -----------------
-
-# streets2 = ['p_1', 'p_2', 'p_3']
-
-# branch_points2 = {
-#   'b_1': ['p_1', 'p_2', 'p_2'],
-#   'b_2': ['p_1', 'p_3', 'p_3'],
-# }
-
-# joints2 = {}
-
-# homology_classes2 = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-# }
-
-# bp_coordinates2 = {
-#   'b_1': [0.0, 0.0],
-#   'b_2': [0.0, 1.0],
-# }
-
-# j_coordinates2 = {}
-
-# e_coordinates2 = None
-
-# one2 = ['p_1', 'p_2']
-# tau2 = ['p_1', 'p_3']
-
-
-
-
-
-
-
-
-# # # --------------- SU(2) N_f=4 -----------------
-
-
-
-# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
-
-# branch_points = {
-#   'b_1': ['p_1', 'p_2', 'p_3'],
-#   'b_2': ['p_2', 'p_4', 'p_5'],
-#   'b_3': ['p_1', 'p_6', 'p_4'],
-#   'b_4': ['p_3', 'p_5', 'p_6'],}
-
-# joints = {}
-
-# homology_classes = {
-#   'gamma_1' : ['p_1'],
-#   'gamma_2' : ['p_2'],
-#   'gamma_3' : ['p_3'],
-#   'gamma_4' : ['p_4'],
-#   'gamma_5' : ['p_5'],
-#   'gamma_6' : ['p_6'],}
-
-
-# bp_coordinates = {
-#   'b_1': [0.513, 0.01],
-#   'b_2': [0.01, 0.52],
-#   'b_3': [-0.52, -0.01],
-#   'b_4': [0.01, -0.53],
-# }
-
-# j_coordinates = {}
-
-# e_coordinates = {
-#     'p_1': [bp_coordinates['b_1'], bp_coordinates['b_3']],
-#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
-#     'p_3': [bp_coordinates['b_1'], bp_coordinates['b_4']], 
-#     'p_4': [bp_coordinates['b_2'], bp_coordinates['b_3']],
-#     'p_5': [bp_coordinates['b_2'], bp_coordinates['b_4']], 
-#     'p_6': [bp_coordinates['b_3'], bp_coordinates['b_4']]
-# }
-
-# one = ['p_1', 'p_3', 'p_5', 'p_4']
-# tau = ['p_6', 'p_3', 'p_2', 'p_4']
-
-
-
-# --------------- SU2 N2star -----------------
-
-streets = ['p_1', 'p_2', 'p_3']
+streets = ['p_' + str(i + 1) for i in range(21)]
 
 branch_points = {
   'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_1', 'p_2', 'p_3'],
-}
+  'b_2': ['p_5', 'p_6', 'p_7'],
+  'b_3': ['p_8', 'p_15', 'p_16'],
+  'b_4': ['p_17', 'p_18', 'p_19'],
+  'b_5': ['p_2', 'p_4', 'p_11'],
+  'b_6': ['p_6', 'p_10', 'p_12'],
+  'b_7': ['p_15', 'p_14', 'p_21'],
+  'b_8': ['p_18', 'p_20', 'p_1'],}
 
-joints = {}
+joints = {
+    'j_1': ['p_9', None, 'p_10', None, 'p_11', None],
+    'j_2': ['p_13', None, 'p_14', None, 'p_12', None],
+    'j_3': ['p_19', None, 'p_20', None, 'p_21', None],
+    'j_4': ['p_3', None, 'p_5', None, 'p_4', None],
+    'j_5': ['p_7', None, 'p_8', None, 'p_9', None],
+    'j_6': ['p_13', None, 'p_16', None, 'p_17', None],
+}
 
 homology_classes = {
   'gamma_1' : ['p_1'],
   'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3'],
+  'gamma_3' : ['p_3', 'p_4', 'p_5'],
+  'gamma_4' : ['p_6'],
+  'gamma_5' : ['p_7', 'p_8', 'p_9', 'p_10', 'p_11'],
+  'gamma_6' : ['p_12', 'p_13', 'p_14', 'p_16', 'p_17'],
+  'gamma_7' : ['p_15'],
+  'gamma_8' : ['p_19', 'p_20', 'p_21'],
+  'gamma_9' : ['p_18'],
 }
 
 bp_coordinates = {
-  'b_1': [0.25, 0.25],
-  'b_2': [0.8, 0.8],
+  'b_1': [0.81, 0.61],
+  'b_2': [0.71, 0.51],
+  'b_3': [0.61, 0.41],
+  'b_4': [0.51, 0.31],
+  'b_5': [0.61, 0.81],
+  'b_6': [0.51, 0.71],
+  'b_7': [0.41, 0.61],
+  'b_8': [0.31, 0.51],
 }
 
-j_coordinates = {}
+j_coordinates = {
+    'j_1': [0.5, 0.8],
+    'j_2': [0.4, 0.7],
+    'j_3': [0.3, 0.6],
+    'j_4': [0.8, 0.5],
+    'j_5': [0.7, 0.4],
+    'j_6': [0.6, 0.3],
+}
+
 
 e_coordinates = {
-    'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
-    'p_2': [[bp_coordinates['b_2'][0] - 1, bp_coordinates['b_2'][1]], bp_coordinates['b_1']], 
-    'p_3': [bp_coordinates['b_2'], [bp_coordinates['b_1'][0], bp_coordinates['b_1'][1] + 1]]
+    'p_1': [bp_coordinates['b_1'], [bp_coordinates['b_8'][0] + 1, bp_coordinates['b_8'][1]]],
+    'p_2': [bp_coordinates['b_1'], bp_coordinates['b_5']],
+    'p_3': [bp_coordinates['b_1'], j_coordinates['j_4']],
+    'p_4': [bp_coordinates['b_5'], [j_coordinates['j_4'][0], j_coordinates['j_4'][1] + 1]],
+    'p_5': [bp_coordinates['b_2'], j_coordinates['j_4']],
+    'p_6': [bp_coordinates['b_6'], bp_coordinates['b_2']],
+    'p_7': [bp_coordinates['b_2'], j_coordinates['j_5']],
+    'p_8': [bp_coordinates['b_3'], j_coordinates['j_5']],
+    'p_9': [j_coordinates['j_5'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] - 1]],
+    'p_10': [bp_coordinates['b_6'], j_coordinates['j_1']],
+    'p_11': [j_coordinates['j_1'], bp_coordinates['b_5']],
+    'p_12': [bp_coordinates['b_6'], j_coordinates['j_2']],
+    'p_13': [j_coordinates['j_2'], [j_coordinates['j_6'][0], j_coordinates['j_6'][1] + 1]],
+    'p_14': [bp_coordinates['b_7'], j_coordinates['j_2']],
+    'p_15': [bp_coordinates['b_3'], bp_coordinates['b_7']],
+    'p_16': [bp_coordinates['b_3'], j_coordinates['j_6']],
+    'p_17': [bp_coordinates['b_4'], j_coordinates['j_6']],
+    'p_18': [bp_coordinates['b_4'], bp_coordinates['b_8']],
+    'p_19': [bp_coordinates['b_4'], [j_coordinates['j_3'][0], j_coordinates['j_3'][1] - 1]],
+    'p_20': [bp_coordinates['b_8'], j_coordinates['j_3']],
+    'p_21': [bp_coordinates['b_7'], j_coordinates['j_3']],
 }
 
-one = ['p_1', 'p_2']
-tau = ['p_1', 'p_3']
+one = ['p_1', 'p_20', 'p_21', 'p_14', 'p_12', 'p_10', 'p_11', 'p_2']
+tau = ['p_19', 'p_18', 'p_20']
+
+
+
 
 
 
@@ -4081,9 +3936,9 @@ w = BPSgraph(
 
 
 # analyze all sequences which give back the BPS graph
-max_n_moves = 1
-last_moves_to_avoid = 0
-last_mutations_to_avoid = 0
+max_n_moves = 5
+last_moves_to_avoid = 1
+last_mutations_to_avoid = 1
 SAVE_PLOTS = False
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
