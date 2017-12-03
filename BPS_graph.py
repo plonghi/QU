@@ -3111,7 +3111,8 @@ def find_sequence_completion(
                     if (
                         c_num_is_in_list(
                             new_modular_parameter, 
-                            possible_modular_parameters
+                            possible_modular_parameters,
+                            0.0001
                         ) is False
                     ):
                         possible_modular_parameters.append(
@@ -3155,6 +3156,273 @@ def c_num_is_in_list(c_num, l, eps):
             ans = True
 
     return ans
+
+
+def symmetry_degree(graph):
+    """
+    return n for a graph with Z_n symmetry
+    """
+    edge_dictionary = match_graphs_by_edges(graph, graph, all_perms=True)
+    if edge_dictionary is not None:
+        ok_perms = []
+        # (double) check if the dictionary of edges provides the correct
+        # branch point and joint structure.
+        # Select the valid ones
+        for perm in edge_dictionary:
+            check = validate_edge_perm(graph, graph, perm)
+            if check is not None:
+                # print 'OK found a dictionary for edges'
+                ok_perms.append(perm)
+                pass
+            else:
+                # print 'Discard permutation.'
+                pass
+    return len(ok_perms)
+
+
+def find_graphs_with_symmetry(
+    prev_graph, depth, level=None, ref_graph=None, sequence=None,
+    mutation_sequence=None,
+    edge_cycle_min_length=None, min_n_cooties=None,
+    fundamental_region=None, drop_if_trivial_perm=None,
+    avoid_last_n_moves=None, avoid_last_n_mutations=None,
+):
+    """
+    Find a sequence of flips or cootie moves, up to length 
+    'depth' which takes a BPS graph into a (usually new) BPS back 
+    with a higher symmetry (Z3).
+    The criterion for the automorphism is that the two graphs must 
+    coincide up to a permutation of the streets.
+    We try to match streets on both graphs by following the node structure.
+    Only retain sequences in which streets are permuted with cycles 
+    of a given minimal length.
+
+    We avoid sequences whose corresponding mutations include two identical
+    consecutive elements.
+
+    'level' is an auxiliary variable, it is used to keep track of recursion.
+    'ref_graph' is the original graph, a sequence must eventually reproduce it.
+    'sequence' is also an auxiliary variable, it keeps track of how many moves
+    have been done, in fact level=len(sequence)
+    'mutation_sequence' contains the same data as 'sequence', except that
+    it translates it into actual quiver mutations, that is: it doesn't
+    record cooties, and it translates flips on streets into mutations on 
+    quvier nodes.
+    'edge_cycle_min_length' determines whether to retain a valid sequence, 
+    based on how the edges of the graph are permuted: if it's a cyclic 
+    permutation of length greater than a certain minimal value
+    'min_n_cooties' determines whether to retain a valid sequence based on the
+    number of cootie moves it contains
+    'fundamental_region' is a list [one, tau] which contains information about 
+    the fundamental region of the torus where the reference BPS graph sits.
+    For example, in the [2,1] torus we would have
+    one = ['p_1', 'p_8', 'p_9', 'p_2']
+    tau = ['p_2', 'p_5', 'p_4', 'p_1']
+    'drop_if_trivial_perm' drops a sequence of moves if there exists a trivial 
+    permutation which relates its outcome to the original graph.
+
+    """
+    # ### DEBUG TEMP
+    # temp_perms = are_equivalent_as_graphs(prev_graph, prev_graph)
+    # if temp_perms is not None:
+    #     if len(temp_perms) > 2:
+    #         print '\n\n\nTHIS GRAPHS HAS A Z{} SYMMETRY\n{}\n\n\n'.format(
+    #             len(temp_perms), sequence
+    #             )
+    # #### END DEBUG
+    if edge_cycle_min_length is None:
+        edge_cycle_min_length = 0
+
+    if min_n_cooties is None:
+        min_n_cooties = 0
+
+    if level is None:
+        level = 0
+
+    if drop_if_trivial_perm is None:
+        drop_if_trivial_perm = False
+
+    if level == depth:
+        # print 'max depth reached'
+        return []
+
+    if sequence is None:
+        sequence = []
+
+    if mutation_sequence is None:
+        mutation_sequence = []
+    
+    if ref_graph is None:
+        ref_graph = prev_graph
+
+    # the graph (as an object) may change during successive iterations
+    # hence record now the important data
+    mutable_faces = prev_graph.mutable_faces
+    mutable_edges = prev_graph.mutable_edges
+
+    good_sequences = []
+
+    for f in mutable_faces:
+        # avoid repeating the last move in the sequence
+        # that would be a trivial result (it's involutive)
+        if len(sequence) > 0:
+            if f == sequence[-1]:
+                # print 'cootie on {} is the same as last move'.format(f)
+                continue
+
+        # avoid repeating any move in the last k ones, 
+        # where k is given as an argument of this function
+        if avoid_last_n_moves is not None:            
+            prev_n = min(len(sequence), avoid_last_n_moves)
+            if f in sequence[-prev_n:]:
+                continue
+
+        new_graph = cootie_face(prev_graph, f)
+        ### DEBUG
+        # if sequence == ['p_6', 'p_2'] and f == 'f_1':
+        #     print '\n\n\nlevel {}: cootie on face {}'.format(level, f)
+        #     print '\n\n\tNEW GRAPH\n\n'
+        #     new_graph.print_info()
+        ### DEBUG END
+        new_sequence = [m for m in sequence] + [f]
+        # Cooties are not recorded as mutations
+        new_mutation_sequence = [m for m in mutation_sequence]
+
+        # Check if there is a higher (at least Z3) symmetry
+        sym_degree = symmetry_degree(new_graph)
+
+        if sym_degree > 2:
+            print (
+                'Sequence {} produces a BPS graph with Z_{} symmetry'
+                .format(
+                    new_sequence, sym_degree
+                )
+            )
+            good_sequences.append(new_sequence)
+                
+        
+        # If there was no higher symmetry, keep going deeper.
+        
+        # print 'Will try going deeper with: {}'.format(new_sequence)
+        deeper_sequences = find_graphs_with_symmetry(
+            new_graph,
+            depth,
+            level=level+1,
+            ref_graph=ref_graph,
+            sequence=new_sequence,
+            mutation_sequence=new_mutation_sequence,
+            edge_cycle_min_length=edge_cycle_min_length,
+            min_n_cooties=min_n_cooties,
+            avoid_last_n_moves=avoid_last_n_moves,
+            avoid_last_n_mutations=avoid_last_n_mutations,
+        )
+        good_sequences += deeper_sequences
+
+    for e in mutable_edges:
+        # Note: this includes both flips on I-webs
+        # and 'H-flips' on the middle edges of H-webs.
+
+        # avoid repeating the last move in the sequence
+        # that would be a trivial result (it's involutive)
+        # print 'studying mutation on {}'.format(e)
+        if len(sequence) > 0:
+            if e == sequence[-1]:
+                # print 'flipping {} is the same as last move'.format(e)
+                continue
+
+        # avoid repeating any move in the last k ones, 
+        # where k is given as an argument of this function
+        if avoid_last_n_moves is not None:
+            prev_n = min(len(sequence), avoid_last_n_moves)
+            if e in sequence[-prev_n:]:
+                continue
+
+        new_graph = flip_edge(prev_graph, e)
+        ### DEBUG
+        # if sequence == ['p_6'] and e == 'p_2':
+        #     print '\n\n\nlevel {}: flip on face {}'.format(level, e)
+        #     print '\n\n\tNEW GRAPH\n\n'
+        #     new_graph.print_info()
+        ### DEBUG END
+        new_sequence = [m for m in sequence] + [e]
+
+        # if the edge is an I-web (as opposed to the middle of an H-web)
+        # record this into the mutation sequence as well.
+        p = prev_graph.streets[e]
+        ep0, ep1 = p.endpoints
+        if (
+            ep0.end_point.__class__.__name__ == 'BranchPoint' and 
+            ep1.end_point.__class__.__name__ == 'BranchPoint'
+        ):
+            gamma = (
+                [key for key, value 
+                in prev_graph.homology_dictionary().iteritems() 
+                if e in value][0]
+            )
+            # if gamma is the same as the last entry of the mutation sequence, 
+            # stop exploring these sequence and its descendants.
+            if len(mutation_sequence) > 0:
+                if gamma == mutation_sequence[-1]:
+                    continue
+                # additionally check if we are repeating one of the last n 
+                # quiver mutations
+                if avoid_last_n_mutations is not None:
+                    prev_n = min(
+                        len(mutation_sequence), avoid_last_n_mutations
+                    )
+                    if gamma in mutation_sequence[-prev_n:]:
+                        continue
+                    else:
+                        pass
+                else:
+                    pass
+
+            new_mutation_sequence = [m for m in mutation_sequence] + [gamma]
+        # otherwise, if it's a H-web, just keep the mutation sequence as it was
+        elif (
+            ep0.end_point.__class__.__name__ == 'Joint' and 
+            ep1.end_point.__class__.__name__ == 'Joint'
+        ):
+            new_mutation_sequence = [m for m in mutation_sequence] 
+
+        # Check if there is a higher (at least Z3) symmetry
+        sym_degree = symmetry_degree(new_graph)
+
+        if sym_degree > 2:
+            print (
+                'Sequence {} produces a BPS graph with Z_{} symmetry'
+                .format(
+                    new_sequence, sym_degree
+                )
+            )
+            good_sequences.append(new_sequence)
+                
+        
+        # If there was no higher symmetry, keep going deeper.
+        
+        # print 'Will try going deeper with: {}'.format(new_sequence)
+        deeper_sequences = find_graphs_with_symmetry(
+            new_graph,
+            depth,
+            level=level+1,
+            ref_graph=ref_graph,
+            sequence=new_sequence,
+            mutation_sequence=new_mutation_sequence,
+            edge_cycle_min_length=edge_cycle_min_length,
+            min_n_cooties=min_n_cooties,
+            avoid_last_n_moves=avoid_last_n_moves,
+            avoid_last_n_mutations=avoid_last_n_mutations,
+        )
+        good_sequences += deeper_sequences
+
+    
+
+    return good_sequences
+
+
+
+
+
 
 # # --------- torus graph with two joints and two branch points ----------
 
@@ -3404,72 +3672,72 @@ def c_num_is_in_list(c_num, l, eps):
 
 
 
-# --------------- [3,1]-punctured torus SELF-GLUING -----------------
+# # --------------- [3,1]-punctured torus SELF-GLUING -----------------
 
-streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6', 'p_7', 'p_8', 'p_9', 'p_10', 'p_11', 'p_12', 'p_13', 'p_14', 'p_15']
 
-branch_points = {
-  'b_1': ['p_1', 'p_2', 'p_3'],
-  'b_2': ['p_8', 'p_14', 'p_15'],
-  'b_3': ['p_5', 'p_13', 'p_12'],
-  'b_4': ['p_2', 'p_4', 'p_10'],
-  'b_5': ['p_7', 'p_8', 'p_9'],
-  'b_6': ['p_1', 'p_5', 'p_6'],}
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_8', 'p_14', 'p_15'],
+#   'b_3': ['p_5', 'p_13', 'p_12'],
+#   'b_4': ['p_2', 'p_4', 'p_10'],
+#   'b_5': ['p_7', 'p_8', 'p_9'],
+#   'b_6': ['p_1', 'p_5', 'p_6'],}
 
-joints = {
-    'j_1': ['p_9', None, 'p_10', None, 'p_11', None],
-    'j_2': ['p_13', None, 'p_6', None, 'p_7', None],
-    'j_3': ['p_3', None, 'p_15', None, 'p_4', None],
-    'j_4': ['p_12', None, 'p_11', None, 'p_14', None],
-}
+# joints = {
+#     'j_1': ['p_9', None, 'p_10', None, 'p_11', None],
+#     'j_2': ['p_13', None, 'p_6', None, 'p_7', None],
+#     'j_3': ['p_3', None, 'p_15', None, 'p_4', None],
+#     'j_4': ['p_12', None, 'p_11', None, 'p_14', None],
+# }
 
-homology_classes = {
-  'gamma_1' : ['p_1'],
-  'gamma_2' : ['p_2'],
-  'gamma_3' : ['p_3', 'p_4', 'p_15'],
-  'gamma_4' : ['p_9', 'p_10', 'p_11', 'p_12', 'p_14'],
-  'gamma_5' : ['p_13', 'p_7', 'p_6'],
-  'gamma_6' : ['p_5'],
-  'gamma_7' : ['p_8'],
-}
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3', 'p_4', 'p_15'],
+#   'gamma_4' : ['p_9', 'p_10', 'p_11', 'p_12', 'p_14'],
+#   'gamma_5' : ['p_13', 'p_7', 'p_6'],
+#   'gamma_6' : ['p_5'],
+#   'gamma_7' : ['p_8'],
+# }
 
-bp_coordinates = {
-  'b_1': [0.87, 0.64],
-  'b_2': [0.62, 0.43],
-  'b_3': [0.35, 0.17],
-  'b_4': [0.66, 0.85],
-  'b_5': [0.43, 0.60],
-  'b_6': [0.18, 0.33],
-}
+# bp_coordinates = {
+#   'b_1': [0.87, 0.64],
+#   'b_2': [0.62, 0.43],
+#   'b_3': [0.35, 0.17],
+#   'b_4': [0.66, 0.85],
+#   'b_5': [0.43, 0.60],
+#   'b_6': [0.18, 0.33],
+# }
 
-j_coordinates = {
-    'j_1': [0.51, 0.78],
-    'j_2': [0.23, 0.52],
-    'j_3': [0.82, 0.47],
-    'j_4': [0.53, 0.21],
-}
+# j_coordinates = {
+#     'j_1': [0.51, 0.78],
+#     'j_2': [0.23, 0.52],
+#     'j_3': [0.82, 0.47],
+#     'j_4': [0.53, 0.21],
+# }
 
 
-e_coordinates = {
-    'p_1': [bp_coordinates['b_1'], [bp_coordinates['b_6'][0] + 1, bp_coordinates['b_6'][1]]],
-    'p_2': [bp_coordinates['b_1'], bp_coordinates['b_4']],
-    'p_3': [bp_coordinates['b_1'], j_coordinates['j_3']],
-    'p_4': [bp_coordinates['b_4'], [j_coordinates['j_3'][0], j_coordinates['j_3'][1] + 1]],
-    'p_5': [bp_coordinates['b_3'], bp_coordinates['b_6']],
-    'p_6': [bp_coordinates['b_6'], j_coordinates['j_2']],
-    'p_7': [bp_coordinates['b_5'], j_coordinates['j_2']],
-    'p_8': [bp_coordinates['b_5'], bp_coordinates['b_2']],
-    'p_9': [bp_coordinates['b_5'], j_coordinates['j_1']],
-    'p_10': [bp_coordinates['b_4'], j_coordinates['j_1']],
-    'p_11': [j_coordinates['j_4'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] - 1]],
-    'p_12': [bp_coordinates['b_3'], j_coordinates['j_4']],
-    'p_13': [bp_coordinates['b_3'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] - 1]],
-    'p_14': [bp_coordinates['b_2'], j_coordinates['j_4']],
-    'p_15': [bp_coordinates['b_2'], j_coordinates['j_3']],
-}
+# e_coordinates = {
+#     'p_1': [bp_coordinates['b_1'], [bp_coordinates['b_6'][0] + 1, bp_coordinates['b_6'][1]]],
+#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_4']],
+#     'p_3': [bp_coordinates['b_1'], j_coordinates['j_3']],
+#     'p_4': [bp_coordinates['b_4'], [j_coordinates['j_3'][0], j_coordinates['j_3'][1] + 1]],
+#     'p_5': [bp_coordinates['b_3'], bp_coordinates['b_6']],
+#     'p_6': [bp_coordinates['b_6'], j_coordinates['j_2']],
+#     'p_7': [bp_coordinates['b_5'], j_coordinates['j_2']],
+#     'p_8': [bp_coordinates['b_5'], bp_coordinates['b_2']],
+#     'p_9': [bp_coordinates['b_5'], j_coordinates['j_1']],
+#     'p_10': [bp_coordinates['b_4'], j_coordinates['j_1']],
+#     'p_11': [j_coordinates['j_4'], [j_coordinates['j_1'][0], j_coordinates['j_1'][1] - 1]],
+#     'p_12': [bp_coordinates['b_3'], j_coordinates['j_4']],
+#     'p_13': [bp_coordinates['b_3'], [j_coordinates['j_2'][0], j_coordinates['j_2'][1] - 1]],
+#     'p_14': [bp_coordinates['b_2'], j_coordinates['j_4']],
+#     'p_15': [bp_coordinates['b_2'], j_coordinates['j_3']],
+# }
 
-one = ['p_5', 'p_12', 'p_14', 'p_15', 'p_3', 'p_1']
-tau = ['p_11', 'p_14', 'p_8', 'p_9']
+# one = ['p_5', 'p_12', 'p_14', 'p_15', 'p_3', 'p_1']
+# tau = ['p_11', 'p_14', 'p_8', 'p_9']
 
 
 
@@ -3704,6 +3972,93 @@ tau = ['p_11', 'p_14', 'p_8', 'p_9']
 
 
 
+
+
+# # # --------------- SU(2) N_f=4 -----------------
+
+
+
+# streets = ['p_1', 'p_2', 'p_3', 'p_4', 'p_5', 'p_6']
+
+# branch_points = {
+#   'b_1': ['p_1', 'p_2', 'p_3'],
+#   'b_2': ['p_2', 'p_4', 'p_5'],
+#   'b_3': ['p_1', 'p_6', 'p_4'],
+#   'b_4': ['p_3', 'p_5', 'p_6'],}
+
+# joints = {}
+
+# homology_classes = {
+#   'gamma_1' : ['p_1'],
+#   'gamma_2' : ['p_2'],
+#   'gamma_3' : ['p_3'],
+#   'gamma_4' : ['p_4'],
+#   'gamma_5' : ['p_5'],
+#   'gamma_6' : ['p_6'],}
+
+
+# bp_coordinates = {
+#   'b_1': [0.513, 0.01],
+#   'b_2': [0.01, 0.52],
+#   'b_3': [-0.52, -0.01],
+#   'b_4': [0.01, -0.53],
+# }
+
+# j_coordinates = {}
+
+# e_coordinates = {
+#     'p_1': [bp_coordinates['b_1'], bp_coordinates['b_3']],
+#     'p_2': [bp_coordinates['b_1'], bp_coordinates['b_2']], 
+#     'p_3': [bp_coordinates['b_1'], bp_coordinates['b_4']], 
+#     'p_4': [bp_coordinates['b_2'], bp_coordinates['b_3']],
+#     'p_5': [bp_coordinates['b_2'], bp_coordinates['b_4']], 
+#     'p_6': [bp_coordinates['b_3'], bp_coordinates['b_4']]
+# }
+
+# one = ['p_1', 'p_3', 'p_5', 'p_4']
+# tau = ['p_6', 'p_3', 'p_2', 'p_4']
+
+
+
+# --------------- SU2 N2star -----------------
+
+streets = ['p_1', 'p_2', 'p_3']
+
+branch_points = {
+  'b_1': ['p_1', 'p_2', 'p_3'],
+  'b_2': ['p_1', 'p_2', 'p_3'],
+}
+
+joints = {}
+
+homology_classes = {
+  'gamma_1' : ['p_1'],
+  'gamma_2' : ['p_2'],
+  'gamma_3' : ['p_3'],
+}
+
+bp_coordinates = {
+  'b_1': [0.25, 0.25],
+  'b_2': [0.8, 0.8],
+}
+
+j_coordinates = {}
+
+e_coordinates = {
+    'p_1': [bp_coordinates['b_1'], bp_coordinates['b_2']],
+    'p_2': [[bp_coordinates['b_2'][0] - 1, bp_coordinates['b_2'][1]], bp_coordinates['b_1']], 
+    'p_3': [bp_coordinates['b_2'], [bp_coordinates['b_1'][0], bp_coordinates['b_1'][1] + 1]]
+}
+
+one = ['p_1', 'p_2']
+tau = ['p_1', 'p_3']
+
+
+
+
+
+
+
 w = BPSgraph(
     branch_points=branch_points, 
     streets=streets, 
@@ -3716,6 +4071,8 @@ w = BPSgraph(
 )
 
 
+
+
 ####################################################
 ####################################################
 
@@ -3724,9 +4081,9 @@ w = BPSgraph(
 
 
 # analyze all sequences which give back the BPS graph
-max_n_moves = 5
-last_moves_to_avoid = None
-last_mutations_to_avoid = None
+max_n_moves = 1
+last_moves_to_avoid = 0
+last_mutations_to_avoid = 0
 SAVE_PLOTS = False
 seq = find_invariant_sequences(
     w, max_n_moves, level=0, ref_graph=w, 
@@ -3738,465 +4095,480 @@ seq = find_invariant_sequences(
     avoid_last_n_mutations=last_mutations_to_avoid,
 )
 
-print 'Found {} sequences.'.format(len(seq))
+# print 'Found {} sequences.'.format(len(seq))
 
-old_modular_parameter = compute_modular_parameter(one, tau, w)
-old_one = sum_up_edges(one, w)[0] + 1j * sum_up_edges(one, w)[1]
-old_tau = sum_up_edges(tau, w)[0] + 1j * sum_up_edges(tau, w)[1]
-# #
-# S_old_modular_parameter = -1 / old_modular_parameter
-# S_old_one = old_tau 
-# S_old_tau = -1 * old_one 
-# S_inv_old_one = -1 * old_tau 
-# S_inv_old_tau = old_one
-# #
-# L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
-# L_old_one = old_one + old_tau
-# L_old_tau = old_tau
-# L_inv_old_one = old_one - old_tau
-# L_inv_old_tau = old_tau
-# #
-# R_old_modular_parameter = 1 + old_modular_parameter
-# R_old_one = old_one 
-# R_old_tau = old_tau + old_one
-# R_inv_old_one = old_one 
-# R_inv_old_tau = old_tau - old_one
+# old_modular_parameter = compute_modular_parameter(one, tau, w)
+# old_one = sum_up_edges(one, w)[0] + 1j * sum_up_edges(one, w)[1]
+# old_tau = sum_up_edges(tau, w)[0] + 1j * sum_up_edges(tau, w)[1]
+# # #
+# # S_old_modular_parameter = -1 / old_modular_parameter
+# # S_old_one = old_tau 
+# # S_old_tau = -1 * old_one 
+# # S_inv_old_one = -1 * old_tau 
+# # S_inv_old_tau = old_one
+# # #
+# # L_old_modular_parameter = old_modular_parameter / (1 + old_modular_parameter)
+# # L_old_one = old_one + old_tau
+# # L_old_tau = old_tau
+# # L_inv_old_one = old_one - old_tau
+# # L_inv_old_tau = old_tau
+# # #
+# # R_old_modular_parameter = 1 + old_modular_parameter
+# # R_old_one = old_one 
+# # R_old_tau = old_tau + old_one
+# # R_inv_old_one = old_one 
+# # R_inv_old_tau = old_tau - old_one
 
-# prepare a directory
-mydir = os.path.join(
-    os.getcwd(), 'mcg_moves', 
-    (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
-)
-os.makedirs(mydir)
-
-# save info about sequences of moves in a text file
-text_file = open(mydir + '/sequence_data.txt', 'w')
-text_file.write('\t\tSequence data\n\n')
-text_file.write(
-    'Modular parameter of the original torus: {}'
-    '\none : {} = {}\ntau : {} = {}\n\n'.format(
-        old_modular_parameter, 
-        one, sum_up_edges(one, w), 
-        tau, sum_up_edges(tau, w)
-    )
-)
-text_file.write('Quiver:\n{}\n\n'.format(w.seed.quiver))
-
-# find permutations which leave the graph invariant
-text_file.write(
-    '\n----------------------------------\n'
-    'Nontrivial permutations giving isomorphic graphs\n'
-)
-self_permutations = find_self_permutations(w, [one, tau])
-for p, mod_param in self_permutations:
-    hc_perm_dic = {}
-    for p_k, p_v in p.iteritems():
-        source = (
-            [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
-            if p_k in [s.label for s in h_v.streets]][0]
-        )
-        target = (
-            [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
-            if p_v in [s.label for s in h_v.streets]][0]
-        )
-        hc_perm_dic[source] = target
-
-    text_file.write('\t{}\n'.format(p))
-    text_file.write('\tmodular parameter : {}\n'.format(mod_param))
-    text_file.write('\thomology class permutation : {}\n'.format(hc_perm_dic))
-    
-# S_move_candidates = []
-# L_move_candidates = []
-# R_move_candidates = []
-# S_inv_move_candidates = []
-# L_inv_move_candidates = []
-# R_inv_move_candidates = []
-
-# Keep track of how many sequences give the same quiver mutation sequence
-# only give one sequence of moves that corresponds to a given mutation
-# sequence.
-seen_by_mutations = {}
-# keep track of all possible modular parameters associated to a sequence 
-# of mutations
-mutation_seq_modular_parameters = {}
-# keep track of all modular parameters which are seen
-all_modular_parameters = []
-
-# keep track of modular transformations matrices (better than modular parameters)
-all_modular_transformations = []
-# keep track of all possible mutations that give the same modular transformation
-modular_transf_mutations = {}
-
-for i, s in enumerate(seq):
-    if str(s.quiver_mutations) not in seen_by_mutations.keys():
-        # initiate the count for graph moves corresponding to 
-        # this mutation sequence.
-        # use a list of mutation turned into a string for dictionary keys...
-        seen_by_mutations[str(s.quiver_mutations)] = [i]
-
-        text_file.write(
-            '\n\n-------------------------'
-            '\nSequence #{} : {}\nMutations : {}'.format(
-                i, s.moves_sequence, s.quiver_mutations
-            )
-        )
-        text_file.write(
-            '\n\t\tPermutation data\n(Note: this is in the form '
-                '(.., old_edge : new_edge, ..)'
-                '\nAll permutations are included\n'
-        )
-        if SAVE_PLOTS is True:
-            sub_dir = os.path.join(mydir, 'sequence_'+str(i))
-            os.makedirs(sub_dir)
-            new_graph = apply_sequence(w, s.moves_sequence, save_plot=sub_dir)
-        else:
-            new_graph = apply_sequence(w, s.moves_sequence)
-        # Each sequence of moves comes with a set of permutations
-        # that relate the final graph to the original one.
-        # Must consider each of them
-        for j in range(len(s.edge_permutations)):
-            # the edge permutation
-            p = s.edge_permutations[j] 
-            ### DEBUG: disabling this for now
-            # # the homology class permutation
-            # hc_p = 'homology permutation not implemented'
-            hc_p = s.homology_permutations[j] 
-            ### DEBUG END
-
-            # use the infor about the funadmental region to compute the 
-            # new modular parameter, by tracking where the edges 
-            # ended up.
-            # Before the moves, the two parameteters [1, \tau] were 
-            # specified by a sequence of edges each.
-            # Now tracking where those edges ended up we are
-            # able to compute the new [1', \tau'].
-            # First of all, we translate the old sequence of edges
-            # into the new sequence, by applying the permutation 
-            # dictionary
-            new_one = [p[edge] for edge in one]
-            new_tau = [p[edge] for edge in tau]
-            new_modular_parameter = compute_modular_parameter(
-                new_one, new_tau, new_graph
-            )
-            new_one_value = (
-                sum_up_edges(new_one, new_graph, int_round=True)[0] + 
-                1j * sum_up_edges(new_one, new_graph, int_round=True)[1]
-            )
-            new_tau_value = (
-                sum_up_edges(new_tau, new_graph, int_round=True)[0] +
-                1j * sum_up_edges(new_tau, new_graph, int_round=True)[1]
-            )
-            # record the new modular parameter produced by this 
-            # sequence of moves
-            mutation_seq_modular_parameters[str(s.quiver_mutations)] = (
-                [new_modular_parameter]
-            )
-            # also record the modular parameter in overall list
-            if c_num_is_in_list(
-                new_modular_parameter, 
-                all_modular_parameters,
-                EPSILON
-            ) is False:
-                all_modular_parameters.append(new_modular_parameter)
-
-            # also record the modular transformation in overall list,
-            # and record which mutations give the same modular transformatilon
-            modular_tmn = [
-                    [
-                        sum_up_edges(new_tau, new_graph, int_round=True)[1], 
-                        sum_up_edges(new_tau, new_graph, int_round=True)[0]
-                    ], 
-                    [
-                        sum_up_edges(new_one, new_graph, int_round=True)[1], 
-                        sum_up_edges(new_one, new_graph, int_round=True)[0]
-                    ]
-                ]
-
-            if str(modular_tmn) not in all_modular_transformations:
-                all_modular_transformations.append(str(modular_tmn))
-                modular_transf_mutations[str(modular_tmn)] = (
-                    [str(s.quiver_mutations)]
-                )
-            else: 
-                modular_transf_mutations[str(modular_tmn)].append(
-                    str(s.quiver_mutations)
-                )
-
-
-            # # check if this is a candidate for n S, L or R move:
-            # #
-            # # if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
-            # #     S_move_candidates.append([i, j])
-            # # if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
-            # #     L_move_candidates.append([i, j])
-            # # if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
-            # #     R_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - S_old_one) < EPSILON and 
-            #     abs(new_tau_value - S_old_tau) < EPSILON
-            # ):
-            #     S_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - S_inv_old_one) < EPSILON and 
-            #     abs(new_tau_value - S_inv_old_tau) < EPSILON
-            # ):
-            #     S_inv_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - L_old_one) < EPSILON and 
-            #     abs(new_tau_value - L_old_tau) < EPSILON
-            # ):
-            #     L_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - L_inv_old_one) < EPSILON and 
-            #     abs(new_tau_value - L_inv_old_tau) < EPSILON
-            # ):
-            #     L_inv_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - R_old_one) < EPSILON and 
-            #     abs(new_tau_value - R_old_tau) < EPSILON
-            # ):
-            #     R_move_candidates.append([i, j])
-            # if (
-            #     abs(new_one_value - R_inv_old_one) < EPSILON and 
-            #     abs(new_tau_value - R_inv_old_tau) < EPSILON
-            # ):
-            #     R_inv_move_candidates.append([i, j])
-
-            text_file.write(
-                '\n\tpermutation #{}'
-                '\n\t---------------'
-                '\n\ton edges:\n\t{}'
-                '\n\ton homology basis:\n\t{}'
-                '\n\tmodular parameter : {}'.format(
-                    j, p, hc_p, new_modular_parameter
-                )
-            )
-            text_file.write(
-                '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}'.format(
-                    sum_up_edges(new_one, new_graph, int_round=True), new_one, 
-                    sum_up_edges(new_tau, new_graph, int_round=True), new_tau
-                )
-            )
-            text_file.write(
-                '\n\tModular transformation: \n{}\n'.format(modular_tmn)
-            )
-            
-    else:
-        # add the sequence to the list of moves sequences that give
-        # a certain mutation sequence
-        seen_by_mutations[str(s.quiver_mutations)].append(i)
-        # record which modular parameter is produced by this sequence of moves
-        new_graph = apply_sequence(w, s.moves_sequence)
-        
-        for j in range(len(s.edge_permutations)):
-            # the edge permutation
-            p = s.edge_permutations[j] 
-            ### DEBUG: disabling this for now
-            # # the homology class permutation
-            # hc_p = 'homology permutation not implemented'
-            hc_p = s.homology_permutations[j] 
-            ### DEBUG END
-
-            # use the infor about the funadmental region to compute the 
-            # new modular parameter, by tracking where the edges 
-            # ended up.
-            # Before the moves, the two parameteters [1, \tau] were 
-            # specified by a sequence of edges each.
-            # Now tracking where those edges ended up we are
-            # able to compute the new [1', \tau'].
-            # First of all, we translate the old sequence of edges
-            # into the new sequence, by applying the permutation 
-            # dictionary
-            new_one = [p[edge] for edge in one]
-            new_tau = [p[edge] for edge in tau]
-            new_modular_parameter = compute_modular_parameter(
-                new_one, new_tau, new_graph
-            )
-            # record the new modular parameter produced by this 
-            # sequqnece of moves
-            if (
-                new_modular_parameter not in 
-                mutation_seq_modular_parameters[str(s.quiver_mutations)]
-            ):
-                mutation_seq_modular_parameters[str(s.quiver_mutations)].append(
-                    new_modular_parameter
-                )
-
-# Write the tally of how many moves seem to give the same sequence of 
-# mutations
-text_file.write('\n\n\n\tTally of mutations\n\n')
-for mut_seq in seen_by_mutations.keys():
-    text_file.write(
-        'This mutation sequence : {}\nwas seen {} times. '
-        'In moves sequences : {}\n'
-        .format(
-            mut_seq, len(seen_by_mutations[mut_seq]), 
-            seen_by_mutations[mut_seq]
-        )
-    )
-    text_file.write(
-        'Associated modular parameters: {}\n\n'.format(
-            [round(mp.real, 2) + 1j * round(mp.imag, 2) 
-            for mp in mutation_seq_modular_parameters[mut_seq]]
-        )
-    )
-
-
-# Write the tally of which mutations seem to give the same modular transformation
-# avoiding the identity transformation
-text_file.write(
-    '\n\n\tTally of modular transformations (skipping the identity)'
-)
-for mod_transf in modular_transf_mutations.keys():
-    if (
-        (eval(mod_transf) != [[1, 0], [0, 1]]) and 
-        (eval(mod_transf) != [[-1, 0], [0, -1]])
-    ):
-        text_file.write(
-            '\n\nThis modular transformation : \n{}\n'
-            'Corresponds to the following mutations\n'
-            .format(numpy.array(eval(mod_transf)))
-        )
-        for mut in modular_transf_mutations[mod_transf]:
-            text_file.write('{}\n'.format(mut))
-
-
-# # write in the text file the candidates for S, L, R transformations,
-# # and their inverses
-# text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
-# for [i, j] in S_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for S^-1-move\n')
-# for [i, j] in S_inv_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
-# for [i, j] in L_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for L^-1-move\n')
-# for [i, j] in L_inv_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
-# for [i, j] in R_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-# text_file.write('\n\n-----------------------\n\t Candidates for R^-1-move\n')
-# for [i, j] in R_inv_move_candidates:
-#     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
-
-
-text_file.write('\n\n-----------------------\n\t All modular transformations\n')
-for mt in all_modular_transformations:
-    text_file.write('\n{}\n'.format(numpy.array(eval(mt))))
-
-
-
-####################################################
-####################################################
-
-####################################################
-####################################################
-
-
-
-### STUDY A PARTICULAR SEQUENCE
-seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
-seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
-seq_2 = ['p_13', 'f_4']
-seq_3 = ['f_0', 'p_9', 'p_3']
-seq_4 = ['p_6', 'p_2', 'f_1']
-seq_5 = ['p_2', 'p_5', 'p_8', 'f_1', 'f_3', 'p_8']
-seq_6 = seq_5 + ['p_1', 'p_4', 'p_1', 'p_4', 'p_1']
-
-### THIS IS A GOOD SEQUENCE for the [3,1] graph derived by reduction of the puncture (not by self-gluing)
-### it should correspond to the SL2Z element (1, 0 // -1, 1) = L^{-1}
-seq_7 = [
-'p_13', 'p_8', 'f_4', 'p_2', 'p_14', 
-'p_13', 'f_3', 'p_9', 'p_5', 'p_14', 
-'p_13', 'p_10', 'f_0',
-'p_14', 'p_3', 'f_4', 'p_4'
-]
-
-#### THIS GIVES THE S-transformation! For the [3,1] graph obtainedd by reduction
-seq_8 = ['p_4', 'f_2', 'p_10', 'p_8', 'p_3', 'p_10', 'f_4', 'p_11', 'p_5', 'p_3',
-'p_8', 'p_14', 'f_0',
-'p_1', 'f_2', 'p_13']
-
-#### This takes the [3,1] selfglued graph and transforms it into the [3,1] graph obtained by reduction of the puncture
-seq_9 = ['p_11', 'f_0', 'p_1', 'p_5', 'p_3', 'f_4', 'p_7']
-
-#### The L-move for the [3,1] selfglued graph
-seq_10 = ['p_11', 'f_0', 'f_2', 'p_11', 'p_6', 'p_3']
-
-#### The (S L^{-1}) -move for the [3,1] selfglued graph
-###seq_11=['p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'p_7', 'p_11', 'f_0', 'f_2', 'p_8', 'p_1']
-seq_11 = ['p_11', 'p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'f_0', 'p_7', 'f_2', 'p_8', 'p_1']
-
-#### L-move sequence for [4,1] selfglued graph
-seq_12 = ['p_9', 'p_13'] + ['f_4', 'f_1', 'f_2'] + ['p_9', 'p_13'] + ['p_20', 'p_3']
-
-#### The (S L^{-1}) -move for the [4,1] selfglued graph
-# seq_13 = (
-#     ['p_1', 'p_18', 'p_2', 'f_6', 'p_21', 'p_5', 'p_9', 'p_13'] +
-#     ['f_4', 'f_1', 'f_2'] + ['p_1'] #+ ['f_1'] + ['p_20', 'p_3'] + ['f_6']
-#     #+ ['p_7', 'p_14'] + ['p_15', 'p_6'] + ['p_1']
-# )
-
-#### An absolutely crazy sequence for the [4,1] selfglued graph
-# seq_13 = (
-#     ['p_1', 'p_18', 'p_2', 'f_6', 'p_9', 'p_13', 'f_1', 'p_5', 'p_21'] +
-#     ['f_4', 'f_2', 'f_1', 'p_6', 'p_15', 'p_1', 'p_3', 'p_20', 'f_5'] + 
-#     ['f_0', 'p_14', 'p_7', 'p_8', 'p_12', 'f_3', 'p_6', 'p_15', 'p_1'] +
-#     [ 'f_1', 'p_18', 'p_2', 'f_3', 'p_14', 'p_7']#, 'p_1']
-# )
-
-#### trying to find another SL(2,Z) move for the [4,1] selfglued graph
-seq_14 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'f_2', 'p_21', 'f_4', 'p_6', 'p_15', 'p_1']
-
-
-
-
+# # prepare a directory
 # mydir = os.path.join(
 #     os.getcwd(), 'mcg_moves', 
-#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_{}_moves'.format(max_n_moves))
 # )
-# # os.makedirs(mydir)
+# os.makedirs(mydir)
+
+# # save info about sequences of moves in a text file
+# text_file = open(mydir + '/sequence_data.txt', 'w')
+# text_file.write('\t\tSequence data\n\n')
+# text_file.write(
+#     'Avoiding the last {} moves and last {} mutations.\n\n'.format(
+#         last_moves_to_avoid, last_mutations_to_avoid
+#     )
+# )
+# text_file.write(
+#     'Modular parameter of the original torus: {}'
+#     '\none : {} = {}\ntau : {} = {}\n\n'.format(
+#         old_modular_parameter, 
+#         one, sum_up_edges(one, w), 
+#         tau, sum_up_edges(tau, w)
+#     )
+# )
+# text_file.write('Quiver:\n{}\n\n'.format(w.seed.quiver))
+
+# # find permutations which leave the graph invariant
+# text_file.write(
+#     '\n----------------------------------\n'
+#     'Nontrivial permutations giving isomorphic graphs\n'
+# )
+# self_permutations = find_self_permutations(w, [one, tau])
+# for p, mod_param in self_permutations:
+#     hc_perm_dic = {}
+#     for p_k, p_v in p.iteritems():
+#         source = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_k in [s.label for s in h_v.streets]][0]
+#         )
+#         target = (
+#             [h_k for h_k, h_v in w.basis_homology_classes.iteritems()
+#             if p_v in [s.label for s in h_v.streets]][0]
+#         )
+#         hc_perm_dic[source] = target
+
+#     text_file.write('\t{}\n'.format(p))
+#     text_file.write('\tmodular parameter : {}\n'.format(mod_param))
+#     text_file.write('\thomology class permutation : {}\n'.format(hc_perm_dic))
+    
+# # S_move_candidates = []
+# # L_move_candidates = []
+# # R_move_candidates = []
+# # S_inv_move_candidates = []
+# # L_inv_move_candidates = []
+# # R_inv_move_candidates = []
+
+# # Keep track of how many sequences give the same quiver mutation sequence
+# # only give one sequence of moves that corresponds to a given mutation
+# # sequence.
+# seen_by_mutations = {}
+# # keep track of all possible modular parameters associated to a sequence 
+# # of mutations
+# mutation_seq_modular_parameters = {}
+# # keep track of all modular parameters which are seen
+# all_modular_parameters = []
+
+# # keep track of modular transformations matrices (better than modular parameters)
+# all_modular_transformations = []
+# # keep track of all possible mutations that give the same modular transformation
+# modular_transf_mutations = {}
+
+# for i, s in enumerate(seq):
+#     if str(s.quiver_mutations) not in seen_by_mutations.keys():
+#         # initiate the count for graph moves corresponding to 
+#         # this mutation sequence.
+#         # use a list of mutation turned into a string for dictionary keys...
+#         seen_by_mutations[str(s.quiver_mutations)] = [i]
+
+#         text_file.write(
+#             '\n\n-------------------------'
+#             '\nSequence #{} : {}\nMutations : {}'.format(
+#                 i, s.moves_sequence, s.quiver_mutations
+#             )
+#         )
+#         text_file.write(
+#             '\n\t\tPermutation data\n(Note: this is in the form '
+#                 '(.., old_edge : new_edge, ..)'
+#                 '\nAll permutations are included\n'
+#         )
+#         if SAVE_PLOTS is True:
+#             sub_dir = os.path.join(mydir, 'sequence_'+str(i))
+#             os.makedirs(sub_dir)
+#             new_graph = apply_sequence(w, s.moves_sequence, save_plot=sub_dir)
+#         else:
+#             new_graph = apply_sequence(w, s.moves_sequence)
+#         # Each sequence of moves comes with a set of permutations
+#         # that relate the final graph to the original one.
+#         # Must consider each of them
+#         for j in range(len(s.edge_permutations)):
+#             # the edge permutation
+#             p = s.edge_permutations[j] 
+#             ### DEBUG: disabling this for now
+#             # # the homology class permutation
+#             # hc_p = 'homology permutation not implemented'
+#             hc_p = s.homology_permutations[j] 
+#             ### DEBUG END
+
+#             # use the infor about the funadmental region to compute the 
+#             # new modular parameter, by tracking where the edges 
+#             # ended up.
+#             # Before the moves, the two parameteters [1, \tau] were 
+#             # specified by a sequence of edges each.
+#             # Now tracking where those edges ended up we are
+#             # able to compute the new [1', \tau'].
+#             # First of all, we translate the old sequence of edges
+#             # into the new sequence, by applying the permutation 
+#             # dictionary
+#             new_one = [p[edge] for edge in one]
+#             new_tau = [p[edge] for edge in tau]
+#             new_modular_parameter = compute_modular_parameter(
+#                 new_one, new_tau, new_graph
+#             )
+#             new_one_value = (
+#                 sum_up_edges(new_one, new_graph, int_round=True)[0] + 
+#                 1j * sum_up_edges(new_one, new_graph, int_round=True)[1]
+#             )
+#             new_tau_value = (
+#                 sum_up_edges(new_tau, new_graph, int_round=True)[0] +
+#                 1j * sum_up_edges(new_tau, new_graph, int_round=True)[1]
+#             )
+#             # record the new modular parameter produced by this 
+#             # sequence of moves
+#             mutation_seq_modular_parameters[str(s.quiver_mutations)] = (
+#                 [new_modular_parameter]
+#             )
+#             # also record the modular parameter in overall list
+#             if c_num_is_in_list(
+#                 new_modular_parameter, 
+#                 all_modular_parameters,
+#                 EPSILON
+#             ) is False:
+#                 all_modular_parameters.append(new_modular_parameter)
+
+#             # also record the modular transformation in overall list,
+#             # and record which mutations give the same modular transformatilon
+#             modular_tmn = [
+#                     [
+#                         sum_up_edges(new_tau, new_graph, int_round=True)[1], 
+#                         sum_up_edges(new_tau, new_graph, int_round=True)[0]
+#                     ], 
+#                     [
+#                         sum_up_edges(new_one, new_graph, int_round=True)[1], 
+#                         sum_up_edges(new_one, new_graph, int_round=True)[0]
+#                     ]
+#                 ]
+
+#             if str(modular_tmn) not in all_modular_transformations:
+#                 all_modular_transformations.append(str(modular_tmn))
+#                 modular_transf_mutations[str(modular_tmn)] = (
+#                     [str(s.quiver_mutations)]
+#                 )
+#             else: 
+#                 modular_transf_mutations[str(modular_tmn)].append(
+#                     str(s.quiver_mutations)
+#                 )
+
+
+#             # # check if this is a candidate for n S, L or R move:
+#             # #
+#             # # if abs(new_modular_parameter - S_old_modular_parameter) < EPSILON:
+#             # #     S_move_candidates.append([i, j])
+#             # # if abs(new_modular_parameter - L_old_modular_parameter) < EPSILON:
+#             # #     L_move_candidates.append([i, j])
+#             # # if abs(new_modular_parameter - R_old_modular_parameter) < EPSILON:
+#             # #     R_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - S_old_one) < EPSILON and 
+#             #     abs(new_tau_value - S_old_tau) < EPSILON
+#             # ):
+#             #     S_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - S_inv_old_one) < EPSILON and 
+#             #     abs(new_tau_value - S_inv_old_tau) < EPSILON
+#             # ):
+#             #     S_inv_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - L_old_one) < EPSILON and 
+#             #     abs(new_tau_value - L_old_tau) < EPSILON
+#             # ):
+#             #     L_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - L_inv_old_one) < EPSILON and 
+#             #     abs(new_tau_value - L_inv_old_tau) < EPSILON
+#             # ):
+#             #     L_inv_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - R_old_one) < EPSILON and 
+#             #     abs(new_tau_value - R_old_tau) < EPSILON
+#             # ):
+#             #     R_move_candidates.append([i, j])
+#             # if (
+#             #     abs(new_one_value - R_inv_old_one) < EPSILON and 
+#             #     abs(new_tau_value - R_inv_old_tau) < EPSILON
+#             # ):
+#             #     R_inv_move_candidates.append([i, j])
+
+#             text_file.write(
+#                 '\n\tpermutation #{}'
+#                 '\n\t---------------'
+#                 '\n\ton edges:\n\t{}'
+#                 '\n\ton homology basis:\n\t{}'
+#                 '\n\tmodular parameter : {}'.format(
+#                     j, p, hc_p, new_modular_parameter
+#                 )
+#             )
+#             text_file.write(
+#                 '\n\tThe new one : {} = {}\n\tThe new tau : {} = {}'.format(
+#                     sum_up_edges(new_one, new_graph, int_round=True), new_one, 
+#                     sum_up_edges(new_tau, new_graph, int_round=True), new_tau
+#                 )
+#             )
+#             text_file.write(
+#                 '\n\tModular transformation: \n{}\n'.format(modular_tmn)
+#             )
+            
+#     else:
+#         # add the sequence to the list of moves sequences that give
+#         # a certain mutation sequence
+#         seen_by_mutations[str(s.quiver_mutations)].append(i)
+#         # record which modular parameter is produced by this sequence of moves
+#         new_graph = apply_sequence(w, s.moves_sequence)
+        
+#         for j in range(len(s.edge_permutations)):
+#             # the edge permutation
+#             p = s.edge_permutations[j] 
+#             ### DEBUG: disabling this for now
+#             # # the homology class permutation
+#             # hc_p = 'homology permutation not implemented'
+#             hc_p = s.homology_permutations[j] 
+#             ### DEBUG END
+
+#             # use the infor about the funadmental region to compute the 
+#             # new modular parameter, by tracking where the edges 
+#             # ended up.
+#             # Before the moves, the two parameteters [1, \tau] were 
+#             # specified by a sequence of edges each.
+#             # Now tracking where those edges ended up we are
+#             # able to compute the new [1', \tau'].
+#             # First of all, we translate the old sequence of edges
+#             # into the new sequence, by applying the permutation 
+#             # dictionary
+#             new_one = [p[edge] for edge in one]
+#             new_tau = [p[edge] for edge in tau]
+#             new_modular_parameter = compute_modular_parameter(
+#                 new_one, new_tau, new_graph
+#             )
+#             # record the new modular parameter produced by this 
+#             # sequqnece of moves
+#             if (
+#                 new_modular_parameter not in 
+#                 mutation_seq_modular_parameters[str(s.quiver_mutations)]
+#             ):
+#                 mutation_seq_modular_parameters[str(s.quiver_mutations)].append(
+#                     new_modular_parameter
+#                 )
+
+# # Write the tally of how many moves seem to give the same sequence of 
+# # mutations
+# text_file.write('\n\n\n\tTally of mutations\n\n')
+# for mut_seq in seen_by_mutations.keys():
+#     text_file.write(
+#         'This mutation sequence : {}\nwas seen {} times. '
+#         'In moves sequences : {}\n'
+#         .format(
+#             mut_seq, len(seen_by_mutations[mut_seq]), 
+#             seen_by_mutations[mut_seq]
+#         )
+#     )
+#     text_file.write(
+#         'Associated modular parameters: {}\n\n'.format(
+#             [round(mp.real, 2) + 1j * round(mp.imag, 2) 
+#             for mp in mutation_seq_modular_parameters[mut_seq]]
+#         )
+#     )
+
+
+# # Write the tally of which mutations seem to give the same modular transformation
+# # avoiding the identity transformation
+# text_file.write(
+#     '\n\n\tTally of modular transformations (skipping the identity)'
+# )
+# for mod_transf in modular_transf_mutations.keys():
+#     if (
+#         (eval(mod_transf) != [[1, 0], [0, 1]]) and 
+#         (eval(mod_transf) != [[-1, 0], [0, -1]])
+#     ):
+#         text_file.write(
+#             '\n\nThis modular transformation : \n{}\n'
+#             'Corresponds to the following mutations\n'
+#             .format(numpy.array(eval(mod_transf)))
+#         )
+#         for mut in sorted(modular_transf_mutations[mod_transf], key=len):
+#             text_file.write('{}\n'.format(mut))
+
+
+# # # write in the text file the candidates for S, L, R transformations,
+# # # and their inverses
+# # text_file.write('\n\n-----------------------\n\t Candidates for S-move\n')
+# # for [i, j] in S_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# # text_file.write('\n\n-----------------------\n\t Candidates for S^-1-move\n')
+# # for [i, j] in S_inv_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# # text_file.write('\n\n-----------------------\n\t Candidates for L-move\n')
+# # for [i, j] in L_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# # text_file.write('\n\n-----------------------\n\t Candidates for L^-1-move\n')
+# # for [i, j] in L_inv_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# # text_file.write('\n\n-----------------------\n\t Candidates for R-move\n')
+# # for [i, j] in R_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+# # text_file.write('\n\n-----------------------\n\t Candidates for R^-1-move\n')
+# # for [i, j] in R_inv_move_candidates:
+# #     text_file.write('\nmove #{}, permutation #{}'.format(i, j))
+
+
+# text_file.write('\n\n-----------------------\n\t All modular transformations\n')
+# for mt in all_modular_transformations:
+#     text_file.write('\n{}\n'.format(numpy.array(eval(mt))))
+
+
+
+# ####################################################
+# ####################################################
+
+# ####################################################
+# ####################################################
+
+
+
+# ### STUDY A PARTICULAR SEQUENCE
+# seq_0 = ['p_13', 'p_8', 'f_3', 'p_13', 'p_2', 'f_2', 'p_14', 'f_2', 'p_2', 'p_14', 'p_2', 'p_13']
+# seq_1 = ['p_4', 'p_8', 'f_2', 'p_3', 'f_4']
+# seq_2 = ['p_13', 'f_4']
+# seq_3 = ['f_0', 'p_9', 'p_3']
+# seq_4 = ['p_6', 'p_2', 'f_1']
+# seq_5 = ['p_2', 'p_5', 'p_8', 'f_1', 'f_3', 'p_8']
+# seq_6 = seq_5 + ['p_1', 'p_4', 'p_1', 'p_4', 'p_1']
+
+# ### THIS IS A GOOD SEQUENCE for the [3,1] graph derived by reduction of the puncture (not by self-gluing)
+# ### it should correspond to the SL2Z element (1, 0 // -1, 1) = L^{-1}
+# seq_7 = [
+# 'p_13', 'p_8', 'f_4', 'p_2', 'p_14', 
+# 'p_13', 'f_3', 'p_9', 'p_5', 'p_14', 
+# 'p_13', 'p_10', 'f_0',
+# 'p_14', 'p_3', 'f_4', 'p_4'
+# ]
+
+# #### THIS GIVES THE S-transformation! For the [3,1] graph obtainedd by reduction
+# seq_8 = ['p_4', 'f_2', 'p_10', 'p_8', 'p_3', 'p_10', 'f_4', 'p_11', 'p_5', 'p_3',
+# 'p_8', 'p_14', 'f_0',
+# 'p_1', 'f_2', 'p_13']
+
+# #### This takes the [3,1] selfglued graph and transforms it into the [3,1] graph obtained by reduction of the puncture
+# seq_9 = ['p_11', 'f_0', 'p_1', 'p_5', 'p_3', 'f_4', 'p_7']
+
+# #### The L-move for the [3,1] selfglued graph
+# seq_10 = ['p_11', 'f_0', 'f_2', 'p_11', 'p_6', 'p_3']
+
+# #### The (S L^{-1}) -move for the [3,1] selfglued graph
+# ###seq_11=['p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'p_7', 'p_11', 'f_0', 'f_2', 'p_8', 'p_1']
+# seq_11 = ['p_11', 'p_1', 'p_5', 'p_2', 'f_4', 'p_15', 'f_0', 'p_7', 'f_2', 'p_8', 'p_1']
+
+# #### L-move sequence for [4,1] selfglued graph
+# seq_12 = ['p_9', 'p_13'] + ['f_4', 'f_1', 'f_2'] + ['p_9', 'p_13'] + ['p_20', 'p_3']
+
+# #### The (S L^{-1}) -move for the [4,1] selfglued graph NOT WORKING(?)
+# # seq_13 = (
+# #     ['p_1', 'p_18', 'p_2', 'f_6', 'p_21', 'p_5', 'p_9', 'p_13'] +
+# #     ['f_4', 'f_1', 'f_2'] + ['p_1'] #+ ['f_1'] + ['p_20', 'p_3'] + ['f_6']
+# #     #+ ['p_7', 'p_14'] + ['p_15', 'p_6'] + ['p_1']
+# # )
+
+# #### An absolutely crazy sequence for the [4,1] selfglued graph
+# # seq_13 = (
+# #     ['p_1', 'p_18', 'p_2', 'f_6', 'p_9', 'p_13', 'f_1', 'p_5', 'p_21'] +
+# #     ['f_4', 'f_2', 'f_1', 'p_6', 'p_15', 'p_1', 'p_3', 'p_20', 'f_5'] + 
+# #     ['f_0', 'p_14', 'p_7', 'p_8', 'p_12', 'f_3', 'p_6', 'p_15', 'p_1'] +
+# #     [ 'f_1', 'p_18', 'p_2', 'f_3', 'p_14', 'p_7']#, 'p_1']
+# # )
+
+# #### trying to find another SL(2,Z) move for the [4,1] selfglued graph, inspired by SL^-1 move for [3,1]
+# seq_14 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'f_2', 'p_21', 'f_4', 'p_6', 'p_15', 'p_1']
+# seq_15 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'p_21']
+
+
+# seq_16 = ['p_13', 'f_4', 'p_9', 'f_4', 'f_1', 'f_2', 'f_1', 'p_1', 'p_18', 'f_2', 'p_1', 'p_13', 'p_9', 'p_18']#, 'p_1']
+
+
+
+# # mydir = os.path.join(
+# #     os.getcwd(), 'mcg_moves', 
+# #     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_DEBUG')
+# # )
+# # # os.makedirs(mydir)
 
 # w1, mutation_seq = apply_sequence(
-#     w, seq_14, 
+#     w, seq_17, 
 #     save_plot=None,
 #     # save_plot=mydir, 
 #     include_mutation_sequence=True
 # )
 
-# # print w1.compute_quiver()
+# # # # print w1.compute_quiver()
 
-# print w1.mutable_faces
-# print w1.mutable_edges
+# # print w1.mutable_faces
+# # print w1.mutable_edges
 
 # # perms = are_equivalent_as_graphs(w, w1)
 # # # print len(perms)
 # # print perms
 
-# # print '\n\n'
-# # w1.faces['f_1'].print_info()
-# # print '\n\n'
-# # w1.faces['f_2'].print_info()
-# # print '\n\n'
-# # w1.faces['f_4'].print_info()
+# # # print '\n\n'
+# # # w1.faces['f_1'].print_info()
+# # # print '\n\n'
+# # # w1.faces['f_2'].print_info()
+# # # print '\n\n'
+# # # w1.faces['f_4'].print_info()
 
 
-##
+# ##
 
 # find_sequence_completion(
-#     w, seq_14, 5, one, tau, save_files=True, 
+#     w, seq_16, 1, one, tau, save_files=True, 
 #     drop_if_trivial_perm=False,
-#     avoid_last_n_moves=3, avoid_last_n_mutations=None,
+#     avoid_last_n_moves=None, avoid_last_n_mutations=1,
 # )
 
+
+
+
+
+
+
+##############
 
 
 ########### Build a partial sequence based on some criterion
@@ -4279,6 +4651,36 @@ seq_14 = ['p_13', 'p_9', 'p_1', 'p_18', 'p_2', 'f_6', 'p_5', 'f_2', 'p_21', 'f_4
 #     venture(w, min_seq_length, max_seq_length, completion_depth)
 
 
+
+##############################
+##############################
+#   Find a sequence leading to a Z3 symmetric graph
+
+# max_n_moves = 10
+# seq = find_graphs_with_symmetry(w, max_n_moves)
+
+
+# # prepare a directory
+# mydir = os.path.join(
+#     os.getcwd(), 'mcg_moves', 
+#     (datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + 'symm_seq__{}_moves'.format(max_n_moves))
+# )
+# os.makedirs(mydir)
+
+# # save info about sequences of moves in a text file
+# text_file = open(mydir + '/symmetric_sequence_data.txt', 'w')
+# text_file.write('\t\tSymmetric sequence data\n\n')
+# text_file.write(
+#     'Number of streets of the original graph: {}'
+#     .format(len(streets))
+# )
+# text_file.write('\n\nSymmetric sequences:\n')
+# for s in seq:
+#     text_file.write('\n{}'.format(s))
+
+
+
+##############################
 
 ###########
 
